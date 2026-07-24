@@ -1,0 +1,23 @@
+# IntelliJ
+.idea/
+*.iml
+out/
+
+# Maven
+backend/target/
+.mvn/wrapper/maven-wrapper.jar
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Environment
+.env
+*.env
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
