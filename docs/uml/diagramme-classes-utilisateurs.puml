@@ -1,0 +1,63 @@
+@startuml
+title Diagramme de classes - Utilisateurs
+
+top to bottom direction
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+hide empty methods
+
+class Personne {
+  - idPersonne : Long
+  - nom : String
+  - prenom : String
+  - emailContact : String
+  - telephone : String
+  - adresse : String
+}
+
+class Eleve {
+  - matricule : String
+  - dateNaissance : LocalDate
+  - photoUrl : String
+}
+
+class Responsable {
+  - profession : String
+}
+
+class Enseignant {
+  - numeroEmploye : String
+}
+
+class CompteUtilisateur {
+  - idUtilisateur : Long
+  - emailConnexion : String
+  - motDePasseHash : String
+  - role : RoleUtilisateur
+  - actif : Boolean
+  - dateCreation : OffsetDateTime
+}
+
+enum RoleUtilisateur {
+  ADMIN
+  ENSEIGNANT
+  RESPONSABLE
+}
+
+class ResponsabiliteLegale {
+  - idResponsable : Long
+  - idEleve : Long
+}
+
+Personne <|-- Eleve
+Personne <|-- Responsable
+Personne <|-- Enseignant
+
+Personne "1" -- "0..1" CompteUtilisateur : possède
+CompteUtilisateur --> RoleUtilisateur
+
+Responsable "1" -- "0..*" ResponsabiliteLegale
+Eleve "1" -- "1..*" ResponsabiliteLegale
+
+@enduml

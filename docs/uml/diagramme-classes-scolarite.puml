@@ -1,0 +1,69 @@
+@startuml
+title Diagramme de classes - Scolarité
+
+top to bottom direction
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+hide empty methods
+
+class Eleve {
+  - matricule : String
+  - dateNaissance : LocalDate
+  - photoUrl : String
+}
+
+class Inscription {
+  - idInscription : Long
+  - dateInscription : LocalDate
+  - dateFin : LocalDate
+  - statut : String
+}
+
+class Scolarite {
+  - idScolarite : Long
+  - dateDebut : LocalDate
+  - dateFin : LocalDate
+  - statut : String
+}
+
+class Classe {
+  - idClasse : Long
+  - nom : String
+  - niveau : String
+  - anneeScolaire : String
+}
+
+class Periode {
+  - idPeriode : Long
+  - libelle : String
+  - dateDebut : LocalDate
+  - dateFin : LocalDate
+  - dateDebutSaisie : LocalDate
+  - dateFinSaisie : LocalDate
+  - statut : String
+}
+
+class Enseignant {
+  - numeroEmploye : String
+}
+
+class Bulletin {
+  - idBulletin : Long
+  - dateGeneration : LocalDate
+  - moyenneGenerale : BigDecimal
+  - appreciationGenerale : String
+  - statut : String
+  - dateValidation : OffsetDateTime
+}
+
+Eleve "1" -- "0..*" Inscription : est inscrit
+Eleve "1" -- "0..*" Scolarite : suit
+Classe "1" -- "0..*" Scolarite : accueille
+
+Enseignant "0..1" -- "0..*" Classe : professeur principal
+
+Scolarite "1" -- "0..*" Bulletin : donne lieu à
+Periode "1" -- "0..*" Bulletin : correspond à
+
+@enduml

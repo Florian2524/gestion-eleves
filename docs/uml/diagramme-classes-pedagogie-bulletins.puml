@@ -1,0 +1,103 @@
+@startuml
+title Diagramme de classes - Pédagogie et bulletins
+
+top to bottom direction
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+hide empty methods
+
+class Enseignant {
+  - numeroEmploye : String
+}
+
+class Classe {
+  - idClasse : Long
+  - nom : String
+  - niveau : String
+  - anneeScolaire : String
+}
+
+class Matiere {
+  - idMatiere : Long
+  - code : String
+  - nom : String
+}
+
+class Enseignement {
+  - idEnseignement : Long
+  - coefficientMatiere : BigDecimal
+  - dateDebut : LocalDate
+  - dateFin : LocalDate
+  - actif : Boolean
+}
+
+class Evaluation {
+  - idEvaluation : Long
+  - libelle : String
+  - dateEvaluation : LocalDate
+  - typeEvaluation : String
+  - coefficientEvaluation : BigDecimal
+  - bareme : BigDecimal
+}
+
+class Note {
+  - idNote : Long
+  - valeur : BigDecimal
+  - commentaire : String
+  - statutNote : String
+  - dateSaisie : OffsetDateTime
+}
+
+class Scolarite {
+  - idScolarite : Long
+  - dateDebut : LocalDate
+  - dateFin : LocalDate
+  - statut : String
+}
+
+class Periode {
+  - idPeriode : Long
+  - libelle : String
+  - dateDebut : LocalDate
+  - dateFin : LocalDate
+  - dateDebutSaisie : LocalDate
+  - dateFinSaisie : LocalDate
+  - statut : String
+}
+
+class Bulletin {
+  - idBulletin : Long
+  - dateGeneration : LocalDate
+  - moyenneGenerale : BigDecimal
+  - appreciationGenerale : String
+  - statut : String
+  - dateValidation : OffsetDateTime
+}
+
+class LigneBulletin {
+  - idLigneBulletin : Long
+  - texte : String
+  - dateSaisie : OffsetDateTime
+  - dateModification : OffsetDateTime
+  - statut : String
+}
+
+Enseignant "1" -- "0..*" Enseignement : assure
+Classe "1" -- "0..*" Enseignement : reçoit
+Matiere "1" -- "0..*" Enseignement : concerne
+
+Enseignement "1" -- "0..*" Evaluation : comporte
+Periode "1" -- "0..*" Evaluation : regroupe
+
+Scolarite "1" -- "0..*" Note : obtient
+Evaluation "1" -- "0..*" Note : donne lieu à
+
+Scolarite "1" -- "0..*" Bulletin : donne lieu à
+Periode "1" -- "0..*" Bulletin : correspond à
+Enseignant "0..1" -- "0..*" Bulletin : valide
+
+Bulletin "1" -- "0..*" LigneBulletin : contient
+Enseignement "1" -- "0..*" LigneBulletin : fait l'objet de
+
+@enduml

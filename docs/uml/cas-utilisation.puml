@@ -1,0 +1,72 @@
+@startuml
+title Diagramme de cas d'utilisation\nApplication de gestion des élèves
+
+left to right direction
+
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam linetype ortho
+
+actor "Utilisateur" as Utilisateur
+actor "Administrateur" as Admin
+actor "Enseignant" as Enseignant
+actor "Professeur principal" as ProfesseurPrincipal
+actor "Responsable légal" as Responsable
+
+Utilisateur <|-- Admin
+Utilisateur <|-- Enseignant
+Utilisateur <|-- Responsable
+Enseignant <|-- ProfesseurPrincipal
+
+rectangle "Application de gestion des élèves" {
+
+    usecase "Se connecter" as UC_Connexion
+
+    usecase "Gérer les élèves" as UC_Eleves
+    usecase "Gérer les inscriptions" as UC_Inscriptions
+
+    usecase "Saisir les notes" as UC_Notes
+    usecase "Rédiger l'appréciation\nde sa matière" as UC_AppreciationMatiere
+
+    usecase "Rédiger l'appréciation\ngénérale" as UC_AppreciationGenerale
+    usecase "Valider un bulletin" as UC_Validation
+
+    usecase "Consulter les bulletins" as UC_Consultation
+    usecase "Exporter un bulletin\nen PDF" as UC_ExportPDF
+}
+
+Utilisateur --> UC_Connexion
+
+Admin --> UC_Eleves
+Admin --> UC_Inscriptions
+Admin --> UC_Consultation
+
+Enseignant --> UC_Notes
+Enseignant --> UC_AppreciationMatiere
+Enseignant --> UC_Consultation
+
+ProfesseurPrincipal --> UC_AppreciationGenerale
+ProfesseurPrincipal --> UC_Validation
+
+Responsable --> UC_Consultation
+
+UC_ExportPDF ..> UC_Consultation : <<extend>>
+
+note right of UC_Notes
+L'enseignant saisit uniquement
+les notes des enseignements
+qu'il assure.
+end note
+
+note right of UC_AppreciationGenerale
+Le professeur principal agit uniquement
+sur les bulletins de sa classe.
+end note
+
+note right of UC_Consultation
+Le responsable légal consulte uniquement
+les bulletins des élèves
+dont il est responsable.
+end note
+
+@enduml

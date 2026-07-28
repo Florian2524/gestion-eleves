@@ -1,0 +1,59 @@
+@startuml
+title Diagramme de classes - Vue d'ensemble\nApplication de gestion des élèves
+
+top to bottom direction
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+hide methods
+
+class Personne
+class Eleve
+class Responsable
+class Enseignant
+class CompteUtilisateur
+class Classe
+class Inscription
+class Scolarite
+class Periode
+class Matiere
+class Enseignement
+class Evaluation
+class Note
+class Bulletin
+class LigneBulletin
+class ResponsabiliteLegale
+
+Personne <|-- Eleve
+Personne <|-- Responsable
+Personne <|-- Enseignant
+
+Personne "1" -- "0..1" CompteUtilisateur : possède
+
+Responsable "1" -- "0..*" ResponsabiliteLegale
+Eleve "1" -- "1..*" ResponsabiliteLegale
+
+Eleve "1" -- "0..*" Inscription
+Eleve "1" -- "0..*" Scolarite
+Classe "1" -- "0..*" Scolarite
+
+Enseignant "0..1" -- "0..*" Classe : prof. principal
+
+Enseignant "1" -- "0..*" Enseignement
+Classe "1" -- "0..*" Enseignement
+Matiere "1" -- "0..*" Enseignement
+
+Enseignement "1" -- "0..*" Evaluation
+Periode "1" -- "0..*" Evaluation
+
+Scolarite "1" -- "0..*" Note
+Evaluation "1" -- "0..*" Note
+
+Scolarite "1" -- "0..*" Bulletin
+Periode "1" -- "0..*" Bulletin
+Enseignant "0..1" -- "0..*" Bulletin : valide
+
+Bulletin "1" -- "0..*" LigneBulletin
+Enseignement "1" -- "0..*" LigneBulletin
+
+@enduml

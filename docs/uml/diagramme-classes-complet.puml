@@ -1,0 +1,209 @@
+@startuml
+title Diagramme de classes métier\nApplication de gestion des élèves
+
+left to right direction
+
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam packageStyle rectangle
+
+hide empty methods
+
+' ============================================================
+' PERSONNES ET COMPTES
+' ============================================================
+
+package "Utilisateurs" {
+
+    abstract class Personne {
+        - idPersonne : Long
+        - nom : String
+        - prenom : String
+        - emailContact : String
+        - telephone : String
+        - adresse : String
+    }
+
+    class Eleve {
+        - matricule : String
+        - dateNaissance : LocalDate
+        - photoUrl : String
+    }
+
+    class Responsable {
+        - profession : String
+    }
+
+    class Enseignant {
+        - numeroEmploye : String
+    }
+
+    class CompteUtilisateur {
+        - idUtilisateur : Long
+        - emailConnexion : String
+        - motDePasseHash : String
+        - role : RoleUtilisateur
+        - actif : Boolean
+        - dateCreation : OffsetDateTime
+    }
+
+    enum RoleUtilisateur {
+        ADMIN
+        ENSEIGNANT
+        RESPONSABLE
+    }
+}
+
+Personne <|-- Eleve
+Personne <|-- Responsable
+Personne <|-- Enseignant
+
+Personne "1" -- "0..1" CompteUtilisateur : possède >
+CompteUtilisateur --> RoleUtilisateur
+
+' ============================================================
+' ORGANISATION SCOLAIRE
+' ============================================================
+
+package "Organisation scolaire" {
+
+    class Inscription {
+        - idInscription : Long
+        - dateInscription : LocalDate
+        - dateFin : LocalDate
+        - statut : String
+    }
+
+    class Scolarite {
+        - idScolarite : Long
+        - dateDebut : LocalDate
+        - dateFin : LocalDate
+        - statut : String
+    }
+
+    class Classe {
+        - idClasse : Long
+        - nom : String
+        - niveau : String
+        - anneeScolaire : String
+    }
+
+    class Periode {
+        - idPeriode : Long
+        - libelle : String
+        - dateDebut : LocalDate
+        - dateFin : LocalDate
+        - dateDebutSaisie : LocalDate
+        - dateFinSaisie : LocalDate
+        - statut : String
+    }
+
+    class ResponsabiliteLegale {
+        - idResponsable : Long
+        - idEleve : Long
+    }
+}
+
+Eleve "1" -- "0..*" Inscription : est inscrit >
+
+Eleve "1" -- "0..*" Scolarite : suit >
+Classe "1" -- "0..*" Scolarite : accueille >
+
+Responsable "1" -- "0..*" ResponsabiliteLegale
+Eleve "1" -- "1..*" ResponsabiliteLegale
+
+Enseignant "0..1" -- "0..*" Classe : professeur principal >
+
+' ============================================================
+' ENSEIGNEMENTS ET EVALUATIONS
+' ============================================================
+
+package "Pédagogie" {
+
+    class Matiere {
+        - idMatiere : Long
+        - code : String
+        - nom : String
+    }
+
+    class Enseignement {
+        - idEnseignement : Long
+        - coefficientMatiere : BigDecimal
+        - dateDebut : LocalDate
+        - dateFin : LocalDate
+        - actif : Boolean
+    }
+
+    class Evaluation {
+        - idEvaluation : Long
+        - libelle : String
+        - dateEvaluation : LocalDate
+        - typeEvaluation : String
+        - coefficientEvaluation : BigDecimal
+        - bareme : BigDecimal
+    }
+
+    class Note {
+        - idNote : Long
+        - valeur : BigDecimal
+        - commentaire : String
+        - statutNote : String
+        - dateSaisie : OffsetDateTime
+    }
+}
+
+Enseignant "1" -- "0..*" Enseignement : assure >
+Classe "1" -- "0..*" Enseignement : reçoit >
+Matiere "1" -- "0..*" Enseignement : concerne >
+
+Enseignement "1" -- "0..*" Evaluation : comporte >
+Periode "1" -- "0..*" Evaluation : regroupe >
+
+Scolarite "1" -- "0..*" Note : obtient >
+Evaluation "1" -- "0..*" Note : donne lieu à >
+
+' ============================================================
+' BULLETINS
+' ============================================================
+
+package "Bulletins" {
+
+    class Bulletin {
+        - idBulletin : Long
+        - dateGeneration : LocalDate
+        - moyenneGenerale : BigDecimal
+        - appreciationGenerale : String
+        - statut : String
+        - dateValidation : OffsetDateTime
+    }
+
+    class LigneBulletin {
+        - idLigneBulletin : Long
+        - texte : String
+        - dateSaisie : OffsetDateTime
+        - dateModification : OffsetDateTime
+        - statut : String
+    }
+}
+
+Scolarite "1" -- "0..*" Bulletin : donne lieu à >
+Periode "1" -- "0..*" Bulletin : correspond à >
+
+Enseignant "0..1" -- "0..*" Bulletin : valide >
+
+Bulletin "1" -- "0..*" LigneBulletin : contient >
+Enseignement "1" -- "0..*" LigneBulletin : fait l'objet de >
+
+note bottom of ResponsabiliteLegale
+Cette classe traduit l'association
+entre un responsable légal et un élève.
+end note
+
+note bottom of LigneBulletin
+Une ligne correspond à l'appréciation
+d'un enseignant pour un enseignement
+dans un bulletin donné.
+end note
+
+@enduml

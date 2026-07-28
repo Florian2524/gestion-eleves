@@ -1,0 +1,89 @@
+@startuml
+hide footbox
+title Diagramme de séquence\nAjouter une note à un élève
+
+autonumber
+
+skinparam shadowing false
+skinparam responseMessageBelowArrow true
+skinparam sequenceMessageAlign center
+
+actor Enseignant
+
+boundary "Frontend React" as Frontend
+control "Spring Security\nJWT" as Security
+control "NoteController" as Controller
+control "NoteService" as Service
+
+entity "EvaluationRepository" as EvaluationRepository
+entity "ScolariteRepository" as ScolariteRepository
+entity "NoteRepository" as NoteRepository
+
+database "PostgreSQL" as Database
+
+Enseignant -> Frontend : Saisir la note de l'élève
+Frontend -> Security : POST /notes\nJWT + CreerNoteRequest
+
+Security -> Security : Vérifier le token JWT
+
+alt Token absent ou invalide
+
+    Security --> Frontend : 401 Unauthorized
+    Frontend --> Enseignant : Afficher l'erreur d'authentification
+
+else Token valide
+
+    Security -> Controller : Transmettre la requête authentifiée
+
+    Controller -> Controller : Valider les données reçues
+    Controller -> Service : ajouterNote(request,\nidEnseignantConnecte)
+
+    Service -> EvaluationRepository : findById(idEvaluation)
+    EvaluationRepository -> Database : SELECT evaluation
+    Database --> EvaluationRepository : Évaluation trouvée
+    EvaluationRepository --> Service : Evaluation
+
+    Service -> ScolariteRepository : findById(idScolarite)
+    ScolariteRepository -> Database : SELECT scolarite
+    Database --> ScolariteRepository : Scolarité trouvée
+    ScolariteRepository --> Service : Scolarite
+
+    Service -> Service : Vérifier que l'enseignant assure\nl'enseignement de l'évaluation
+    Service -> Service : Vérifier que l'élève appartient\nà la classe concernée
+
+    alt Enseignant non autorisé ou classe incorrecte
+
+        Service --> Controller : Erreur métier
+        Controller --> Frontend : 403 Forbidden
+        Frontend --> Enseignant : Afficher l'accès refusé
+
+    else Enseignant autorisé
+
+        Service -> NoteRepository : existsByScolariteAndEvaluation(...)
+        NoteRepository -> Database : Vérifier l'existence d'une note
+        Database --> NoteRepository : true / false
+        NoteRepository --> Service : Résultat
+
+        alt Une note existe déjà
+
+            Service --> Controller : Note déjà existante
+            Controller --> Frontend : 409 Conflict
+            Frontend --> Enseignant : Afficher l'erreur
+
+        else Aucune note existante
+
+            Service -> Service : Créer l'objet Note
+            Service -> NoteRepository : save(note)
+            NoteRepository -> Database : INSERT INTO note
+            Database --> NoteRepository : Note enregistrée
+            NoteRepository --> Service : Note
+
+            Service --> Controller : NoteResponse
+            Controller --> Frontend : 201 Created + NoteResponse
+            Frontend --> Enseignant : Confirmer l'enregistrement
+
+        end
+    end
+end
+
+@enduml
