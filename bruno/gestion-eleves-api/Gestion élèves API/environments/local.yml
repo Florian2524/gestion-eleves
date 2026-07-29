@@ -6,3 +6,6 @@ variables:
   - name: idMatiere
     value: "2"
     description: ""
+  - name: idPeriode
+    value: "1"
+    description: ""

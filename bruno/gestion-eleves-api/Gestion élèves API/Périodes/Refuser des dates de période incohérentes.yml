@@ -1,0 +1,32 @@
+info:
+  name: Refuser des dates de période incohérentes
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: "{{baseUrl}}/periodes"
+  body:
+    type: json
+    data: |-
+      {
+        "libelle": "Période invalide",
+        "dateDebut": "2026-12-18",
+        "dateFin": "2026-09-01",
+        "dateDebutSaisie": null,
+        "dateFinSaisie": null,
+        "statut": "OUVERTE"
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "400"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

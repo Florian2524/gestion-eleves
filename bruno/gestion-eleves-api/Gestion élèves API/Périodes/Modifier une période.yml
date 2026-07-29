@@ -1,0 +1,38 @@
+info:
+  name: Modifier une période
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/periodes/{{idPeriode}}"
+  body:
+    type: json
+    data: |-
+      {
+        "libelle": "Trimestre 1 modifié",
+        "dateDebut": "2026-09-01",
+        "dateFin": "2026-12-18",
+        "dateDebutSaisie": "2026-12-01",
+        "dateFinSaisie": "2026-12-16",
+        "statut": "FERMEE"
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.libelle
+      operator: eq
+      value: Trimestre 1 modifié
+    - expression: res.body.statut
+      operator: eq
+      value: FERMEE
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

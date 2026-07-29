@@ -1,0 +1,32 @@
+info:
+  name: Refuser des dates de saisie incohérentes
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: "{{baseUrl}}/periodes"
+  body:
+    type: json
+    data: |-
+      {
+        "libelle": "Trimestre invalide",
+        "dateDebut": "2026-09-01",
+        "dateFin": "2026-12-18",
+        "dateDebutSaisie": "2026-12-15",
+        "dateFinSaisie": "2026-11-30",
+        "statut": "OUVERTE"
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "400"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
