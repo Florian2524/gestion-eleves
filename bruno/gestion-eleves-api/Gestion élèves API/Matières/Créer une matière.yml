@@ -1,0 +1,28 @@
+info:
+  name: Créer une matière
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{baseUrl}}/matieres"
+  body:
+    type: json
+    data: |-
+      {
+        "code": "MATH-BRUNO-001",
+        "nom": "Mathématiques"
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "201"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

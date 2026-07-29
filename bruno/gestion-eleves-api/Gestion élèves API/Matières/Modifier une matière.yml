@@ -1,0 +1,28 @@
+info:
+  name: Modifier une matière
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/matieres/{{idMatiere}}"
+  body:
+    type: json
+    data: |-
+      {
+        "code": "MATH-BRUNO-001",
+        "nom": "Mathématiques avancées"
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

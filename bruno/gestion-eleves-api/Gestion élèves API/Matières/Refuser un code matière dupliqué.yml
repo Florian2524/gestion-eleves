@@ -1,0 +1,37 @@
+info:
+  name: Refuser un code matière dupliqué
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: "{{baseUrl}}/matieres"
+  body:
+    type: json
+    data: |-
+      {
+        "code": "MATH-BRUNO-001",
+        "nom": "Autre matière"
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "409"
+    - expression: res.body.status
+      operator: eq
+      value: "409"
+    - expression: res.body.error
+      operator: eq
+      value: Conflict
+    - expression: res.body.path
+      operator: eq
+      value: /matieres
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

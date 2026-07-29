@@ -1,0 +1,8 @@
+name: local
+variables:
+  - name: baseUrl
+    value: http://localhost:8080
+    description: ""
+  - name: idMatiere
+    value: "2"
+    description: ""
