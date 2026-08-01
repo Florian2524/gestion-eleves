@@ -1,0 +1,31 @@
+info:
+  name: Créer une scolarité
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{baseUrl}}/scolarites"
+  body:
+    type: json
+    data: |-
+      {
+        "idEleve": {{idEleve}},
+        "idClasse": {{idClasse}},
+        "dateDebut": "2026-09-01",
+        "dateFin": null,
+        "statut": "EN_COURS"
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "201"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -9,3 +9,12 @@ variables:
   - name: idPeriode
     value: "1"
     description: ""
+  - name: idEleve
+    value: "2"
+    description: ""
+  - name: idClasse
+    value: "2"
+    description: ""
+  - name: idScolarite
+    value: ""
+    description: ""

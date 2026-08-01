@@ -1,0 +1,31 @@
+info:
+  name: Refuser des dates de scolarité incohérentes
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: "{{baseUrl}}/scolarites"
+  body:
+    type: json
+    data: |-
+      {
+        "idEleve": {{idEleve}},
+        "idClasse": {{idClasse}},
+        "dateDebut": "2026-09-01",
+        "dateFin": "2026-08-31",
+        "statut": "EN_COURS"
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "400"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,31 @@
+info:
+  name: Refuser une scolarité dupliquée
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: "{{baseUrl}}/scolarites"
+  body:
+    type: json
+    data: |-
+      {
+        "idEleve": {{idEleve}},
+        "idClasse": {{idClasse}},
+        "dateDebut": "2026-09-01",
+        "dateFin": null,
+        "statut": "EN_COURS"
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "409"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
