@@ -1,0 +1,26 @@
+info:
+  name: Consulter une inscription
+  type: http
+  seq: 2
+
+http:
+  method: GET
+  url: "{{baseUrl}}/inscriptions/{{idInscription}}?res.status="
+  params:
+    - name: res.status
+      value: ""
+      type: query
+      description: "200"
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
