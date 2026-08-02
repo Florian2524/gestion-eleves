@@ -33,3 +33,9 @@ variables:
   - name: idEnseignementUtilise
     value: ""
     description: ""
+  - name: idEvaluation
+    value: ""
+    description: ""
+  - name: idEvaluationUtilisee
+    value: ""
+    description: ""

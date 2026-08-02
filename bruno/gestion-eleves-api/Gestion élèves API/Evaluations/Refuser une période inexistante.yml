@@ -1,0 +1,33 @@
+info:
+  name: Refuser une période inexistante
+  type: http
+  seq: 7
+
+http:
+  method: POST
+  url: "{{baseUrl}}/evaluations"
+  body:
+    type: json
+    data: |-
+      {
+        "idEnseignement": {{idEnseignement}},
+        "idPeriode": 999999,
+        "libelle": "Évaluation sans période",
+        "dateEvaluation": "2026-11-01",
+        "typeEvaluation": "CONTROLE",
+        "coefficientEvaluation": 1.00,
+        "bareme": 20.00
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "404"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

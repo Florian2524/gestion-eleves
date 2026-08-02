@@ -1,0 +1,33 @@
+info:
+  name: Refuser un enseignement inexistant
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: "{{baseUrl}}/evaluations"
+  body:
+    type: json
+    data: |-
+      {
+        "idEnseignement": 999999,
+        "idPeriode": {{idPeriode}},
+        "libelle": "Évaluation impossible",
+        "dateEvaluation": "2026-11-01",
+        "typeEvaluation": "CONTROLE",
+        "coefficientEvaluation": 1.00,
+        "bareme": 20.00
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "404"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

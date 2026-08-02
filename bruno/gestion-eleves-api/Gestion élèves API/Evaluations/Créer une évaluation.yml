@@ -1,0 +1,33 @@
+info:
+  name: Créer une évaluation
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/evaluations"
+  body:
+    type: json
+    data: |-
+      {
+        "idEnseignement": {{idEnseignement}},
+        "idPeriode": {{idPeriode}},
+        "libelle": "Contrôle de mathématiques",
+        "dateEvaluation": "2026-10-15",
+        "typeEvaluation": "CONTROLE",
+        "coefficientEvaluation": 2.00,
+        "bareme": 20.00
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "201"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

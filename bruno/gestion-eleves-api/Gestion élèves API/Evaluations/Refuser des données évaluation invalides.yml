@@ -1,0 +1,33 @@
+info:
+  name: Refuser des données évaluation invalides
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: "{{baseUrl}}/evaluations"
+  body:
+    type: json
+    data: |-
+      {
+        "idEnseignement": -1,
+        "idPeriode": 0,
+        "libelle": "",
+        "dateEvaluation": null,
+        "typeEvaluation": "",
+        "coefficientEvaluation": 0,
+        "bareme": 0
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "400"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
