@@ -9,4 +9,15 @@ public interface NoteRepository
     boolean existsByEvaluation_IdEvaluation(
             Long idEvaluation
     );
+
+    boolean existsByScolarite_IdScolariteAndEvaluation_IdEvaluation(
+            Long idScolarite,
+            Long idEvaluation
+    );
+
+    boolean existsByScolarite_IdScolariteAndEvaluation_IdEvaluationAndIdNoteNot(
+            Long idScolarite,
+            Long idEvaluation,
+            Long idNote
+    );
 }
