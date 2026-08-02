@@ -5,4 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface LigneBulletinRepository
         extends JpaRepository<LigneBulletin, Long> {
+
+    boolean existsByEnseignement_IdEnseignement(
+            Long idEnseignement
+    );
 }
