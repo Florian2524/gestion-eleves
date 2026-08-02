@@ -21,3 +21,9 @@ variables:
   - name: idInscription
     value: ""
     description: ""
+  - name: idEnseignant
+    value: ""
+    description: ""
+  - name: idEnseignantUtilise
+    value: ""
+    description: ""

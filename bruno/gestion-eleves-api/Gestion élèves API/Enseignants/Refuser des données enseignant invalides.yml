@@ -1,0 +1,32 @@
+info:
+  name: Refuser des données enseignant invalides
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: "{{baseUrl}}/enseignants"
+  body:
+    type: json
+    data: |-
+      {
+        "nom": "",
+        "prenom": "",
+        "emailContact": "adresse-invalide",
+        "telephone": null,
+        "adresse": null,
+        "numeroEmploye": ""
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "400"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

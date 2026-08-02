@@ -1,0 +1,32 @@
+info:
+  name: Refuser un numéro d'employé déjà utilisé
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: "{{baseUrl}}/enseignants"
+  body:
+    type: json
+    data: |-
+      {
+        "nom": "Bernard",
+        "prenom": "Lucas",
+        "emailContact": "lucas.bernard@example.com",
+        "telephone": "0622334455",
+        "adresse": "12 avenue de la République",
+        "numeroEmploye": "ENS-BRUNO-001"
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "409"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

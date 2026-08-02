@@ -1,0 +1,32 @@
+info:
+  name: Modifier un enseignant
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/enseignants/{{idEnseignant}}"
+  body:
+    type: json
+    data: |-
+      {
+        "nom": "Martin",
+        "prenom": "Sophie",
+        "emailContact": "sophie.martin@ecole.example.com",
+        "telephone": "0699887766",
+        "adresse": "25 rue des Écoles",
+        "numeroEmploye": "ENS-BRUNO-001-MOD"
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
