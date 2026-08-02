@@ -1,0 +1,33 @@
+info:
+  name: Créer un enseignement
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/enseignements"
+  body:
+    type: json
+    data: |-
+      {
+        "idEnseignant": {{idEnseignant}},
+        "idClasse": {{idClasse}},
+        "idMatiere": {{idMatiere}},
+        "coefficientMatiere": 2.50,
+        "dateDebut": "2026-09-01",
+        "dateFin": "2027-06-30",
+        "actif": true
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "201"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,33 @@
+info:
+  name: Refuser un enseignant inexistant
+  type: http
+  seq: 7
+
+http:
+  method: POST
+  url: "{{baseUrl}}/enseignements"
+  body:
+    type: json
+    data: |-
+      {
+        "idEnseignant": 999999,
+        "idClasse": {{idClasse}},
+        "idMatiere": {{idMatiere}},
+        "coefficientMatiere": 2.50,
+        "dateDebut": "2026-10-01",
+        "dateFin": "2027-06-30",
+        "actif": true
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "404"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

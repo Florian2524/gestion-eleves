@@ -1,0 +1,33 @@
+info:
+  name: Refuser une affectation déjà existante
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: "{{baseUrl}}/enseignements"
+  body:
+    type: json
+    data: |-
+      {
+        "idEnseignant": {{idEnseignant}},
+        "idClasse": {{idClasse}},
+        "idMatiere": {{idMatiere}},
+        "coefficientMatiere": 3.00,
+        "dateDebut": "2026-09-01",
+        "dateFin": "2027-06-30",
+        "actif": true
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "409"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,33 @@
+info:
+  name: Refuser des données enseignement invalides
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: "{{baseUrl}}/enseignements"
+  body:
+    type: json
+    data: |-
+      {
+        "idEnseignant": -1,
+        "idClasse": 0,
+        "idMatiere": -3,
+        "coefficientMatiere": 0,
+        "dateDebut": "2026-09-02",
+        "dateFin": "2026-09-01",
+        "actif": true
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "400"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

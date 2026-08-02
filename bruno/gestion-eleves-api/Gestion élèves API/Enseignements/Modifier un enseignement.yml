@@ -1,0 +1,33 @@
+info:
+  name: Modifier un enseignement
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/enseignements/{{idEnseignement}}"
+  body:
+    type: json
+    data: |-
+      {
+        "idEnseignant": {{idEnseignant}},
+        "idClasse": {{idClasse}},
+        "idMatiere": {{idMatiere}},
+        "coefficientMatiere": 3.00,
+        "dateDebut": "2026-09-01",
+        "dateFin": "2027-06-30",
+        "actif": false
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
