@@ -42,3 +42,6 @@ variables:
   - name: idNote
     value: ""
     description: ""
+  - name: idResponsable
+    value: ""
+    description: ""

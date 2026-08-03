@@ -1,0 +1,32 @@
+info:
+  name: Créer un responsable
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/responsables"
+  body:
+    type: json
+    data: |-
+      {
+        "nom": "Dupont",
+        "prenom": "Claire",
+        "emailContact": "claire.dupont@example.com",
+        "telephone": "0612345678",
+        "adresse": "12 rue des Écoles",
+        "profession": "Médecin"
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "201"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,32 @@
+info:
+  name: Refuser des données responsable invalides
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: "{{baseUrl}}/responsables"
+  body:
+    type: json
+    data: |-
+      {
+        "nom": "",
+        "prenom": "",
+        "emailContact": "adresse-invalide",
+        "telephone": null,
+        "adresse": null,
+        "profession": null
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "400"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

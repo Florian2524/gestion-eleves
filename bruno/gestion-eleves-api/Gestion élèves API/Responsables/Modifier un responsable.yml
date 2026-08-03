@@ -1,0 +1,32 @@
+info:
+  name: Modifier un responsable
+  type: http
+  seq: 3
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/responsables/{{idResponsable}}"
+  body:
+    type: json
+    data: |-
+      {
+        "nom": "Dupont",
+        "prenom": "Claire",
+        "emailContact": "claire.dupont@ecole.example.com",
+        "telephone": "0698765432",
+        "adresse": "18 avenue de la République",
+        "profession": "Pharmacienne"
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
