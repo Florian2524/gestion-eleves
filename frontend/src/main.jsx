@@ -10,6 +10,7 @@ import "@fontsource/oswald/600.css";
 import "@fontsource/oswald/700.css";
 
 import App from "./App";
+import { AuthProvider } from "./context/AuthContext";
 import "./index.css";
 
 ReactDOM.createRoot(
@@ -17,7 +18,9 @@ ReactDOM.createRoot(
 ).render(
   <React.StrictMode>
     <BrowserRouter>
-      <App />
+      <AuthProvider>
+        <App />
+      </AuthProvider>
     </BrowserRouter>
   </React.StrictMode>,
 );

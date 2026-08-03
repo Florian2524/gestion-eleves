@@ -333,7 +333,7 @@ export default function HomePage() {
 
                 <a
                   id="connexion"
-                  href="#accueil"
+                  href="/connexion"
                   className="mt-auto inline-flex min-h-13 items-center justify-center gap-3 bg-brand-yellow px-6 py-3 font-display text-lg font-semibold uppercase text-black"
                 >
                   Accéder à l’espace sécurisé

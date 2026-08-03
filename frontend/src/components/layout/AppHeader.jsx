@@ -90,7 +90,7 @@ export default function AppHeader() {
           </nav>
 
           <a
-            href="#connexion"
+            href="/connexion"
             className="hidden items-center gap-3 font-display text-lg font-semibold uppercase text-school-blue transition hover:text-brand-black lg:flex"
           >
             <span className="grid size-11 place-items-center rounded-full bg-brand-yellow text-black">
@@ -139,7 +139,7 @@ export default function AppHeader() {
               ))}
 
               <a
-                href="#connexion"
+                href="/connexion"
                 className="mt-4 flex items-center gap-3 bg-brand-yellow px-4 py-3 font-display text-lg font-semibold uppercase text-black"
                 onClick={() => setMobileOpen(false)}
               >
