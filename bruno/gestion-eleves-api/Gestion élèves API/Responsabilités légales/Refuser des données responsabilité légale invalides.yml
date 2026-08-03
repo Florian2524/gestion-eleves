@@ -1,0 +1,28 @@
+info:
+  name: Refuser des données responsabilité légale invalides
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: "{{baseUrl}}/responsabilites-legales"
+  body:
+    type: json
+    data: |-
+      {
+        "idResponsable": null,
+        "idEleve": 0
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "400"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,28 @@
+info:
+  name: Créer une responsabilité légale
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/responsabilites-legales"
+  body:
+    type: json
+    data: |-
+      {
+        "idResponsable": {{idResponsable}},
+        "idEleve": {{idEleve}}
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "201"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

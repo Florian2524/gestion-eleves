@@ -1,0 +1,28 @@
+info:
+  name: Refuser un responsable inexistant
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: "{{baseUrl}}/responsabilites-legales"
+  body:
+    type: json
+    data: |-
+      {
+        "idResponsable": 999999,
+        "idEleve": {{idEleve}}
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "404"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

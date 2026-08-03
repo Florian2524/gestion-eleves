@@ -1,0 +1,28 @@
+info:
+  name: Refuser une responsabilité légale déjà existante
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: "{{baseUrl}}/responsabilites-legales"
+  body:
+    type: json
+    data: |-
+      {
+        "idResponsable": {{idResponsable}},
+        "idEleve": {{idEleve}}
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "409"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
