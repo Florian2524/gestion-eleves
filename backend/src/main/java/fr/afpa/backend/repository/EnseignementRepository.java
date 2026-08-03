@@ -9,6 +9,10 @@ import java.util.List;
 public interface EnseignementRepository
         extends JpaRepository<Enseignement, Long> {
 
+    List<Enseignement> findAllByClasse_IdClasse(
+            Long idClasse
+    );
+
     List<Enseignement> findAllByEnseignant_IdPersonne(
             Long idPersonne
     );

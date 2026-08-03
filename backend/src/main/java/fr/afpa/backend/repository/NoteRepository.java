@@ -8,6 +8,11 @@ import java.util.List;
 public interface NoteRepository
         extends JpaRepository<Note, Long> {
 
+    List<Note> findAllByScolarite_IdScolariteAndEvaluation_Periode_IdPeriode(
+            Long idScolarite,
+            Long idPeriode
+    );
+
     List<Note> findAllByEvaluation_Enseignement_Enseignant_IdPersonne(
             Long idPersonne
     );
