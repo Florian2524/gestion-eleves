@@ -5,24 +5,29 @@ import fr.afpa.backend.dto.bulletin.LigneBulletinDto;
 import fr.afpa.backend.exception.GlobalExceptionHandler;
 import fr.afpa.backend.exception.ResourceNotFoundException;
 import fr.afpa.backend.service.BulletinCalculService;
+import fr.afpa.backend.service.BulletinPdfService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.List;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -39,6 +44,9 @@ class BulletinControllerTest {
 
     @MockitoBean
     private BulletinCalculService bulletinCalculService;
+
+    @MockitoBean
+    private BulletinPdfService bulletinPdfService;
 
     private BulletinDto bulletin;
 
@@ -143,6 +151,52 @@ class BulletinControllerTest {
                 ).value(15.33));
 
         verify(bulletinCalculService).calculer(
+                ID_SCOLARITE,
+                ID_PERIODE
+        );
+    }
+
+    @Test
+    void shouldDownloadBulletinPdf()
+            throws Exception {
+
+        byte[] pdf =
+                "%PDF-1.7 bulletin"
+                        .getBytes(
+                                StandardCharsets.US_ASCII
+                        );
+
+        when(bulletinPdfService.generer(
+                ID_SCOLARITE,
+                ID_PERIODE
+        )).thenReturn(pdf);
+
+        mockMvc.perform(get(
+                        "/bulletins/calcul/{idScolarite}/{idPeriode}/pdf",
+                        ID_SCOLARITE,
+                        ID_PERIODE
+                ))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(
+                        MediaType.APPLICATION_PDF
+                ))
+                .andExpect(content().bytes(pdf))
+                .andExpect(header().longValue(
+                        HttpHeaders.CONTENT_LENGTH,
+                        pdf.length
+                ))
+                .andExpect(header().string(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        containsString("attachment")
+                ))
+                .andExpect(header().string(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        containsString(
+                                "bulletin-scolarite-10-periode-20.pdf"
+                        )
+                ));
+
+        verify(bulletinPdfService).generer(
                 ID_SCOLARITE,
                 ID_PERIODE
         );
