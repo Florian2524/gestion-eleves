@@ -1,0 +1,24 @@
+info:
+  name: Supprimer le second compte utilisateur
+  type: http
+  seq: 11
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/comptes-utilisateurs/{{idUtilisateurSecondaire}}"
+  body:
+    type: json
+    data: |-
+        auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "204"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,29 @@
+info:
+  name: Créer un compte utilisateur
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/comptes-utilisateurs"
+  body:
+    type: json
+    data: |-
+      {
+        "idPersonne": {{idResponsable}},
+        "emailConnexion": "responsable.compte@example.com",
+        "motDePasse": "MotDePasse123",
+        "role": "RESPONSABLE"
+      }  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "201"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,29 @@
+info:
+  name: Créer un second compte utilisateur
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{baseUrl}}/comptes-utilisateurs"
+  body:
+    type: json
+    data: |-
+      {
+        "idPersonne": {{idEnseignant}},
+        "emailConnexion": "enseignant.compte@example.com",
+        "motDePasse": "MotDePasse123",
+        "role": "ENSEIGNANT"
+      }  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "201"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

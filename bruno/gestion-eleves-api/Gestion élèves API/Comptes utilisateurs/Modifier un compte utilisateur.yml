@@ -1,0 +1,29 @@
+info:
+  name: Modifier un compte utilisateur
+  type: http
+  seq: 5
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/comptes-utilisateurs/{{idUtilisateur}}"
+  body:
+    type: json
+    data: |-
+      {
+        "emailConnexion": "responsable.compte.modifie@example.com",
+        "nouveauMotDePasse": "NouveauMotDePasse123",
+        "role": "RESPONSABLE",
+        "actif": false
+      }  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

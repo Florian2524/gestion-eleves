@@ -45,3 +45,9 @@ variables:
   - name: idResponsable
     value: ""
     description: ""
+  - name: idUtilisateur
+    value: ""
+    description: ""
+  - name: idUtilisateurSecondaire
+    value: ""
+    description: ""

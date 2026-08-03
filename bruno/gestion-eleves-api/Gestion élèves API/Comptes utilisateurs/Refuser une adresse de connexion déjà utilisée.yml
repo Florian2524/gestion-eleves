@@ -1,0 +1,28 @@
+info:
+  name: Refuser une adresse de connexion déjà utilisée
+  type: http
+  seq: 9
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/comptes-utilisateurs/{{idUtilisateurSecondaire}}"
+  body:
+    type: json
+    data: |-
+      {
+        "emailConnexion": "responsable.compte.modifie@example.com",
+        "role": "ENSEIGNANT",
+        "actif": true
+      }  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "409"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

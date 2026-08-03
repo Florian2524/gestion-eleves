@@ -1,0 +1,29 @@
+info:
+  name: Refuser des données compte utilisateur invalides
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: "{{baseUrl}}/comptes-utilisateurs"
+  body:
+    type: json
+    data: |-
+      {
+        "idPersonne": null,
+        "emailConnexion": "adresse-invalide",
+        "motDePasse": "court",
+        "role": null
+      }  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "400"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

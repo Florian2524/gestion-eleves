@@ -1,0 +1,24 @@
+info:
+  name: Lister les comptes utilisateurs
+  type: http
+  seq: 4
+
+http:
+  method: GET
+  url: "{{baseUrl}}/comptes-utilisateurs"
+  body:
+    type: json
+    data: |-
+        auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

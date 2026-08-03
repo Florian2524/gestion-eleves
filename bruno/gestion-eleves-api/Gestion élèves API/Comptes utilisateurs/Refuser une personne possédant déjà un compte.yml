@@ -1,0 +1,29 @@
+info:
+  name: Refuser une personne possédant déjà un compte
+  type: http
+  seq: 8
+
+http:
+  method: POST
+  url: "{{baseUrl}}/comptes-utilisateurs"
+  body:
+    type: json
+    data: |-
+      {
+        "idPersonne": {{idResponsable}},
+        "emailConnexion": "autre.adresse@example.com",
+        "motDePasse": "MotDePasse123",
+        "role": "RESPONSABLE"
+      }  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "409"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
