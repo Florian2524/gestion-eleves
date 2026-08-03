@@ -1,0 +1,43 @@
+info:
+  name: Refuser une scolarité inexistante
+  type: http
+  seq: 2
+
+http:
+  method: GET
+  url: "{{baseUrl}}/bulletins/calcul/999999/{{idPeriode}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        const idPeriode =
+          bru.getVar("idPeriode") ||
+          bru.getEnvVar("idPeriode");
+
+        if (!idPeriode) {
+          throw new Error(
+            "idPeriode est vide."
+          );
+        }
+
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "404"
+    - expression: res.body.status
+      operator: eq
+      value: "404"
+    - expression: res.body.error
+      operator: eq
+      value: "Not Found"
+    - expression: res.body.path
+      operator: eq
+      value: "/bulletins/calcul/999999/{{idPeriode}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

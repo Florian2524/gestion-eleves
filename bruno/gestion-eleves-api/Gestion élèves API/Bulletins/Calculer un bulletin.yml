@@ -1,0 +1,73 @@
+info:
+  name: Calculer un bulletin
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: "{{baseUrl}}/bulletins/calcul/{{idScolarite}}/{{idPeriode}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        const idScolarite =
+          bru.getVar("idScolarite") ||
+          bru.getEnvVar("idScolarite");
+
+        const idPeriode =
+          bru.getVar("idPeriode") ||
+          bru.getEnvVar("idPeriode");
+
+        const token =
+          bru.getVar("jwtToken") ||
+          bru.getEnvVar("jwtToken");
+
+        if (!token) {
+          throw new Error(
+            "jwtToken est vide. Exécuter d'abord la connexion valide."
+          );
+        }
+
+        if (!idScolarite) {
+          throw new Error(
+            "idScolarite est vide. Créer ou sélectionner une scolarité avant de calculer le bulletin."
+          );
+        }
+
+        if (!idPeriode) {
+          throw new Error(
+            "idPeriode est vide. Créer ou sélectionner une période avant de calculer le bulletin."
+          );
+        }
+
+        console.log(
+          "Calcul du bulletin : scolarité=" +
+          idScolarite +
+          ", période=" +
+          idPeriode
+        );
+
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.idScolarite
+      operator: eq
+      value: "{{idScolarite}}"
+    - expression: res.body.idPeriode
+      operator: eq
+      value: "{{idPeriode}}"
+    - expression: res.body.nomEleve
+      operator: isString
+    - expression: res.body.prenomEleve
+      operator: isString
+    - expression: res.body.lignes
+      operator: isArray
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
