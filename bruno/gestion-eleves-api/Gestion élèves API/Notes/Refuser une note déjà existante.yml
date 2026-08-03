@@ -1,0 +1,31 @@
+info:
+  name: Refuser une note déjà existante
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: "{{baseUrl}}/notes"
+  body:
+    type: json
+    data: |-
+      {
+        "idScolarite": {{idScolarite}},
+        "idEvaluation": {{idEvaluation}},
+        "valeur": 12.00,
+        "commentaire": "Tentative de doublon.",
+        "statutNote": "SAISIE"
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "409"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

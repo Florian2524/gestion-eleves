@@ -39,3 +39,6 @@ variables:
   - name: idEvaluationUtilisee
     value: ""
     description: ""
+  - name: idNote
+    value: ""
+    description: ""

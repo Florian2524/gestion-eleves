@@ -1,0 +1,7 @@
+info:
+  name: Notes
+  type: folder
+  seq: 8
+
+request:
+  auth: inherit

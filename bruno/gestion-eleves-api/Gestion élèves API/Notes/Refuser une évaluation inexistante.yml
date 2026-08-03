@@ -1,0 +1,31 @@
+info:
+  name: Refuser une évaluation inexistante
+  type: http
+  seq: 8
+
+http:
+  method: POST
+  url: "{{baseUrl}}/notes"
+  body:
+    type: json
+    data: |-
+      {
+        "idScolarite": {{idScolarite}},
+        "idEvaluation": 999999,
+        "valeur": 10.00,
+        "commentaire": "Évaluation inexistante.",
+        "statutNote": "SAISIE"
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "404"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,31 @@
+info:
+  name: Refuser une scolarité inexistante
+  type: http
+  seq: 7
+
+http:
+  method: POST
+  url: "{{baseUrl}}/notes"
+  body:
+    type: json
+    data: |-
+      {
+        "idScolarite": 999999,
+        "idEvaluation": {{idEvaluation}},
+        "valeur": 10.00,
+        "commentaire": "Scolarité inexistante.",
+        "statutNote": "SAISIE"
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "404"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

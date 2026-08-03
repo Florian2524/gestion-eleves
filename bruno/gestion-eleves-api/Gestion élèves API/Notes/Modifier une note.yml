@@ -1,0 +1,31 @@
+info:
+  name: Modifier une note
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/notes/{{idNote}}"
+  body:
+    type: json
+    data: |-
+      {
+        "idScolarite": {{idScolarite}},
+        "idEvaluation": {{idEvaluation}},
+        "valeur": 17.00,
+        "commentaire": "Très bon travail.",
+        "statutNote": "VALIDEE"
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
