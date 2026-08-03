@@ -1,0 +1,55 @@
+info:
+  name: Se connecter avec des identifiants valides
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: "{{baseUrl}}/auth/login"
+  body:
+    type: json
+    data: |-
+      {
+        "emailConnexion": "admin.jwt@example.com",
+        "motDePasse": "MotDePasseAdmin123"
+      }
+  auth: none
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const token = res.body.token;
+        const idUtilisateur = String(res.body.idUtilisateur);
+
+        if (!token) {
+          throw new Error("Le endpoint de connexion n'a retourné aucun JWT.");
+        }
+
+        bru.setVar("jwtToken", token);
+        bru.setVar("idUtilisateur", idUtilisateur);
+
+        bru.setEnvVar("jwtToken", token);
+        bru.setEnvVar("idUtilisateur", idUtilisateur);
+
+        console.log(
+          "JWT enregistré : longueur=" +
+          token.length +
+          ", préfixe=" +
+          token.substring(0, 3)
+        );
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.token
+      operator: isString
+    - expression: res.body.role
+      operator: eq
+      value: "ADMIN"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

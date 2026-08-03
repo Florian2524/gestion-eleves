@@ -1,18 +1,18 @@
 info:
-  name: Lister les comptes utilisateurs
+  name: Refuser l'accès sans jeton
   type: http
-  seq: 4
+  seq: 2
 
 http:
   method: GET
-  url: "{{baseUrl}}/comptes-utilisateurs"
-  auth: inherit
+  url: "{{baseUrl}}/matieres"
+auth: none
 
 runtime:
   assertions:
     - expression: res.status
       operator: eq
-      value: "200"
+      value: "401"
 
 settings:
   encodeUrl: true

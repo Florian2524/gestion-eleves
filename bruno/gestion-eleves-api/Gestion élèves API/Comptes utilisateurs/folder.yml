@@ -4,4 +4,6 @@ info:
   seq: 12
 
 request:
-  auth: inherit
+  auth:
+    type: bearer
+    token: "{{jwtToken}}"

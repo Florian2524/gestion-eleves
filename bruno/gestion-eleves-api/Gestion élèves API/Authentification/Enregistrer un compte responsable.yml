@@ -1,0 +1,46 @@
+info:
+  name: Enregistrer un compte responsable
+  type: http
+  seq: 8
+
+http:
+  method: POST
+  url: "{{baseUrl}}/auth/register"
+  body:
+    type: json
+    data: |-
+      {
+        "idPersonne": {{idResponsable}},
+        "emailConnexion": "responsable.jwt@example.com",
+        "motDePasse": "MotDePasseResponsable123",
+        "role": "RESPONSABLE"
+      }
+  auth:
+    type: bearer
+    token: "{{jwtToken}}"
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const data = res.getBody();
+
+        if (res.getStatus() === 201 && data && data.token) {
+          const idUtilisateur = String(data.idUtilisateur);
+
+          bru.setVar("jwtTokenSecondaire", data.token);
+          bru.setVar("idUtilisateurSecondaire", idUtilisateur);
+
+          bru.setEnvVar("jwtTokenSecondaire", data.token);
+          bru.setEnvVar("idUtilisateurSecondaire", idUtilisateur);
+        }
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "201"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

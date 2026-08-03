@@ -1,0 +1,45 @@
+info:
+  name: Créer un responsable temporaire
+  type: http
+  seq: 7
+
+http:
+  method: POST
+  url: "{{baseUrl}}/responsables"
+  body:
+    type: json
+    data: |-
+      {
+        "nom": "Jwt",
+        "prenom": "Responsable",
+        "emailContact": "responsable.jwt@example.com",
+        "telephone": "0699999999",
+        "adresse": "1 rue de la Sécurité",
+        "profession": "Testeur"
+      }
+  auth:
+    type: bearer
+    token: "{{jwtToken}}"
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const data = res.getBody();
+
+        if (res.getStatus() === 201 && data) {
+          const idResponsable = String(data.idPersonne);
+
+          bru.setVar("idResponsable", idResponsable);
+          bru.setEnvVar("idResponsable", idResponsable);
+        }
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "201"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

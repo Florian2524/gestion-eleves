@@ -1,0 +1,50 @@
+info:
+  name: Accéder avec le jeton responsable
+  type: http
+  seq: 10
+
+http:
+  method: GET
+  url: "{{baseUrl}}/matieres"
+  auth: none
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        const runtimeToken =
+          bru.getVar("jwtTokenSecondaire");
+
+        const environmentToken =
+          bru.getEnvVar("jwtTokenSecondaire");
+
+        const token =
+          runtimeToken || environmentToken;
+
+        if (!token) {
+          throw new Error(
+            "jwtTokenSecondaire est vide. Exécuter d'abord la connexion du responsable."
+          );
+        }
+
+        console.log(
+          "JWT responsable injecté : longueur=" +
+          token.length +
+          ", préfixe=" +
+          token.substring(0, 3)
+        );
+
+        req.setHeader(
+          "Authorization",
+          "Bearer " + token
+        );
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

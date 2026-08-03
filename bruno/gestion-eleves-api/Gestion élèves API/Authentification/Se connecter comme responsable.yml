@@ -1,0 +1,67 @@
+info:
+  name: Se connecter comme responsable
+  type: http
+  seq: 9
+
+http:
+  method: POST
+  url: "{{baseUrl}}/auth/login"
+  body:
+    type: json
+    data: |-
+      {
+        "emailConnexion": "responsable.jwt@example.com",
+        "motDePasse": "MotDePasseResponsable123"
+      }
+  auth: none
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const token = res.body.token;
+        const idUtilisateur = String(res.body.idUtilisateur);
+
+        if (!token) {
+          throw new Error(
+            "La connexion du responsable n'a retourné aucun JWT."
+          );
+        }
+
+        bru.setVar("jwtTokenSecondaire", token);
+        bru.setVar(
+          "idUtilisateurSecondaire",
+          idUtilisateur
+        );
+
+        bru.setEnvVar(
+          "jwtTokenSecondaire",
+          token
+        );
+
+        bru.setEnvVar(
+          "idUtilisateurSecondaire",
+          idUtilisateur
+        );
+
+        console.log(
+          "JWT responsable enregistré : longueur=" +
+          token.length +
+          ", préfixe=" +
+          token.substring(0, 3)
+        );
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.token
+      operator: isString
+    - expression: res.body.role
+      operator: eq
+      value: "RESPONSABLE"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

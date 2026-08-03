@@ -1,0 +1,44 @@
+info:
+  name: Enregistrer le premier administrateur
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/auth/register"
+  body:
+    type: json
+    data: |-
+      {
+        "idPersonne": {{idEleve}},
+        "emailConnexion": "admin.jwt@example.com",
+        "motDePasse": "MotDePasseAdmin123",
+        "role": "ADMIN"
+      }
+  auth: none
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const data = res.getBody();
+
+        if (res.getStatus() === 201 && data && data.token) {
+          const idUtilisateur = String(data.idUtilisateur);
+
+          bru.setVar("jwtToken", data.token);
+          bru.setVar("idUtilisateur", idUtilisateur);
+
+          bru.setEnvVar("jwtToken", data.token);
+          bru.setEnvVar("idUtilisateur", idUtilisateur);
+        }
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "201"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

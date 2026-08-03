@@ -1,0 +1,30 @@
+info:
+  name: Refuser l'enregistrement sans administrateur
+  type: http
+  seq: 12
+
+http:
+  method: POST
+  url: "{{baseUrl}}/auth/register"
+  body:
+    type: json
+    data: |-
+      {
+        "idPersonne": {{idResponsable}},
+        "emailConnexion": "interdit.jwt@example.com",
+        "motDePasse": "MotDePasseInterdit123",
+        "role": "RESPONSABLE"
+      }
+auth: none
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "403"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

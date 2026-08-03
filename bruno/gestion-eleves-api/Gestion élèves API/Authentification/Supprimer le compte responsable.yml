@@ -1,0 +1,38 @@
+info:
+  name: Supprimer le compte responsable
+  type: http
+  seq: 14
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/comptes-utilisateurs/{{idUtilisateurSecondaire}}"
+  auth: none
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        const token =
+          bru.getVar("jwtToken") ||
+          bru.getEnvVar("jwtToken");
+
+        if (!token) {
+          throw new Error(
+            "jwtToken administrateur est vide."
+          );
+        }
+
+        req.setHeader(
+          "Authorization",
+          "Bearer " + token
+        );
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "204"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

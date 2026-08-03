@@ -1,0 +1,38 @@
+info:
+  name: Refuser l'accès responsable aux comptes utilisateurs
+  type: http
+  seq: 11
+
+http:
+  method: GET
+  url: "{{baseUrl}}/comptes-utilisateurs"
+  auth: none
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        const token =
+          bru.getVar("jwtTokenSecondaire") ||
+          bru.getEnvVar("jwtTokenSecondaire");
+
+        if (!token) {
+          throw new Error(
+            "jwtTokenSecondaire est vide."
+          );
+        }
+
+        req.setHeader(
+          "Authorization",
+          "Bearer " + token
+        );
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "403"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

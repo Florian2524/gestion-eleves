@@ -6,10 +6,7 @@ info:
 http:
   method: GET
   url: "{{baseUrl}}/comptes-utilisateurs/{{idUtilisateur}}"
-  body:
-    type: json
-    data: |-
-        auth: inherit
+  auth: inherit
 
 runtime:
   assertions:

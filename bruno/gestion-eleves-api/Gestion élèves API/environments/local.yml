@@ -2,52 +2,39 @@ name: local
 variables:
   - name: baseUrl
     value: http://localhost:8080
-    description: ""
   - name: idMatiere
     value: "2"
-    description: ""
   - name: idPeriode
     value: "1"
-    description: ""
   - name: idEleve
     value: "2"
-    description: ""
   - name: idClasse
     value: "2"
-    description: ""
   - name: idScolarite
     value: ""
-    description: ""
   - name: idInscription
     value: ""
-    description: ""
   - name: idEnseignant
     value: ""
-    description: ""
   - name: idEnseignantUtilise
     value: ""
-    description: ""
   - name: idEnseignement
     value: ""
-    description: ""
   - name: idEnseignementUtilise
     value: ""
-    description: ""
   - name: idEvaluation
     value: ""
-    description: ""
   - name: idEvaluationUtilisee
     value: ""
-    description: ""
   - name: idNote
     value: ""
-    description: ""
   - name: idResponsable
     value: ""
-    description: ""
   - name: idUtilisateur
     value: ""
-    description: ""
   - name: idUtilisateurSecondaire
     value: ""
-    description: ""
+  - name: jwtToken
+    value: ""
+  - name: jwtTokenSecondaire
+    value: ""

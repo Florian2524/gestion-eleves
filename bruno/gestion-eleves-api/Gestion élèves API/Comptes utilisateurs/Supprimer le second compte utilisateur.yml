@@ -6,10 +6,7 @@ info:
 http:
   method: DELETE
   url: "{{baseUrl}}/comptes-utilisateurs/{{idUtilisateurSecondaire}}"
-  body:
-    type: json
-    data: |-
-        auth: inherit
+  auth: inherit
 
 runtime:
   assertions:
