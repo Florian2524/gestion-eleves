@@ -13,7 +13,7 @@ const navigation = [
   },
   {
     label: "Élèves",
-    href: "#eleves",
+    href: "/eleves",
   },
   {
     label: "Notes",

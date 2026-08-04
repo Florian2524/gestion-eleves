@@ -4,10 +4,11 @@ import {
 } from "./authStorage";
 
 const configuredBaseUrl =
-  import.meta.env.VITE_API_URL?.trim() ?? "";
+  import.meta.env.VITE_API_URL?.trim();
 
 const apiBaseUrl =
-  configuredBaseUrl.replace(/\/+$/, "");
+  (configuredBaseUrl || "/api")
+    .replace(/\/+$/, "");
 
 export class ApiError extends Error {
   constructor(

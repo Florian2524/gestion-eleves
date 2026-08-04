@@ -1,4 +1,5 @@
 import {
+  ArrowRight,
   FileText,
   GraduationCap,
   LogOut,
@@ -27,18 +28,21 @@ const modules = [
     description:
       "Consulter les dossiers et les informations scolaires.",
     icon: Users,
+    to: "/eleves",
   },
   {
     title: "Notes",
     description:
       "Saisir et consulter les résultats des évaluations.",
     icon: NotebookPen,
+    to: null,
   },
   {
     title: "Bulletins",
     description:
       "Calculer les moyennes et télécharger les PDF.",
     icon: FileText,
+    to: null,
   },
 ];
 
@@ -124,8 +128,8 @@ export default function DashboardPage() {
 
             <p className="mt-6 max-w-2xl leading-7 text-school-muted">
               Votre authentification JWT est valide.
-              Vous pouvez désormais accéder aux
-              fonctionnalités autorisées pour le rôle
+              Vous pouvez accéder aux fonctionnalités
+              autorisées pour le rôle
               {` ${roleLabel}`}.
             </p>
           </div>
@@ -169,10 +173,19 @@ export default function DashboardPage() {
                   {module.description}
                 </p>
 
-                <p className="mt-8 border-t border-slate-200 pt-5 text-sm font-semibold text-school-blue">
-                  Connexion fonctionnelle — module à
-                  intégrer à l’étape suivante.
-                </p>
+                {module.to ? (
+                  <Link
+                    to={module.to}
+                    className="mt-8 inline-flex items-center gap-2 border-t border-slate-200 pt-5 font-semibold text-school-blue transition hover:text-school-blue-dark"
+                  >
+                    Ouvrir le module
+                    <ArrowRight size={18} />
+                  </Link>
+                ) : (
+                  <p className="mt-8 border-t border-slate-200 pt-5 text-sm font-semibold text-school-muted">
+                    Module à intégrer prochainement.
+                  </p>
+                )}
               </article>
             );
           })}

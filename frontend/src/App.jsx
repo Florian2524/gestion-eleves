@@ -6,6 +6,7 @@ import {
 
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import DashboardPage from "./pages/DashboardPage";
+import ElevesPage from "./pages/ElevesPage";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 
@@ -27,6 +28,15 @@ export default function App() {
         element={
           <ProtectedRoute>
             <DashboardPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/eleves"
+        element={
+          <ProtectedRoute>
+            <ElevesPage />
           </ProtectedRoute>
         }
       />
