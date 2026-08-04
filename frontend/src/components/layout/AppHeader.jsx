@@ -21,7 +21,7 @@ const navigation = [
   },
   {
     label: "Bulletins",
-    href: "#bulletins",
+    href: "/bulletins",
   },
 ];
 

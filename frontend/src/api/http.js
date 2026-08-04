@@ -24,7 +24,9 @@ export class ApiError extends Error {
   }
 }
 
-async function parseResponseBody(response) {
+async function parseStandardResponseBody(
+  response,
+) {
   if (response.status === 204) {
     return null;
   }
@@ -50,6 +52,25 @@ async function parseResponseBody(response) {
   return responseText;
 }
 
+async function parseSuccessfulResponseBody(
+  response,
+  responseType,
+) {
+  if (response.status === 204) {
+    return null;
+  }
+
+  if (responseType === "blob") {
+    return response.blob();
+  }
+
+  if (responseType === "text") {
+    return response.text();
+  }
+
+  return parseStandardResponseBody(response);
+}
+
 export async function apiRequest(
   path,
   {
@@ -58,15 +79,18 @@ export async function apiRequest(
     headers,
     authenticated = true,
     signal,
+    responseType = "json",
   } = {},
 ) {
   const requestHeaders =
     new Headers(headers);
 
-  requestHeaders.set(
-    "Accept",
-    "application/json",
-  );
+  if (!requestHeaders.has("Accept")) {
+    requestHeaders.set(
+      "Accept",
+      "application/json",
+    );
+  }
 
   let requestBody = body;
 
@@ -104,8 +128,14 @@ export async function apiRequest(
     },
   );
 
-  const responseBody =
-    await parseResponseBody(response);
+  const responseBody = response.ok
+    ? await parseSuccessfulResponseBody(
+        response,
+        responseType,
+      )
+    : await parseStandardResponseBody(
+        response,
+      );
 
   if (!response.ok) {
     if (

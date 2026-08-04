@@ -42,7 +42,7 @@ const modules = [
     description:
       "Calculer les moyennes et télécharger les PDF.",
     icon: FileText,
-    to: null,
+    to: "/bulletins",
   },
 ];
 

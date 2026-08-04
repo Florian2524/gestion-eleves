@@ -5,6 +5,7 @@ import {
 } from "react-router";
 
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import BulletinsPage from "./pages/BulletinsPage";
 import DashboardPage from "./pages/DashboardPage";
 import ElevesPage from "./pages/ElevesPage";
 import HomePage from "./pages/HomePage";
@@ -37,6 +38,15 @@ export default function App() {
         element={
           <ProtectedRoute>
             <ElevesPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/bulletins"
+        element={
+          <ProtectedRoute>
+            <BulletinsPage />
           </ProtectedRoute>
         }
       />
