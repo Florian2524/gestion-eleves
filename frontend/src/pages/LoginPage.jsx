@@ -166,7 +166,7 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="grid min-h-screen bg-brand-black lg:grid-cols-[1.1fr_0.9fr]">
+    <main className="grid min-h-screen bg-school-blue-dark lg:grid-cols-[1.1fr_0.9fr]">
       <section className="relative hidden min-h-screen overflow-hidden lg:block">
         <img
           src="/images/hero-campus.jpg"
@@ -333,9 +333,8 @@ export default function LoginPage() {
             />
 
             <p>
-              L’accès est protégé par un jeton JWT.
-              Votre session est automatiquement
-              supprimée à son expiration.
+              Connectez-vous avec vos identifiants
+              pour accéder à votre espace personnel.
             </p>
           </div>
         </div>

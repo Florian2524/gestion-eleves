@@ -563,8 +563,8 @@ export default function BulletinsPage() {
               </h2>
 
               <p className="mt-2 text-school-muted">
-                Les données proviennent directement
-                de l'API Spring Boot.
+                Choisissez un élève et une période
+                pour consulter son bulletin.
               </p>
             </div>
 

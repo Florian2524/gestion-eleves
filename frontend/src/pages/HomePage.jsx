@@ -39,36 +39,18 @@ const services = [
   },
 ];
 
-const statistics = [
+const highlights = [
   {
-    value: "293",
-    label: "Tests backend validés",
+    value: "Dossiers",
+    label: "Élèves et scolarités",
   },
   {
-    value: "3",
-    label: "Rôles sécurisés",
+    value: "Résultats",
+    label: "Notes et évaluations",
   },
   {
-    value: "PDF",
-    label: "Bulletins exportables",
-  },
-];
-
-const students = [
-  {
-    matricule: "ELV-2026-001",
-    name: "Camille Martin",
-    className: "6e A",
-  },
-  {
-    matricule: "ELV-2026-002",
-    name: "Lucas Bernard",
-    className: "5e B",
-  },
-  {
-    matricule: "ELV-2026-003",
-    name: "Sarah Dubois",
-    className: "4e A",
+    value: "Bulletins",
+    label: "Consultation et téléchargement",
   },
 ];
 
@@ -192,17 +174,17 @@ export default function HomePage() {
 
         <section className="bg-school-blue text-white">
           <div className="mx-auto grid max-w-[1440px] md:grid-cols-3">
-            {statistics.map((statistic) => (
+            {highlights.map((highlight) => (
               <article
-                key={statistic.label}
+                key={highlight.label}
                 className="border-b border-white/20 px-8 py-12 md:border-b-0 md:border-r md:last:border-r-0 lg:px-12 lg:py-16"
               >
-                <p className="font-display text-6xl font-bold text-brand-yellow sm:text-7xl">
-                  {statistic.value}
+                <p className="font-display text-4xl font-bold uppercase text-brand-yellow sm:text-5xl">
+                  {highlight.value}
                 </p>
 
                 <p className="mt-3 font-display text-lg font-semibold uppercase tracking-wide">
-                  {statistic.label}
+                  {highlight.label}
                 </p>
               </article>
             ))}
@@ -211,80 +193,70 @@ export default function HomePage() {
 
         <section className="bg-school-paper">
           <div className="mx-auto max-w-[1440px] px-4 py-16 sm:px-6 lg:px-10 lg:py-24">
-            <div className="grid gap-8 xl:grid-cols-[1.35fr_0.65fr]">
-              <article className="overflow-hidden border border-slate-200 bg-white">
-                <div className="flex flex-wrap items-end justify-between gap-5 border-b border-slate-200 px-6 py-6 lg:px-8">
-                  <div>
-                    <p className="font-display text-base font-semibold uppercase tracking-[0.16em] text-school-blue">
-                      Dossiers récents
-                    </p>
+            <div className="grid gap-8 xl:grid-cols-[1.2fr_0.8fr]">
+              <article className="border border-slate-200 bg-white p-7 lg:p-10">
+                <p className="font-display text-base font-semibold uppercase tracking-[0.16em] text-school-blue">
+                  Organisation scolaire
+                </p>
 
-                    <h2 className="mt-2 font-display text-4xl font-bold uppercase">
-                      Élèves
-                    </h2>
+                <h2 className="mt-3 max-w-3xl font-display text-4xl font-bold uppercase leading-tight text-school-ink sm:text-5xl">
+                  Un suivi clair, du dossier au bulletin
+                </h2>
+
+                <p className="mt-6 max-w-3xl leading-7 text-school-muted">
+                  Centralisez les informations utiles
+                  et facilitez le suivi quotidien de la
+                  scolarité depuis un espace unique.
+                </p>
+
+                <div className="mt-10 grid gap-5 sm:grid-cols-3">
+                  <div className="border-t-4 border-brand-yellow bg-school-paper p-5">
+                    <Users
+                      size={27}
+                      className="text-school-blue"
+                    />
+
+                    <h3 className="mt-5 font-display text-2xl font-bold uppercase text-school-blue">
+                      Dossiers élèves
+                    </h3>
+
+                    <p className="mt-3 text-sm leading-6 text-school-muted">
+                      Coordonnées, parcours et
+                      informations scolaires.
+                    </p>
                   </div>
 
-                  <a
-                    href="#eleves"
-                    className="inline-flex items-center gap-2 bg-brand-yellow px-5 py-3 font-display text-lg font-semibold uppercase text-black"
-                  >
-                    Voir tous
-                    <ArrowRight size={19} />
-                  </a>
-                </div>
+                  <div className="border-t-4 border-brand-yellow bg-school-paper p-5">
+                    <NotebookPen
+                      size={27}
+                      className="text-school-blue"
+                    />
 
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[680px] text-left">
-                    <thead className="bg-school-blue-dark text-white">
-                      <tr>
-                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider lg:px-8">
-                          Matricule
-                        </th>
+                    <h3 className="mt-5 font-display text-2xl font-bold uppercase text-school-blue">
+                      Résultats
+                    </h3>
 
-                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider">
-                          Élève
-                        </th>
+                    <p className="mt-3 text-sm leading-6 text-school-muted">
+                      Évaluations, notes et suivi de la
+                      progression.
+                    </p>
+                  </div>
 
-                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider">
-                          Classe
-                        </th>
+                  <div className="border-t-4 border-brand-yellow bg-school-paper p-5">
+                    <FileDown
+                      size={27}
+                      className="text-school-blue"
+                    />
 
-                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider">
-                          Action
-                        </th>
-                      </tr>
-                    </thead>
+                    <h3 className="mt-5 font-display text-2xl font-bold uppercase text-school-blue">
+                      Bulletins
+                    </h3>
 
-                    <tbody>
-                      {students.map((student) => (
-                        <tr
-                          key={student.matricule}
-                          className="border-b border-slate-200 last:border-b-0 hover:bg-school-blue-light/40"
-                        >
-                          <td className="px-6 py-5 text-sm font-semibold text-school-muted lg:px-8">
-                            {student.matricule}
-                          </td>
-
-                          <td className="px-6 py-5 font-bold">
-                            {student.name}
-                          </td>
-
-                          <td className="px-6 py-5 text-school-muted">
-                            {student.className}
-                          </td>
-
-                          <td className="px-6 py-5">
-                            <button
-                              type="button"
-                              className="font-display text-lg font-semibold uppercase text-school-blue underline decoration-brand-yellow decoration-2 underline-offset-4"
-                            >
-                              Consulter
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                    <p className="mt-3 text-sm leading-6 text-school-muted">
+                      Moyennes et documents disponibles
+                      au téléchargement.
+                    </p>
+                  </div>
                 </div>
               </article>
 
@@ -294,17 +266,17 @@ export default function HomePage() {
                 </span>
 
                 <p className="mt-9 font-display text-base font-semibold uppercase tracking-[0.18em] text-brand-yellow">
-                  Application sécurisée
+                  Accès personnel
                 </p>
 
                 <h2 className="mt-3 font-display text-4xl font-bold uppercase leading-tight">
-                  Un accès adapté à chaque utilisateur
+                  Connectez-vous à votre espace
                 </h2>
 
                 <p className="mt-5 leading-7 text-zinc-400">
-                  Administrateurs, enseignants et
-                  responsables disposent d’un accès
-                  authentifié par JWT.
+                  Chaque utilisateur accède aux
+                  fonctionnalités correspondant à son
+                  rôle au sein de l’établissement.
                 </p>
 
                 <div className="mt-9 border-t border-zinc-800 pt-7">
@@ -315,7 +287,7 @@ export default function HomePage() {
                     />
 
                     <span className="font-semibold">
-                      Données scolaires centralisées
+                      Données accessibles selon le profil
                     </span>
                   </div>
 
@@ -326,7 +298,7 @@ export default function HomePage() {
                     />
 
                     <span className="font-semibold">
-                      Bulletins exportables en PDF
+                      Bulletins disponibles au téléchargement
                     </span>
                   </div>
                 </div>
@@ -336,7 +308,7 @@ export default function HomePage() {
                   href="/connexion"
                   className="mt-auto inline-flex min-h-13 items-center justify-center gap-3 bg-brand-yellow px-6 py-3 font-display text-lg font-semibold uppercase text-black"
                 >
-                  Accéder à l’espace sécurisé
+                  Accéder à mon espace
                   <ArrowRight size={20} />
                 </a>
               </aside>
@@ -352,7 +324,7 @@ export default function HomePage() {
           </p>
 
           <p className="text-white/60">
-            Projet CDA · Application Spring Boot et React
+            Établissement scolaire · Suivi de la scolarité
           </p>
         </div>
       </footer>

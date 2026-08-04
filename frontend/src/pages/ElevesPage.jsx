@@ -470,8 +470,8 @@ export default function ElevesPage() {
                                   </p>
 
                                   <p className="mt-1 text-sm text-school-muted">
-                                    Dossier #
-                                    {eleve.idPersonne}
+                                    {eleve.emailContact ??
+                                      "Coordonnées non renseignées"}
                                   </p>
                                 </div>
                               </div>
