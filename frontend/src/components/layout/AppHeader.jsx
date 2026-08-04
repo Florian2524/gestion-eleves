@@ -17,7 +17,7 @@ const navigation = [
   },
   {
     label: "Notes",
-    href: "#notes",
+    href: "/notes",
   },
   {
     label: "Bulletins",

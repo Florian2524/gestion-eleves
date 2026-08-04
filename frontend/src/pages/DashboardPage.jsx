@@ -35,7 +35,7 @@ const modules = [
     description:
       "Saisir et consulter les résultats des évaluations.",
     icon: NotebookPen,
-    to: null,
+    to: "/notes",
   },
   {
     title: "Bulletins",

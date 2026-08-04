@@ -10,6 +10,7 @@ import DashboardPage from "./pages/DashboardPage";
 import ElevesPage from "./pages/ElevesPage";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
+import NotesPage from "./pages/NotesPage";
 
 export default function App() {
   return (
@@ -38,6 +39,15 @@ export default function App() {
         element={
           <ProtectedRoute>
             <ElevesPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/notes"
+        element={
+          <ProtectedRoute>
+            <NotesPage />
           </ProtectedRoute>
         }
       />
