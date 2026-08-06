@@ -3,70 +3,101 @@ title Diagramme de cas d'utilisation\nApplication de gestion des élèves
 
 left to right direction
 
+skinparam backgroundColor transparent
 skinparam shadowing false
-skinparam packageStyle rectangle
 skinparam linetype ortho
+skinparam packageStyle rectangle
+skinparam nodesep 45
+skinparam ranksep 55
+skinparam defaultTextAlignment center
 
-actor "Utilisateur" as Utilisateur
-actor "Administrateur" as Admin
-actor "Enseignant" as Enseignant
-actor "Professeur principal" as ProfesseurPrincipal
-actor "Responsable légal" as Responsable
+skinparam ArrowColor #64748B
+skinparam ActorBorderColor #334155
+skinparam ActorFontColor #0F172A
 
-Utilisateur <|-- Admin
-Utilisateur <|-- Enseignant
-Utilisateur <|-- Responsable
-Enseignant <|-- ProfesseurPrincipal
-
-rectangle "Application de gestion des élèves" {
-
-    usecase "Se connecter" as UC_Connexion
-
-    usecase "Gérer les élèves" as UC_Eleves
-    usecase "Gérer les inscriptions" as UC_Inscriptions
-
-    usecase "Saisir les notes" as UC_Notes
-    usecase "Rédiger l'appréciation\nde sa matière" as UC_AppreciationMatiere
-
-    usecase "Rédiger l'appréciation\ngénérale" as UC_AppreciationGenerale
-    usecase "Valider un bulletin" as UC_Validation
-
-    usecase "Consulter les bulletins" as UC_Consultation
-    usecase "Exporter un bulletin\nen PDF" as UC_ExportPDF
+skinparam usecase {
+    BackgroundColor #F8FAFC
+    BorderColor #334155
+    FontColor #0F172A
 }
 
-Utilisateur --> UC_Connexion
+skinparam package {
+    BackgroundColor #FFFFFF
+    BorderColor #CBD5E1
+    FontColor #0F172A
+}
 
+actor "Administrateur" as Admin
+actor "Enseignant" as Enseignant
+
+rectangle "Application de gestion des élèves" as Application {
+
+    package "Accès sécurisé" {
+        usecase "Se connecter\nà l'application" as UC_Connexion
+    }
+
+    package "Administration scolaire" {
+
+        usecase "Gérer les élèves\n(consulter, ajouter, modifier,\nsupprimer et gérer la photo)" as UC_Eleves
+
+        usecase "Gérer les inscriptions\n(inscrire, affecter à une classe,\nmodifier ou annuler)" as UC_Inscriptions
+
+        usecase "Gérer les référentiels scolaires\n(classes, matières, périodes\net enseignements)" as UC_Referentiels
+
+        usecase "Gérer les utilisateurs et les rôles\n(comptes, enseignants et\nresponsables légaux)" as UC_Utilisateurs
+    }
+
+    package "Suivi pédagogique" {
+
+        usecase "Consulter les élèves et les classes\nqui lui sont affectés" as UC_ClassesEleves
+
+        usecase "Gérer les évaluations\n(créer, modifier et supprimer)" as UC_Evaluations
+
+        usecase "Saisir les notes\n(ajouter, corriger, supprimer\net commenter)" as UC_Notes
+    }
+
+    package "Bulletins" {
+
+        usecase "Consulter un bulletin\npar élève et par période" as UC_Bulletins
+
+        usecase "Télécharger le bulletin\nau format PDF" as UC_Pdf
+    }
+}
+
+actor "Responsable légal" as Responsable
+
+' Accès commun
+Admin --> UC_Connexion
+Enseignant --> UC_Connexion
+UC_Connexion <-- Responsable
+
+' Fonctionnalités de l'administrateur
 Admin --> UC_Eleves
 Admin --> UC_Inscriptions
-Admin --> UC_Consultation
+Admin --> UC_Referentiels
+Admin --> UC_Utilisateurs
+Admin --> UC_Bulletins
 
+' Fonctionnalités de l'enseignant
+Enseignant --> UC_ClassesEleves
+Enseignant --> UC_Evaluations
 Enseignant --> UC_Notes
-Enseignant --> UC_AppreciationMatiere
-Enseignant --> UC_Consultation
+Enseignant --> UC_Bulletins
 
-ProfesseurPrincipal --> UC_AppreciationGenerale
-ProfesseurPrincipal --> UC_Validation
+' Fonctionnalités du responsable légal
+UC_Bulletins <-- Responsable
 
-Responsable --> UC_Consultation
+' L'export est une fonctionnalité facultative
+' proposée pendant la consultation
+UC_Pdf ..> UC_Bulletins : <<extend>>
 
-UC_ExportPDF ..> UC_Consultation : <<extend>>
-
-note right of UC_Notes
-L'enseignant saisit uniquement
-les notes des enseignements
-qu'il assure.
+note bottom of UC_Notes
+L'enseignant agit uniquement dans le périmètre
+des classes et enseignements qui lui sont attribués.
 end note
 
-note right of UC_AppreciationGenerale
-Le professeur principal agit uniquement
-sur les bulletins de sa classe.
+note bottom of UC_Bulletins
+Le responsable légal consulte uniquement les bulletins
+des élèves auxquels il est associé.
 end note
-
-note right of UC_Consultation
-Le responsable légal consulte uniquement
-les bulletins des élèves
-dont il est responsable.
-end note
-
 @enduml
