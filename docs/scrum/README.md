@@ -13,8 +13,10 @@ Centraliser les dossiers élèves, la scolarité, les évaluations, les notes et
 | P0 | Authentification JWT et droits métier par rôle et rattachement | Réalisé |
 | P0 | Dossier élève : création, modification, recherche, photo sécurisée | Réalisé |
 | P0 | Notes cohérentes avec classe et barème | Réalisé |
-| P1 | Évaluations, scolarités et enseignements | API réalisée ; écrans partiels |
+| P1 | Évaluations, scolarités et enseignements | Écrans réalisés selon les rôles |
+| P1 | Classes, matières, périodes et inscriptions | Écrans d'administration réalisés |
 | P1 | Calcul et export PDF des bulletins | Réalisé |
+| P2 | Administration des enseignants, responsables et comptes dans React | À faire |
 | P2 | Tests de parcours navigateur et déploiement complet | À faire |
 
 ## User stories
@@ -30,7 +32,8 @@ Centraliser les dossiers élèves, la scolarité, les évaluations, les notes et
 1. Modèle relationnel, migrations Flyway et API des ressources scolaires.
 2. Authentification, rôles et contrôle du périmètre métier.
 3. Parcours élèves, notes, bulletins et amorçage du premier administrateur.
-4. À venir : couverture des parcours navigateur et préparation du déploiement.
+4. Parcours React des classes, matières, périodes, inscriptions, scolarités, enseignements et évaluations.
+5. À venir : administration React des autres personnes, couverture des parcours navigateur et préparation du déploiement.
 
 ## Définition de terminé
 

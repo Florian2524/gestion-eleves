@@ -11,6 +11,7 @@ import ElevesPage from "./pages/ElevesPage";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import NotesPage from "./pages/NotesPage";
+import { ClassesPage, EnseignementsPage, EvaluationsPage, InscriptionsPage, MatieresPage, PeriodesPage, ScolaritesPage } from "./pages/AdministrationPages";
 
 const rolesAutorises = ["ADMIN", "ENSEIGNANT", "RESPONSABLE"];
 
@@ -62,6 +63,16 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+
+      {[
+        ["/classes", ClassesPage, ["ADMIN"]],
+        ["/matieres", MatieresPage, ["ADMIN"]],
+        ["/periodes", PeriodesPage, ["ADMIN"]],
+        ["/inscriptions", InscriptionsPage, ["ADMIN"]],
+        ["/scolarites", ScolaritesPage, ["ADMIN"]],
+        ["/enseignements", EnseignementsPage, rolesAutorises],
+        ["/evaluations", EvaluationsPage, rolesAutorises],
+      ].map(([path, Page, allowedRoles]) => <Route key={path} path={path} element={<ProtectedRoute allowedRoles={allowedRoles}><Page /></ProtectedRoute>} />)}
 
       <Route
         path="*"

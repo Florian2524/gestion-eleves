@@ -51,7 +51,9 @@ L’interface React propose actuellement :
 - un formulaire de connexion ;
 - un espace protégé par authentification ;
 - une page de consultation, recherche et administration des élèves, avec photo ;
-- un module de consultation et de gestion des notes ;
+- des écrans de gestion des classes, matières, périodes, inscriptions et scolarités pour l'administrateur ;
+- des écrans d'enseignements et d'évaluations adaptés au rôle ;
+- un module de consultation et de gestion des notes avec choix des évaluations et des élèves compatibles ;
 - un module de calcul des bulletins ;
 - le téléchargement des bulletins au format PDF ;
 - une interface responsive réalisée avec Tailwind CSS.
@@ -66,7 +68,7 @@ L’application utilise trois rôles :
 
 L’authentification JWT et la protection des routes sont opérationnelles.
 
-Les consultations des élèves, notes, évaluations et bulletins sont filtrées selon les rattachements métier de l'utilisateur.
+Les consultations des élèves, enseignements, évaluations, notes, scolarités et bulletins sont filtrées selon les rattachements métier de l'utilisateur. Les écrans d'administration ne sont accessibles qu'au rôle `ADMIN`. L'enseignant peut gérer les évaluations et notes de ses enseignements. Le responsable légal dispose de parcours de consultation uniquement.
 
 ## Technologies utilisées
 
@@ -264,8 +266,7 @@ Le projet est un MVP Full Stack fonctionnel.
 
 Les principales évolutions prévues sont :
 
-- compléter les autres écrans d’administration dans React ;
-- ajouter la gestion des évaluations dans le frontend ;
+- compléter les écrans d’administration des enseignants, responsables légaux et comptes utilisateurs dans React ;
 - ajouter des tests automatisés pour l’interface React ;
 - ajouter des scénarios end-to-end ;
 - conteneuriser le backend et le frontend ;

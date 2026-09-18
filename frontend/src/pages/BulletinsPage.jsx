@@ -31,6 +31,7 @@ import {
 } from "../api/bulletinsApi";
 
 import { getEleves } from "../api/elevesApi";
+import { listResource } from "../api/schoolApi";
 import { ApiError } from "../api/http";
 import { useAuth } from "../context/authContextCore";
 
@@ -192,6 +193,7 @@ export default function BulletinsPage() {
 
   const [reloadKey, setReloadKey] =
     useState(0);
+  const [classes, setClasses] = useState([]);
 
   const roleLabel =
     roleLabels[auth?.role] ??
@@ -213,6 +215,7 @@ export default function BulletinsPage() {
           elevesResponse,
           scolaritesResponse,
           periodesResponse,
+          classesResponse,
         ] = await Promise.all([
           getEleves({
             signal: controller.signal,
@@ -225,6 +228,7 @@ export default function BulletinsPage() {
           getPeriodes({
             signal: controller.signal,
           }),
+          listResource("classes", { signal: controller.signal }),
         ]);
 
         const loadedEleves =
@@ -246,6 +250,7 @@ export default function BulletinsPage() {
         setEleves(loadedEleves);
         setScolarites(loadedScolarites);
         setPeriodes(loadedPeriodes);
+        setClasses(toArray(classesResponse));
 
         setSelectedScolariteId(
           loadedScolarites[0]?.idScolarite
@@ -645,8 +650,8 @@ export default function BulletinsPage() {
                     >
                       {eleve
                         ? `${eleve.prenom} ${eleve.nom} — ${eleve.matricule}`
-                        : `Élève #${scolarite.idEleve}`}
-                      {` — scolarité #${scolarite.idScolarite}`}
+                        : "Élève indisponible"}
+                      {` — ${classes.find((item) => item.idClasse === scolarite.idClasse)?.nom ?? "Classe indisponible"} (${classes.find((item) => item.idClasse === scolarite.idClasse)?.anneeScolaire ?? scolarite.dateDebut})`}
                     </option>
                   ),
                 )}

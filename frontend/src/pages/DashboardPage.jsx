@@ -28,6 +28,7 @@ const modules = [
       "Consulter les dossiers et les informations scolaires.",
     icon: Users,
     to: "/eleves",
+    roles: ["ADMIN", "ENSEIGNANT", "RESPONSABLE"],
   },
   {
     title: "Notes",
@@ -35,6 +36,7 @@ const modules = [
       "Saisir et consulter les résultats des évaluations.",
     icon: NotebookPen,
     to: "/notes",
+    roles: ["ADMIN", "ENSEIGNANT", "RESPONSABLE"],
   },
   {
     title: "Bulletins",
@@ -42,7 +44,17 @@ const modules = [
       "Calculer les moyennes et télécharger les PDF.",
     icon: FileText,
     to: "/bulletins",
+    roles: ["ADMIN", "ENSEIGNANT", "RESPONSABLE"],
   },
+  ...[
+    ["Classes", "/classes", ["ADMIN"]],
+    ["Matières", "/matieres", ["ADMIN"]],
+    ["Périodes", "/periodes", ["ADMIN"]],
+    ["Inscriptions", "/inscriptions", ["ADMIN"]],
+    ["Scolarités", "/scolarites", ["ADMIN"]],
+    ["Enseignements", "/enseignements", ["ADMIN", "ENSEIGNANT", "RESPONSABLE"]],
+    ["Évaluations", "/evaluations", ["ADMIN", "ENSEIGNANT", "RESPONSABLE"]],
+  ].map(([title, to, roles]) => ({ title, to, roles, icon: FileText, description: `Consulter ${title.toLowerCase()}.` })),
 ];
 
 export default function DashboardPage() {
@@ -151,7 +163,7 @@ export default function DashboardPage() {
         </section>
 
         <section className="mt-8 grid gap-5 md:grid-cols-3">
-          {modules.map((module) => {
+          {modules.filter((module) => module.roles.includes(auth?.role)).map((module) => {
             const Icon = module.icon;
 
             return (
