@@ -3,9 +3,13 @@ spring:
     name: backend
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/gestion_eleves
-    username: gestion_eleves
-    password: gestion_eleves
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/gestion_eleves}
+    username: ${DB_USER:gestion_eleves}
+    password: ${DB_PASSWORD:gestion_eleves}
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
 
   jpa:
     hibernate:
@@ -16,6 +20,14 @@ spring:
         format_sql: true
 
 application:
+  upload:
+    directory: ${UPLOAD_DIRECTORY:uploads}
+  bootstrap:
+    admin:
+      email: ${BOOTSTRAP_ADMIN_EMAIL:}
+      password: ${BOOTSTRAP_ADMIN_PASSWORD:}
+      nom: ${BOOTSTRAP_ADMIN_NOM:}
+      prenom: ${BOOTSTRAP_ADMIN_PRENOM:}
   security:
     jwt:
       secret: ${JWT_SECRET:Z2VzdGlvbi1lbGV2ZXMtZGV2ZWxvcG1lbnQtand0LXNlY3JldC0yMDI2}

@@ -6,6 +6,7 @@ import fr.afpa.backend.dto.scolarite.ScolariteResponse;
 import fr.afpa.backend.exception.ResourceNotFoundException;
 import fr.afpa.backend.service.BulletinCalculService;
 import fr.afpa.backend.service.EleveService;
+import fr.afpa.backend.service.ElevePhotoService;
 import fr.afpa.backend.service.EvaluationService;
 import fr.afpa.backend.service.NoteService;
 import fr.afpa.backend.service.ScolariteService;
@@ -34,6 +35,7 @@ class AuthorizationHttpTest {
     @Autowired MockMvc mvc;
     @MockitoBean SecurityExpressions expressions;
     @MockitoBean EleveService eleves;
+    @MockitoBean ElevePhotoService photos;
     @MockitoBean EvaluationService evaluations;
     @MockitoBean NoteService notes;
     @MockitoBean ScolariteService scolarites;
@@ -49,6 +51,30 @@ class AuthorizationHttpTest {
     private org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor role(String role) {
         return jwt().jwt(token -> token.claim("idPersonne", 5L))
                 .authorities(new SimpleGrantedAuthority("ROLE_" + role));
+    }
+
+    @Test void photoEstProtegeeEtModificationReserveeAdmin() throws Exception {
+        var file = new org.springframework.mock.web.MockMultipartFile("file", "a.png", "image/png", new byte[]{1});
+        mvc.perform(multipart("/eleves/1/photo").file(file).with(role("ENSEIGNANT")))
+                .andExpect(status().isForbidden());
+        mvc.perform(multipart("/eleves/1/photo").file(file).with(role("RESPONSABLE")))
+                .andExpect(status().isForbidden());
+        mvc.perform(delete("/eleves/1/photo").with(role("ENSEIGNANT")))
+                .andExpect(status().isForbidden());
+        mvc.perform(put("/eleves/1").with(role("ENSEIGNANT"))
+                .contentType(MediaType.APPLICATION_JSON).content("{}"))
+                .andExpect(status().isForbidden());
+        mvc.perform(delete("/eleves/1").with(role("RESPONSABLE")))
+                .andExpect(status().isForbidden());
+        mvc.perform(get("/eleves/1/photo")).andExpect(status().isUnauthorized());
+        mvc.perform(get("/eleves/1/photo").with(role("RESPONSABLE")))
+                .andExpect(status().isForbidden());
+        when(expressions.peutConsulterEleve(eq(1L), any())).thenReturn(true);
+        when(photos.read(1L)).thenReturn(new ElevePhotoService.Photo(new byte[]{1, 2}, MediaType.IMAGE_PNG));
+        mvc.perform(get("/eleves/1/photo").with(role("RESPONSABLE")))
+                .andExpect(status().isOk()).andExpect(content().bytes(new byte[]{1, 2}));
+        mvc.perform(multipart("/eleves/1/photo").file(file).with(role("ADMIN")))
+                .andExpect(status().isOk());
     }
 
     @Test void enseignantModifieSeulementSesEvaluations() throws Exception {

@@ -50,7 +50,7 @@ L’interface React propose actuellement :
 - une page d’accueil ;
 - un formulaire de connexion ;
 - un espace protégé par authentification ;
-- une page de consultation et de recherche des élèves ;
+- une page de consultation, recherche et administration des élèves, avec photo ;
 - un module de consultation et de gestion des notes ;
 - un module de calcul des bulletins ;
 - le téléchargement des bulletins au format PDF ;
@@ -66,9 +66,7 @@ L’application utilise trois rôles :
 
 L’authentification JWT et la protection des routes sont opérationnelles.
 
-La restriction fine des données selon le périmètre métier reste à compléter.
-Par exemple, un responsable légal devra à terme accéder uniquement aux données
-des élèves auxquels il est associé.
+Les consultations des élèves, notes, évaluations et bulletins sont filtrées selon les rattachements métier de l'utilisateur.
 
 ## Technologies utilisées
 
@@ -218,9 +216,20 @@ Variables disponibles :
 |---|---|---|
 | `JWT_SECRET` | Secret utilisé pour signer les JWT | secret de développement |
 | `JWT_EXPIRATION_SECONDS` | Durée de validité du JWT | `3600` |
+| `DB_URL`, `DB_USER`, `DB_PASSWORD` | Connexion PostgreSQL | Valeurs de Docker Compose |
+| `UPLOAD_DIRECTORY` | Dossier privé des photos | `uploads` dans le dossier de lancement |
+| `BOOTSTRAP_ADMIN_EMAIL`, `BOOTSTRAP_ADMIN_PASSWORD`, `BOOTSTRAP_ADMIN_NOM`, `BOOTSTRAP_ADMIN_PRENOM` | Premier administrateur | Absentes |
 
 Les valeurs par défaut sont prévues pour le développement local. Un secret
 distinct doit être utilisé dans un environnement de production.
+
+### Première installation
+
+Sur une base neuve, définir les quatre variables `BOOTSTRAP_ADMIN_*` avant de démarrer le backend. Choisir un mot de passe d'au moins huit caractères et un `JWT_SECRET` Base64 aléatoire. Un exemple des noms de variables figure dans `.env.example` ; ce fichier n'est pas chargé automatiquement par Spring. Au démarrage, l'application crée une personne et un compte `ADMIN` dans une transaction, avec un mot de passe hashé. Elle ignore ces variables dès qu'un compte existe. Se connecter ensuite via `/auth/login` ou l'interface. `/auth/register` exige toujours un administrateur authentifié, y compris lorsque la base est vide.
+
+Les photos sont envoyées en multipart sur `POST /eleves/{id}/photo` (champ `file`), lues via `GET /eleves/{id}/photo` et supprimées via `DELETE /eleves/{id}/photo`. Seul `ADMIN` les modifie ; la lecture suit le droit de consultation de l'élève. Formats JPEG, PNG, GIF ou WebP, 5 Mo maximum. Le dossier `UPLOAD_DIRECTORY` doit être conservé hors du dépôt et sauvegardé avec la base.
+
+La démarche produit et le backlog se trouvent dans [docs/scrum/README.md](docs/scrum/README.md).
 
 ## Exécuter les tests du backend
 
@@ -255,9 +264,7 @@ Le projet est un MVP Full Stack fonctionnel.
 
 Les principales évolutions prévues sont :
 
-- filtrer les données selon le rôle et le périmètre de l’utilisateur ;
-- compléter les écrans d’administration dans React ;
-- ajouter le CRUD des élèves dans le frontend ;
+- compléter les autres écrans d’administration dans React ;
 - ajouter la gestion des évaluations dans le frontend ;
 - ajouter des tests automatisés pour l’interface React ;
 - ajouter des scénarios end-to-end ;

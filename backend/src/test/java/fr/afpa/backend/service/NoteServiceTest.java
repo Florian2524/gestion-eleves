@@ -68,6 +68,7 @@ class NoteServiceTest {
         org.mockito.Mockito.lenient().when(evaluation.getEnseignement()).thenReturn(enseignement);
         org.mockito.Mockito.lenient().when(enseignement.getClasse()).thenReturn(classe);
         org.mockito.Mockito.lenient().when(classe.getIdClasse()).thenReturn(1L);
+        org.mockito.Mockito.lenient().when(evaluation.getBareme()).thenReturn(BigDecimal.valueOf(20));
         noteService = new NoteService(
                 noteRepository,
                 scolariteRepository,
@@ -228,6 +229,31 @@ class NoteServiceTest {
 
         assertThatThrownBy(() -> noteService.create(request))
                 .isInstanceOf(ForbiddenOperationException.class);
+        verify(noteRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldRejectCreationAboveBareme() {
+        when(scolariteRepository.findById(request.idScolarite())).thenReturn(Optional.of(scolarite));
+        when(evaluationRepository.findById(request.idEvaluation())).thenReturn(Optional.of(evaluation));
+        when(evaluation.getBareme()).thenReturn(BigDecimal.TEN);
+
+        assertThatThrownBy(() -> noteService.create(request))
+                .isInstanceOf(ForbiddenOperationException.class)
+                .hasMessageContaining("barème");
+        verify(noteRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldRejectUpdateAboveBareme() {
+        when(noteRepository.findById(200L)).thenReturn(Optional.of(note));
+        when(scolariteRepository.findById(request.idScolarite())).thenReturn(Optional.of(scolarite));
+        when(evaluationRepository.findById(request.idEvaluation())).thenReturn(Optional.of(evaluation));
+        when(evaluation.getBareme()).thenReturn(BigDecimal.TEN);
+
+        assertThatThrownBy(() -> noteService.update(200L, request))
+                .isInstanceOf(ForbiddenOperationException.class)
+                .hasMessageContaining("barème");
         verify(noteRepository, never()).save(any());
     }
 

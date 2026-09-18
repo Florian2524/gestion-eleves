@@ -8,7 +8,6 @@ import fr.afpa.backend.dto.compteutilisateur.CompteUtilisateurResponse;
 import fr.afpa.backend.entity.RoleUtilisateur;
 import fr.afpa.backend.exception.ForbiddenOperationException;
 import fr.afpa.backend.exception.UnauthorizedException;
-import fr.afpa.backend.repository.CompteUtilisateurRepository;
 import fr.afpa.backend.security.CompteUtilisateurDetailsService;
 import fr.afpa.backend.security.CompteUtilisateurPrincipal;
 import fr.afpa.backend.security.JwtService;
@@ -46,10 +45,6 @@ class AuthenticationServiceTest {
     @Mock
     private CompteUtilisateurService
             compteUtilisateurService;
-
-    @Mock
-    private CompteUtilisateurRepository
-            compteUtilisateurRepository;
 
     @Mock
     private CompteUtilisateurDetailsService
@@ -138,47 +133,15 @@ class AuthenticationServiceTest {
     }
 
     @Test
-    void shouldRegisterFirstAdministrator() {
+    void shouldRejectPublicRegistrationOnEmptyDatabase() {
         RegisterRequest request =
                 createRegisterRequest(
                         RoleUtilisateur.ADMIN
                 );
 
-        CompteUtilisateurPrincipal principal =
-                createPrincipal(
-                        RoleUtilisateur.ADMIN
-                );
-
-        when(compteUtilisateurRepository.count())
-                .thenReturn(0L);
-
-        prepareCreatedAccount(
-                request,
-                principal
-        );
-
-        prepareJwt(principal);
-
-        AuthenticationResponse response =
-                authenticationService.register(
-                        request,
-                        null
-                );
-
-        assertExpectedResponse(
-                response,
-                RoleUtilisateur.ADMIN
-        );
-
-        verify(compteUtilisateurService)
-                .create(
-                        new CompteUtilisateurCreateRequest(
-                                request.idPersonne(),
-                                request.emailConnexion(),
-                                request.motDePasse(),
-                                request.role()
-                        )
-                );
+        assertThatThrownBy(() -> authenticationService.register(request, null))
+                .isInstanceOf(UnauthorizedException.class);
+        verify(compteUtilisateurService, never()).create(any());
     }
 
     @Test
@@ -188,9 +151,6 @@ class AuthenticationServiceTest {
                         RoleUtilisateur.RESPONSABLE
                 );
 
-        when(compteUtilisateurRepository.count())
-                .thenReturn(0L);
-
         assertThatThrownBy(() ->
                 authenticationService.register(
                         request,
@@ -198,10 +158,10 @@ class AuthenticationServiceTest {
                 )
         )
                 .isInstanceOf(
-                        ForbiddenOperationException.class
+                        UnauthorizedException.class
                 )
                 .hasMessage(
-                        "Le premier compte utilisateur doit avoir le rôle ADMIN."
+                        "Une authentification est nécessaire pour créer un compte utilisateur."
                 );
 
         verify(
@@ -217,8 +177,6 @@ class AuthenticationServiceTest {
                         RoleUtilisateur.RESPONSABLE
                 );
 
-        when(compteUtilisateurRepository.count())
-                .thenReturn(1L);
 
         assertThatThrownBy(() ->
                 authenticationService.register(
@@ -251,8 +209,6 @@ class AuthenticationServiceTest {
                         "ROLE_RESPONSABLE"
                 );
 
-        when(compteUtilisateurRepository.count())
-                .thenReturn(2L);
 
         assertThatThrownBy(() ->
                 authenticationService.register(
@@ -287,8 +243,6 @@ class AuthenticationServiceTest {
                         RoleUtilisateur.RESPONSABLE
                 );
 
-        when(compteUtilisateurRepository.count())
-                .thenReturn(3L);
 
         prepareCreatedAccount(
                 request,

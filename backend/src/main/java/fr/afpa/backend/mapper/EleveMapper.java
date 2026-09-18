@@ -17,7 +17,7 @@ public class EleveMapper {
                 request.adresse(),
                 request.matricule(),
                 request.dateNaissance(),
-                request.photoUrl()
+                null
         );
     }
 
@@ -31,7 +31,7 @@ public class EleveMapper {
                 eleve.getAdresse(),
                 eleve.getMatricule(),
                 eleve.getDateNaissance(),
-                eleve.getPhotoUrl()
+                eleve.getPhotoUrl() == null ? null : "/eleves/" + eleve.getIdPersonne() + "/photo"
         );
     }
 
@@ -43,6 +43,5 @@ public class EleveMapper {
         eleve.setAdresse(request.adresse());
         eleve.setMatricule(request.matricule());
         eleve.setDateNaissance(request.dateNaissance());
-        eleve.setPhotoUrl(request.photoUrl());
     }
 }

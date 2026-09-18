@@ -77,6 +77,7 @@ public class NoteService {
                 findEvaluationById(request.idEvaluation());
 
         verifierClasse(scolarite, evaluation);
+        verifierBareme(request, evaluation);
 
         Note note = noteMapper.toEntity(
                 request,
@@ -121,6 +122,7 @@ public class NoteService {
                 findEvaluationById(request.idEvaluation());
 
         verifierClasse(scolarite, evaluation);
+        verifierBareme(request, evaluation);
 
         noteMapper.updateEntity(
                 request,
@@ -182,6 +184,14 @@ public class NoteService {
                 evaluation.getEnseignement().getClasse().getIdClasse())) {
             throw new ForbiddenOperationException(
                     "La scolarité ne concerne pas la classe de l'évaluation."
+            );
+        }
+    }
+
+    private void verifierBareme(NoteRequest request, Evaluation evaluation) {
+        if (request.valeur().compareTo(evaluation.getBareme()) > 0) {
+            throw new ForbiddenOperationException(
+                    "La note ne peut pas dépasser le barème de l'évaluation."
             );
         }
     }

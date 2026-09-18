@@ -5,10 +5,8 @@ import fr.afpa.backend.dto.authentication.LoginRequest;
 import fr.afpa.backend.dto.authentication.RegisterRequest;
 import fr.afpa.backend.dto.compteutilisateur.CompteUtilisateurCreateRequest;
 import fr.afpa.backend.dto.compteutilisateur.CompteUtilisateurResponse;
-import fr.afpa.backend.entity.RoleUtilisateur;
 import fr.afpa.backend.exception.ForbiddenOperationException;
 import fr.afpa.backend.exception.UnauthorizedException;
-import fr.afpa.backend.repository.CompteUtilisateurRepository;
 import fr.afpa.backend.security.CompteUtilisateurDetailsService;
 import fr.afpa.backend.security.CompteUtilisateurPrincipal;
 import fr.afpa.backend.security.JwtService;
@@ -34,9 +32,6 @@ public class AuthenticationService {
     private final CompteUtilisateurService
             compteUtilisateurService;
 
-    private final CompteUtilisateurRepository
-            compteUtilisateurRepository;
-
     private final CompteUtilisateurDetailsService
             compteUtilisateurDetailsService;
 
@@ -45,16 +40,12 @@ public class AuthenticationService {
     public AuthenticationService(
             AuthenticationManager authenticationManager,
             CompteUtilisateurService compteUtilisateurService,
-            CompteUtilisateurRepository compteUtilisateurRepository,
             CompteUtilisateurDetailsService compteUtilisateurDetailsService,
             JwtService jwtService
     ) {
         this.authenticationManager = authenticationManager;
         this.compteUtilisateurService =
                 compteUtilisateurService;
-
-        this.compteUtilisateurRepository =
-                compteUtilisateurRepository;
 
         this.compteUtilisateurDetailsService =
                 compteUtilisateurDetailsService;
@@ -94,28 +85,15 @@ public class AuthenticationService {
             RegisterRequest request,
             Authentication currentAuthentication
     ) {
-        boolean firstAccount =
-                compteUtilisateurRepository.count() == 0;
-
-        if (firstAccount
-                && request.role() != RoleUtilisateur.ADMIN) {
-
-            throw new ForbiddenOperationException(
-                    "Le premier compte utilisateur doit avoir le rôle ADMIN."
-            );
-        }
-
-        if (!firstAccount
-                && (currentAuthentication == null
+        if (currentAuthentication == null
                 || !currentAuthentication.isAuthenticated()
-                || currentAuthentication instanceof AnonymousAuthenticationToken)) {
+                || currentAuthentication instanceof AnonymousAuthenticationToken) {
             throw new UnauthorizedException(
                     "Une authentification est nécessaire pour créer un compte utilisateur."
             );
         }
 
-        if (!firstAccount
-                && !isAdministrator(
+        if (!isAdministrator(
                         currentAuthentication
                 )) {
 

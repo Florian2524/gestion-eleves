@@ -22,7 +22,7 @@ import {
   useNavigate,
 } from "react-router";
 
-import { getEleves } from "../api/elevesApi";
+import { createEleve, deleteEleve, deleteElevePhoto, getElevePhoto, getEleves, updateEleve, uploadElevePhoto } from "../api/elevesApi";
 import { ApiError } from "../api/http";
 import { useAuth } from "../context/authContextCore";
 
@@ -76,6 +76,60 @@ function getInitials(eleve) {
   );
 }
 
+function ElevePortrait({ eleve }) {
+  const [url, setUrl] = useState(null);
+  useEffect(() => {
+    if (!eleve.photoUrl) return undefined;
+    const controller = new AbortController();
+    let objectUrl;
+    getElevePhoto(eleve.idPersonne, controller.signal)
+      .then((blob) => {
+        if (!controller.signal.aborted) {
+          objectUrl = URL.createObjectURL(blob);
+          setUrl(objectUrl);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      controller.abort();
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [eleve.idPersonne, eleve.photoUrl]);
+  return url ? <img src={url} alt={`Portrait de ${eleve.prenom} ${eleve.nom}`} className="size-12 shrink-0 object-cover" />
+    : <span className="grid size-12 shrink-0 place-items-center bg-brand-yellow font-bold text-black">{getInitials(eleve)}</span>;
+}
+
+const emptyEleve = { nom: "", prenom: "", matricule: "", dateNaissance: "", emailContact: "", telephone: "", adresse: "" };
+
+function EleveForm({ eleve, onSave, onCancel, saving }) {
+  const [values, setValues] = useState(() => eleve ? { ...emptyEleve, ...eleve } : emptyEleve);
+  const [photo, setPhoto] = useState(null);
+  const fields = [
+    ["nom", "Nom", "text", true], ["prenom", "Prénom", "text", true],
+    ["matricule", "Matricule", "text", true], ["dateNaissance", "Date de naissance", "date", true],
+    ["emailContact", "E-mail", "email"], ["telephone", "Téléphone", "tel"],
+    ["adresse", "Adresse", "text"],
+  ];
+  return <form onSubmit={(event) => { event.preventDefault(); onSave(values, photo); }} className="mt-7 bg-white p-6 shadow-sm">
+    <h2 className="font-display text-2xl font-bold uppercase text-school-blue">{eleve ? "Modifier l’élève" : "Ajouter un élève"}</h2>
+    <div className="mt-5 grid gap-4 sm:grid-cols-2">
+      {fields.map(([name, label, type, required]) => <label key={name} className="block text-sm font-semibold text-school-ink">
+        {label}{required ? " *" : ""}
+        <input type={type} required={required} maxLength={name === "matricule" ? 50 : name === "telephone" ? 30 : name === "adresse" ? 500 : name === "emailContact" ? 255 : 100}
+          value={values[name] ?? ""} onChange={(event) => setValues({ ...values, [name]: event.target.value })}
+          className="mt-2 min-h-11 w-full border border-slate-300 px-3 outline-none focus:border-school-blue" />
+      </label>)}
+      <label className="block text-sm font-semibold text-school-ink">Photo (JPEG, PNG, GIF ou WebP, 5 Mo max.)
+        <input type="file" accept="image/jpeg,image/png,image/gif,image/webp" onChange={(event) => setPhoto(event.target.files?.[0] ?? null)} className="mt-2 block w-full" />
+      </label>
+    </div>
+    <div className="mt-5 flex flex-wrap gap-3">
+      <button disabled={saving} type="submit" className="min-h-11 bg-school-blue px-5 font-bold text-white disabled:opacity-50">{saving ? "Enregistrement..." : "Enregistrer"}</button>
+      <button type="button" onClick={onCancel} className="min-h-11 border border-slate-300 px-5 font-bold">Annuler</button>
+    </div>
+  </form>;
+}
+
 export default function ElevesPage() {
   const navigate = useNavigate();
 
@@ -98,6 +152,50 @@ export default function ElevesPage() {
 
   const [reloadKey, setReloadKey] =
     useState(0);
+  const [editing, setEditing] = useState(undefined);
+  const [saving, setSaving] = useState(false);
+  const [actionError, setActionError] = useState("");
+  const [notice, setNotice] = useState("");
+  const isAdmin = auth?.role === "ADMIN";
+
+  async function saveEleve(values, photo) {
+    if (photo && (photo.size > 5 * 1024 * 1024 || !["image/jpeg", "image/png", "image/gif", "image/webp"].includes(photo.type))) {
+      setActionError("La photo doit être une image JPEG, PNG, GIF ou WebP de 5 Mo maximum.");
+      return;
+    }
+    setSaving(true); setActionError(""); setNotice("");
+    try {
+      const payload = { ...values, photoUrl: undefined };
+      const saved = editing?.idPersonne ? await updateEleve(editing.idPersonne, payload) : await createEleve(payload);
+      if (photo) await uploadElevePhoto(saved.idPersonne, photo);
+      setEditing(undefined);
+      setNotice("Élève enregistré.");
+      setReloadKey((key) => key + 1);
+    } catch (failure) { setActionError(failure.message || "Enregistrement impossible."); }
+    finally { setSaving(false); }
+  }
+
+  async function removeEleve(eleve) {
+    if (!window.confirm(`Supprimer ${eleve.prenom} ${eleve.nom} ?`)) return;
+    setActionError(""); setNotice("");
+    try { await deleteEleve(eleve.idPersonne); setNotice("Élève supprimé."); setReloadKey((key) => key + 1); }
+    catch (failure) { setActionError(failure.message || "Suppression impossible."); }
+  }
+
+  async function removePhoto(eleve) {
+    if (!window.confirm(`Supprimer la photo de ${eleve.prenom} ${eleve.nom} ?`)) return;
+    try { await deleteElevePhoto(eleve.idPersonne); setNotice("Photo supprimée."); setReloadKey((key) => key + 1); }
+    catch (failure) { setActionError(failure.message || "Suppression de la photo impossible."); }
+  }
+
+  function actions(eleve) {
+    if (!isAdmin) return null;
+    return <div className="flex flex-wrap gap-2 text-sm font-semibold">
+      <button type="button" onClick={() => { setEditing(eleve); setActionError(""); }} className="text-school-blue underline">Modifier</button>
+      {eleve.photoUrl && <button type="button" onClick={() => removePhoto(eleve)} className="text-school-blue underline">Retirer photo</button>}
+      <button type="button" onClick={() => removeEleve(eleve)} className="text-red-700 underline">Supprimer</button>
+    </div>;
+  }
 
   const roleLabel =
     roleLabels[auth?.role] ??
@@ -262,6 +360,10 @@ export default function ElevesPage() {
       </header>
 
       <main className="mx-auto max-w-[1440px] px-4 py-8 sm:px-6 lg:px-10 lg:py-12">
+        {isAdmin && <button type="button" onClick={() => { setEditing(null); setActionError(""); }} className="mb-5 min-h-11 bg-school-blue px-5 font-bold text-white">Ajouter un élève</button>}
+        {actionError && <p role="alert" className="mb-5 border border-red-300 bg-red-50 p-4 text-red-800">{actionError}</p>}
+        {notice && <p role="status" className="mb-5 border border-green-300 bg-green-50 p-4 text-green-800">{notice}</p>}
+        {isAdmin && editing !== undefined && <EleveForm key={editing?.idPersonne ?? "new"} eleve={editing} onSave={saveEleve} onCancel={() => setEditing(undefined)} saving={saving} />}
         <Link
           to="/espace"
           className="inline-flex items-center gap-2 font-semibold text-school-blue transition hover:text-school-blue-dark"
@@ -443,6 +545,7 @@ export default function ElevesPage() {
                           Contact
                         </th>
 
+                        {isAdmin && <th className="px-6 py-4 text-sm uppercase tracking-wider">Actions</th>}
                         <th className="px-6 py-4 text-sm uppercase tracking-wider">
                           Naissance
                         </th>
@@ -458,9 +561,7 @@ export default function ElevesPage() {
                           >
                             <td className="px-6 py-5">
                               <div className="flex items-center gap-4">
-                                <span className="grid size-11 shrink-0 place-items-center bg-brand-yellow font-bold text-black">
-                                  {getInitials(eleve)}
-                                </span>
+                                <ElevePortrait eleve={eleve} />
 
                                 <div>
                                   <p className="font-semibold text-school-ink">
@@ -494,6 +595,7 @@ export default function ElevesPage() {
                               </p>
                             </td>
 
+                            {isAdmin && <td className="px-6 py-5">{actions(eleve)}</td>}
                             <td className="px-6 py-5 text-school-muted">
                               {formatDate(
                                 eleve.dateNaissance,
@@ -514,9 +616,7 @@ export default function ElevesPage() {
                     className="bg-white p-6 shadow-[0_12px_35px_rgba(23,23,23,0.05)]"
                   >
                     <div className="flex items-start gap-4">
-                      <span className="grid size-12 shrink-0 place-items-center bg-brand-yellow font-bold text-black">
-                        {getInitials(eleve)}
-                      </span>
+                      <ElevePortrait eleve={eleve} />
 
                       <div className="min-w-0">
                         <h2 className="font-display text-2xl font-bold uppercase text-school-blue">
@@ -570,6 +670,7 @@ export default function ElevesPage() {
                         </div>
                       </div>
                     </dl>
+                    {isAdmin && <div className="mt-5">{actions(eleve)}</div>}
                   </article>
                 ))}
               </section>

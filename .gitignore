@@ -1,5 +1,7 @@
 
 .idea/
+backend/uploads/
+uploads/
 *.iml
 
 # Maven build output

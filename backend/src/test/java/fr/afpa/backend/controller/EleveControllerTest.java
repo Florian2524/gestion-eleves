@@ -50,6 +50,8 @@ class EleveControllerTest {
 
     @MockitoBean
     private EleveService eleveService;
+    @MockitoBean
+    private fr.afpa.backend.service.ElevePhotoService photoService;
 
     private EleveRequest request;
     private EleveResponse response;
