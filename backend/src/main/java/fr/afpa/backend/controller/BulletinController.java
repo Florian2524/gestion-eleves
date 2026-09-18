@@ -3,6 +3,7 @@ package fr.afpa.backend.controller;
 import fr.afpa.backend.dto.bulletin.BulletinDto;
 import fr.afpa.backend.service.BulletinCalculService;
 import fr.afpa.backend.service.BulletinPdfService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -33,6 +34,7 @@ public class BulletinController {
     @GetMapping(
             "/calcul/{idScolarite}/{idPeriode}"
     )
+    @PreAuthorize("@securityExpressions.peutConsulterScolariteOuAbsente(#idScolarite, authentication)")
     public ResponseEntity<BulletinDto> calculer(
             @PathVariable Long idScolarite,
             @PathVariable Long idPeriode
@@ -49,6 +51,7 @@ public class BulletinController {
             value = "/calcul/{idScolarite}/{idPeriode}/pdf",
             produces = MediaType.APPLICATION_PDF_VALUE
     )
+    @PreAuthorize("@securityExpressions.peutConsulterScolariteOuAbsente(#idScolarite, authentication)")
     public ResponseEntity<byte[]> telechargerPdf(
             @PathVariable Long idScolarite,
             @PathVariable Long idPeriode

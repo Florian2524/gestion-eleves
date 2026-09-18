@@ -227,10 +227,10 @@ class AuthenticationServiceTest {
                 )
         )
                 .isInstanceOf(
-                        ForbiddenOperationException.class
+                        UnauthorizedException.class
                 )
                 .hasMessage(
-                        "Seul un administrateur peut créer un nouveau compte utilisateur."
+                        "Une authentification est nécessaire pour créer un compte utilisateur."
                 );
 
         verify(

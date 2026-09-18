@@ -3,6 +3,10 @@ package fr.afpa.backend.controller;
 import fr.afpa.backend.dto.enseignement.EnseignementRequest;
 import fr.afpa.backend.dto.enseignement.EnseignementResponse;
 import fr.afpa.backend.service.EnseignementService;
+import fr.afpa.backend.security.SecurityExpressions;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.access.prepost.PostAuthorize;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,21 +26,27 @@ import java.util.List;
 public class EnseignementController {
 
     private final EnseignementService enseignementService;
+    private final SecurityExpressions securityExpressions;
 
     public EnseignementController(
-            EnseignementService enseignementService
+            EnseignementService enseignementService,
+            SecurityExpressions securityExpressions
     ) {
         this.enseignementService = enseignementService;
+        this.securityExpressions = securityExpressions;
     }
 
     @GetMapping
-    public ResponseEntity<List<EnseignementResponse>> findAll() {
+    public ResponseEntity<List<EnseignementResponse>> findAll(Authentication authentication) {
         return ResponseEntity.ok(
-                enseignementService.findAll()
+                enseignementService.findAll().stream()
+                        .filter(item -> securityExpressions.peutConsulterEnseignement(item.idEnseignement(), authentication))
+                        .toList()
         );
     }
 
     @GetMapping("/{id}")
+    @PostAuthorize("@securityExpressions.peutConsulterEnseignement(returnObject.body.idEnseignement(), authentication)")
     public ResponseEntity<EnseignementResponse> findById(
             @PathVariable Long id
     ) {

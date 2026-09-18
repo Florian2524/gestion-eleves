@@ -6,6 +6,7 @@ import fr.afpa.backend.entity.Evaluation;
 import fr.afpa.backend.entity.Note;
 import fr.afpa.backend.entity.Scolarite;
 import fr.afpa.backend.exception.DuplicateResourceException;
+import fr.afpa.backend.exception.ForbiddenOperationException;
 import fr.afpa.backend.exception.ResourceNotFoundException;
 import fr.afpa.backend.mapper.NoteMapper;
 import fr.afpa.backend.repository.EvaluationRepository;
@@ -75,6 +76,8 @@ public class NoteService {
         Evaluation evaluation =
                 findEvaluationById(request.idEvaluation());
 
+        verifierClasse(scolarite, evaluation);
+
         Note note = noteMapper.toEntity(
                 request,
                 scolarite,
@@ -116,6 +119,8 @@ public class NoteService {
 
         Evaluation evaluation =
                 findEvaluationById(request.idEvaluation());
+
+        verifierClasse(scolarite, evaluation);
 
         noteMapper.updateEntity(
                 request,
@@ -170,5 +175,14 @@ public class NoteService {
                                         + " est introuvable."
                         )
                 );
+    }
+
+    private void verifierClasse(Scolarite scolarite, Evaluation evaluation) {
+        if (!scolarite.getClasse().getIdClasse().equals(
+                evaluation.getEnseignement().getClasse().getIdClasse())) {
+            throw new ForbiddenOperationException(
+                    "La scolarité ne concerne pas la classe de l'évaluation."
+            );
+        }
     }
 }

@@ -101,8 +101,20 @@ public class SecurityConfig {
                                         "/comptes-utilisateurs/**"
                                 )
                                 .hasRole("ADMIN")
+                                .requestMatchers("/enseignants/**", "/responsables/**", "/responsabilites-legales/**", "/inscriptions/**")
+                                .hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/matieres/**", "/periodes/**", "/eleves/**", "/scolarites/**", "/classes/**", "/enseignements/**", "/evaluations/**", "/notes/**", "/bulletins/**")
+                                .hasAnyRole("ADMIN", "ENSEIGNANT", "RESPONSABLE")
+                                .requestMatchers(HttpMethod.POST, "/evaluations", "/notes")
+                                .hasAnyRole("ADMIN", "ENSEIGNANT")
+                                .requestMatchers(HttpMethod.PUT, "/evaluations/**", "/notes/**")
+                                .hasAnyRole("ADMIN", "ENSEIGNANT")
+                                .requestMatchers(HttpMethod.DELETE, "/evaluations/**", "/notes/**")
+                                .hasAnyRole("ADMIN", "ENSEIGNANT")
+                                .requestMatchers("/eleves/**", "/classes/**", "/scolarites/**", "/enseignements/**", "/matieres/**", "/periodes/**")
+                                .hasRole("ADMIN")
                                 .anyRequest()
-                                .authenticated()
+                                .denyAll()
                 )
                 .oauth2ResourceServer(resourceServer ->
                         resourceServer.jwt(jwt ->

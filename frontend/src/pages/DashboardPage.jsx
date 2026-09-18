@@ -126,9 +126,9 @@ export default function DashboardPage() {
             </h1>
 
             <p className="mt-6 max-w-2xl leading-7 text-school-muted">
-              Retrouvez les outils essentiels pour
-              gérer les dossiers des élèves, les notes
-              et les bulletins de l’établissement.
+              {auth?.role === "RESPONSABLE"
+                ? "Consultez les informations, les notes et les bulletins de vos élèves."
+                : "Retrouvez les outils essentiels pour gérer les dossiers des élèves, les notes et les bulletins de l’établissement."}
             </p>
           </div>
 
@@ -168,7 +168,9 @@ export default function DashboardPage() {
                 </h2>
 
                 <p className="mt-4 leading-7 text-school-muted">
-                  {module.description}
+                  {auth?.role === "RESPONSABLE" && module.to === "/notes"
+                    ? "Consulter les résultats de vos élèves."
+                    : module.description}
                 </p>
 
                 {module.to ? (

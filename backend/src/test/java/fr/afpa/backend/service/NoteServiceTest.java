@@ -3,9 +3,12 @@ package fr.afpa.backend.service;
 import fr.afpa.backend.dto.note.NoteRequest;
 import fr.afpa.backend.dto.note.NoteResponse;
 import fr.afpa.backend.entity.Evaluation;
+import fr.afpa.backend.entity.Classe;
+import fr.afpa.backend.entity.Enseignement;
 import fr.afpa.backend.entity.Note;
 import fr.afpa.backend.entity.Scolarite;
 import fr.afpa.backend.exception.DuplicateResourceException;
+import fr.afpa.backend.exception.ForbiddenOperationException;
 import fr.afpa.backend.exception.ResourceNotFoundException;
 import fr.afpa.backend.mapper.NoteMapper;
 import fr.afpa.backend.repository.EvaluationRepository;
@@ -50,6 +53,8 @@ class NoteServiceTest {
 
     @Mock
     private Evaluation evaluation;
+    @Mock private Classe classe;
+    @Mock private Enseignement enseignement;
 
     private NoteService noteService;
 
@@ -59,6 +64,10 @@ class NoteServiceTest {
 
     @BeforeEach
     void setUp() {
+        org.mockito.Mockito.lenient().when(scolarite.getClasse()).thenReturn(classe);
+        org.mockito.Mockito.lenient().when(evaluation.getEnseignement()).thenReturn(enseignement);
+        org.mockito.Mockito.lenient().when(enseignement.getClasse()).thenReturn(classe);
+        org.mockito.Mockito.lenient().when(classe.getIdClasse()).thenReturn(1L);
         noteService = new NoteService(
                 noteRepository,
                 scolariteRepository,
@@ -205,6 +214,21 @@ class NoteServiceTest {
 
         verify(noteRepository).save(note);
         verify(noteMapper).toResponse(note);
+    }
+
+    @Test
+    void shouldRejectNoteForAnotherClass() {
+        Classe autreClasse = org.mockito.Mockito.mock(Classe.class);
+        when(scolariteRepository.findById(request.idScolarite()))
+                .thenReturn(Optional.of(scolarite));
+        when(evaluationRepository.findById(request.idEvaluation()))
+                .thenReturn(Optional.of(evaluation));
+        when(enseignement.getClasse()).thenReturn(autreClasse);
+        when(autreClasse.getIdClasse()).thenReturn(2L);
+
+        assertThatThrownBy(() -> noteService.create(request))
+                .isInstanceOf(ForbiddenOperationException.class);
+        verify(noteRepository, never()).save(any());
     }
 
     @Test

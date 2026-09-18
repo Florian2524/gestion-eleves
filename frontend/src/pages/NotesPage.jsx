@@ -832,9 +832,9 @@ export default function NotesPage() {
             </h1>
 
             <p className="mt-6 max-w-3xl leading-7 text-school-muted">
-              Consultez, ajoutez, modifiez et
-              supprimez les résultats associés aux
-              évaluations.
+              {auth?.role === "RESPONSABLE"
+                ? "Consultez les résultats de vos élèves."
+                : "Consultez et gérez les résultats des évaluations."}
             </p>
           </div>
 
@@ -873,6 +873,7 @@ export default function NotesPage() {
           </div>
         )}
 
+        {auth?.role !== "RESPONSABLE" && (
         <section
           id="note-form"
           className="mt-8 border border-slate-200 bg-white p-6 lg:p-8"
@@ -1141,6 +1142,7 @@ export default function NotesPage() {
               </p>
             )}
         </section>
+        )}
 
         <section className="mt-8 border border-slate-200 bg-white p-6 lg:p-8">
           <div className="flex flex-wrap items-end justify-between gap-5">
@@ -1231,9 +1233,9 @@ export default function NotesPage() {
                           Saisie
                         </th>
 
-                        <th className="px-5 py-4 text-right">
-                          Actions
-                        </th>
+                        {auth?.role !== "RESPONSABLE" && (
+                          <th className="px-5 py-4 text-right">Actions</th>
+                        )}
                       </tr>
                     </thead>
 
@@ -1307,6 +1309,7 @@ export default function NotesPage() {
                                 )}
                               </td>
 
+                              {auth?.role !== "RESPONSABLE" && (
                               <td className="px-5 py-5">
                                 <div className="flex justify-end gap-2">
                                   <button
@@ -1351,6 +1354,7 @@ export default function NotesPage() {
                                   </button>
                                 </div>
                               </td>
+                              )}
                             </tr>
                           );
                         },
@@ -1438,6 +1442,7 @@ export default function NotesPage() {
                               {note.statutNote}
                             </span>
 
+                            {auth?.role !== "RESPONSABLE" && (
                             <div className="flex gap-2">
                               <button
                                 type="button"
@@ -1479,6 +1484,7 @@ export default function NotesPage() {
                                 )}
                               </button>
                             </div>
+                            )}
                           </div>
                         </article>
                       );

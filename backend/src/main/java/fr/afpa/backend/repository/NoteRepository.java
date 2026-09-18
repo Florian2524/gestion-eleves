@@ -7,6 +7,8 @@ import java.util.List;
 
 public interface NoteRepository
         extends JpaRepository<Note, Long> {
+    @org.springframework.data.jpa.repository.Query("select count(n) > 0 from Note n, ResponsabiliteLegale r where n.idNote = :idNote and r.eleve = n.scolarite.eleve and r.responsable.idPersonne = :idResponsable")
+    boolean estLieAuResponsable(Long idNote, Long idResponsable);
 
     List<Note> findAllByScolarite_IdScolariteAndEvaluation_Periode_IdPeriode(
             Long idScolarite,

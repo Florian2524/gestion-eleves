@@ -6,6 +6,7 @@ import fr.afpa.backend.dto.note.NoteResponse;
 import fr.afpa.backend.exception.DuplicateResourceException;
 import fr.afpa.backend.exception.GlobalExceptionHandler;
 import fr.afpa.backend.exception.ResourceNotFoundException;
+import fr.afpa.backend.security.SecurityExpressions;
 import fr.afpa.backend.service.NoteService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,6 +48,9 @@ class NoteControllerTest {
     private ObjectMapper objectMapper;
 
     @MockitoBean
+    private SecurityExpressions securityExpressions;
+
+    @MockitoBean
     private NoteService noteService;
 
     private NoteRequest request;
@@ -54,6 +58,7 @@ class NoteControllerTest {
 
     @BeforeEach
     void setUp() {
+        org.mockito.Mockito.lenient().when(securityExpressions.peutConsulterNote(org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.nullable(org.springframework.security.core.Authentication.class))).thenReturn(true);
         request = new NoteRequest(
                 20L,
                 100L,

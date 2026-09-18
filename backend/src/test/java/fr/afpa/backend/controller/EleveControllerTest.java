@@ -6,6 +6,7 @@ import fr.afpa.backend.dto.eleve.EleveResponse;
 import fr.afpa.backend.exception.DuplicateResourceException;
 import fr.afpa.backend.exception.GlobalExceptionHandler;
 import fr.afpa.backend.exception.ResourceNotFoundException;
+import fr.afpa.backend.security.SecurityExpressions;
 import fr.afpa.backend.service.EleveService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,6 +46,9 @@ class EleveControllerTest {
     private ObjectMapper objectMapper;
 
     @MockitoBean
+    private SecurityExpressions securityExpressions;
+
+    @MockitoBean
     private EleveService eleveService;
 
     private EleveRequest request;
@@ -52,6 +56,7 @@ class EleveControllerTest {
 
     @BeforeEach
     void setUp() {
+        org.mockito.Mockito.lenient().when(securityExpressions.peutConsulterEleve(org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.nullable(org.springframework.security.core.Authentication.class))).thenReturn(true);
         request = new EleveRequest(
                 "Dupont",
                 "Alice",

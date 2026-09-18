@@ -6,6 +6,7 @@ import fr.afpa.backend.dto.classe.ClasseResponse;
 import fr.afpa.backend.exception.DuplicateResourceException;
 import fr.afpa.backend.exception.GlobalExceptionHandler;
 import fr.afpa.backend.exception.ResourceNotFoundException;
+import fr.afpa.backend.security.SecurityExpressions;
 import fr.afpa.backend.service.ClasseService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,6 +46,9 @@ class ClasseControllerTest {
     private ObjectMapper objectMapper;
 
     @MockitoBean
+    private SecurityExpressions securityExpressions;
+
+    @MockitoBean
     private ClasseService classeService;
 
     private ClasseRequest request;
@@ -52,6 +56,7 @@ class ClasseControllerTest {
 
     @BeforeEach
     void setUp() {
+        org.mockito.Mockito.lenient().when(securityExpressions.peutConsulterClasse(org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.nullable(org.springframework.security.core.Authentication.class))).thenReturn(true);
         request = new ClasseRequest(
                 "6A",
                 "Sixième",

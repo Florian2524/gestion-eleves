@@ -3,6 +3,10 @@ package fr.afpa.backend.controller;
 import fr.afpa.backend.dto.note.NoteRequest;
 import fr.afpa.backend.dto.note.NoteResponse;
 import fr.afpa.backend.service.NoteService;
+import fr.afpa.backend.security.SecurityExpressions;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.access.prepost.PostAuthorize;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,19 +26,24 @@ import java.util.List;
 public class NoteController {
 
     private final NoteService noteService;
+    private final SecurityExpressions securityExpressions;
 
-    public NoteController(NoteService noteService) {
+    public NoteController(NoteService noteService, SecurityExpressions securityExpressions) {
         this.noteService = noteService;
+        this.securityExpressions = securityExpressions;
     }
 
     @GetMapping
-    public ResponseEntity<List<NoteResponse>> findAll() {
+    public ResponseEntity<List<NoteResponse>> findAll(Authentication authentication) {
         return ResponseEntity.ok(
-                noteService.findAll()
+                noteService.findAll().stream()
+                        .filter(item -> securityExpressions.peutConsulterNote(item.idNote(), authentication))
+                        .toList()
         );
     }
 
     @GetMapping("/{id}")
+    @PostAuthorize("@securityExpressions.peutConsulterNote(returnObject.body.idNote(), authentication)")
     public ResponseEntity<NoteResponse> findById(
             @PathVariable Long id
     ) {
@@ -44,6 +53,7 @@ public class NoteController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN') or @securityExpressions.estProprietaireEvaluation(#request.idEvaluation(), authentication)")
     public ResponseEntity<NoteResponse> create(
             @Valid @RequestBody NoteRequest request
     ) {
@@ -60,6 +70,7 @@ public class NoteController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or (@securityExpressions.estProprietaireOuAbsenteNote(#id, authentication) and @securityExpressions.estProprietaireEvaluation(#request.idEvaluation(), authentication))")
     public ResponseEntity<NoteResponse> update(
             @PathVariable Long id,
             @Valid @RequestBody NoteRequest request
@@ -70,6 +81,7 @@ public class NoteController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or @securityExpressions.estProprietaireOuAbsenteNote(#id, authentication)")
     public ResponseEntity<Void> delete(
             @PathVariable Long id
     ) {

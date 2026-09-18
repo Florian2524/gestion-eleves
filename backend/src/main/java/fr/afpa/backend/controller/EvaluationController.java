@@ -3,6 +3,10 @@ package fr.afpa.backend.controller;
 import fr.afpa.backend.dto.evaluation.EvaluationRequest;
 import fr.afpa.backend.dto.evaluation.EvaluationResponse;
 import fr.afpa.backend.service.EvaluationService;
+import fr.afpa.backend.security.SecurityExpressions;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.access.prepost.PostAuthorize;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,21 +26,27 @@ import java.util.List;
 public class EvaluationController {
 
     private final EvaluationService evaluationService;
+    private final SecurityExpressions securityExpressions;
 
     public EvaluationController(
-            EvaluationService evaluationService
+            EvaluationService evaluationService,
+            SecurityExpressions securityExpressions
     ) {
         this.evaluationService = evaluationService;
+        this.securityExpressions = securityExpressions;
     }
 
     @GetMapping
-    public ResponseEntity<List<EvaluationResponse>> findAll() {
+    public ResponseEntity<List<EvaluationResponse>> findAll(Authentication authentication) {
         return ResponseEntity.ok(
-                evaluationService.findAll()
+                evaluationService.findAll().stream()
+                        .filter(item -> securityExpressions.peutConsulterEvaluation(item.idEvaluation(), authentication))
+                        .toList()
         );
     }
 
     @GetMapping("/{id}")
+    @PostAuthorize("@securityExpressions.peutConsulterEvaluation(returnObject.body.idEvaluation(), authentication)")
     public ResponseEntity<EvaluationResponse> findById(
             @PathVariable Long id
     ) {
@@ -46,6 +56,7 @@ public class EvaluationController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN') or @securityExpressions.estProprietaireEnseignement(#request.idEnseignement(), authentication)")
     public ResponseEntity<EvaluationResponse> create(
             @Valid @RequestBody EvaluationRequest request
     ) {
@@ -63,6 +74,7 @@ public class EvaluationController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or (@securityExpressions.estProprietaireOuAbsenteEvaluation(#id, authentication) and @securityExpressions.estProprietaireEnseignement(#request.idEnseignement(), authentication))")
     public ResponseEntity<EvaluationResponse> update(
             @PathVariable Long id,
             @Valid @RequestBody EvaluationRequest request
@@ -73,6 +85,7 @@ public class EvaluationController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or @securityExpressions.estProprietaireOuAbsenteEvaluation(#id, authentication)")
     public ResponseEntity<Void> delete(
             @PathVariable Long id
     ) {

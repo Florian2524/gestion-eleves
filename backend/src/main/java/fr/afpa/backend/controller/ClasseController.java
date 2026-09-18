@@ -3,6 +3,10 @@ package fr.afpa.backend.controller;
 import fr.afpa.backend.dto.classe.ClasseRequest;
 import fr.afpa.backend.dto.classe.ClasseResponse;
 import fr.afpa.backend.service.ClasseService;
+import fr.afpa.backend.security.SecurityExpressions;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.access.prepost.PostAuthorize;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,17 +26,22 @@ import java.util.List;
 public class ClasseController {
 
     private final ClasseService classeService;
+    private final SecurityExpressions securityExpressions;
 
-    public ClasseController(ClasseService classeService) {
+    public ClasseController(ClasseService classeService, SecurityExpressions securityExpressions) {
         this.classeService = classeService;
+        this.securityExpressions = securityExpressions;
     }
 
     @GetMapping
-    public ResponseEntity<List<ClasseResponse>> findAll() {
-        return ResponseEntity.ok(classeService.findAll());
+    public ResponseEntity<List<ClasseResponse>> findAll(Authentication authentication) {
+        return ResponseEntity.ok(classeService.findAll().stream()
+                .filter(item -> securityExpressions.peutConsulterClasse(item.idClasse(), authentication))
+                .toList());
     }
 
     @GetMapping("/{id}")
+    @PostAuthorize("@securityExpressions.peutConsulterClasse(returnObject.body.idClasse(), authentication)")
     public ResponseEntity<ClasseResponse> findById(
             @PathVariable Long id
     ) {

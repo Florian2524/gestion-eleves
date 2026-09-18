@@ -12,6 +12,8 @@ import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import NotesPage from "./pages/NotesPage";
 
+const rolesAutorises = ["ADMIN", "ENSEIGNANT", "RESPONSABLE"];
+
 export default function App() {
   return (
     <Routes>
@@ -28,7 +30,7 @@ export default function App() {
       <Route
         path="/espace"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={rolesAutorises}>
             <DashboardPage />
           </ProtectedRoute>
         }
@@ -37,7 +39,7 @@ export default function App() {
       <Route
         path="/eleves"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={rolesAutorises}>
             <ElevesPage />
           </ProtectedRoute>
         }
@@ -46,7 +48,7 @@ export default function App() {
       <Route
         path="/notes"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={rolesAutorises}>
             <NotesPage />
           </ProtectedRoute>
         }
@@ -55,7 +57,7 @@ export default function App() {
       <Route
         path="/bulletins"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={rolesAutorises}>
             <BulletinsPage />
           </ProtectedRoute>
         }

@@ -6,6 +6,7 @@ import fr.afpa.backend.dto.scolarite.ScolariteResponse;
 import fr.afpa.backend.exception.DuplicateResourceException;
 import fr.afpa.backend.exception.GlobalExceptionHandler;
 import fr.afpa.backend.exception.ResourceNotFoundException;
+import fr.afpa.backend.security.SecurityExpressions;
 import fr.afpa.backend.service.ScolariteService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,6 +47,9 @@ class ScolariteControllerTest {
     private ObjectMapper objectMapper;
 
     @MockitoBean
+    private SecurityExpressions securityExpressions;
+
+    @MockitoBean
     private ScolariteService scolariteService;
 
     private ScolariteRequest request;
@@ -53,6 +57,7 @@ class ScolariteControllerTest {
 
     @BeforeEach
     void setUp() {
+        org.mockito.Mockito.lenient().when(securityExpressions.peutConsulterScolarite(org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.nullable(org.springframework.security.core.Authentication.class))).thenReturn(true);
         request = new ScolariteRequest(
                 1L,
                 2L,

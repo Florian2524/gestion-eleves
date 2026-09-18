@@ -4,6 +4,10 @@ import fr.afpa.backend.entity.RoleUtilisateur;
 import fr.afpa.backend.repository.EnseignementRepository;
 import fr.afpa.backend.repository.EvaluationRepository;
 import fr.afpa.backend.repository.NoteRepository;
+import fr.afpa.backend.repository.EleveRepository;
+import fr.afpa.backend.repository.ScolariteRepository;
+import fr.afpa.backend.repository.ResponsabiliteLegaleRepository;
+import fr.afpa.backend.repository.ClasseRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,6 +15,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.never;
@@ -30,6 +37,10 @@ class SecurityExpressionsTest {
 
     @Mock
     private NoteRepository noteRepository;
+    @Mock private EleveRepository eleveRepository;
+    @Mock private ScolariteRepository scolariteRepository;
+    @Mock private ResponsabiliteLegaleRepository responsabiliteLegaleRepository;
+    @Mock private ClasseRepository classeRepository;
 
     private SecurityExpressions securityExpressions;
 
@@ -38,7 +49,11 @@ class SecurityExpressionsTest {
         securityExpressions = new SecurityExpressions(
                 enseignementRepository,
                 evaluationRepository,
-                noteRepository
+                noteRepository,
+                eleveRepository,
+                scolariteRepository,
+                responsabiliteLegaleRepository,
+                classeRepository
         );
     }
 
@@ -225,5 +240,43 @@ class SecurityExpressionsTest {
                 null,
                 principal.getAuthorities()
         );
+    }
+
+    private Authentication jwtAuthentication(RoleUtilisateur role) {
+        Jwt jwt = Jwt.withTokenValue("test")
+                .header("alg", "none")
+                .claim("sub", "test@example.fr")
+                .claim("idPersonne", ID_PERSONNE)
+                .build();
+        return new JwtAuthenticationToken(jwt,
+                java.util.List.of(new SimpleGrantedAuthority("ROLE_" + role.name())));
+    }
+
+    @Test
+    void jwtEnseignantEstReconnuPourSonEvaluation() {
+        when(evaluationRepository.existsByIdEvaluationAndEnseignement_Enseignant_IdPersonne(30L, ID_PERSONNE))
+                .thenReturn(true);
+        assertThat(securityExpressions.estProprietaireEvaluation(30L,
+                jwtAuthentication(RoleUtilisateur.ENSEIGNANT))).isTrue();
+    }
+
+    @Test
+    void responsableNeVoitQueSonEleve() {
+        when(responsabiliteLegaleRepository.existsByResponsable_IdPersonneAndEleve_IdPersonne(ID_PERSONNE, 1L))
+                .thenReturn(true);
+        Authentication authentication = jwtAuthentication(RoleUtilisateur.RESPONSABLE);
+        assertThat(securityExpressions.peutConsulterEleve(1L, authentication)).isTrue();
+        assertThat(securityExpressions.peutConsulterEleve(2L, authentication)).isFalse();
+    }
+
+    @Test
+    void responsableNeVoitQueLaNoteEtLaScolariteDeSonEleve() {
+        when(noteRepository.estLieAuResponsable(11L, ID_PERSONNE)).thenReturn(true);
+        when(scolariteRepository.estLieAuResponsable(21L, ID_PERSONNE)).thenReturn(true);
+        Authentication authentication = jwtAuthentication(RoleUtilisateur.RESPONSABLE);
+        assertThat(securityExpressions.peutConsulterNote(11L, authentication)).isTrue();
+        assertThat(securityExpressions.peutConsulterNote(12L, authentication)).isFalse();
+        assertThat(securityExpressions.peutConsulterScolarite(21L, authentication)).isTrue();
+        assertThat(securityExpressions.peutConsulterScolarite(22L, authentication)).isFalse();
     }
 }

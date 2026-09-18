@@ -13,6 +13,7 @@ import fr.afpa.backend.security.CompteUtilisateurDetailsService;
 import fr.afpa.backend.security.CompteUtilisateurPrincipal;
 import fr.afpa.backend.security.JwtService;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -101,6 +102,15 @@ public class AuthenticationService {
 
             throw new ForbiddenOperationException(
                     "Le premier compte utilisateur doit avoir le rôle ADMIN."
+            );
+        }
+
+        if (!firstAccount
+                && (currentAuthentication == null
+                || !currentAuthentication.isAuthenticated()
+                || currentAuthentication instanceof AnonymousAuthenticationToken)) {
+            throw new UnauthorizedException(
+                    "Une authentification est nécessaire pour créer un compte utilisateur."
             );
         }
 
