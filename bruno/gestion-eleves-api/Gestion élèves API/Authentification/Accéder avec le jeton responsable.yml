@@ -27,12 +27,6 @@ runtime:
           );
         }
 
-        console.log(
-          "JWT responsable injecté : longueur=" +
-          token.length +
-          ", préfixe=" +
-          token.substring(0, 3)
-        );
 
         req.setHeader(
           "Authorization",

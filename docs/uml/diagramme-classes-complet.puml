@@ -111,7 +111,7 @@ Eleve "1" -- "0..*" Scolarite : suit >
 Classe "1" -- "0..*" Scolarite : accueille >
 
 Responsable "1" -- "0..*" ResponsabiliteLegale
-Eleve "1" -- "1..*" ResponsabiliteLegale
+Eleve "1" -- "0..*" ResponsabiliteLegale
 
 Enseignant "0..1" -- "0..*" Classe : professeur principal >
 

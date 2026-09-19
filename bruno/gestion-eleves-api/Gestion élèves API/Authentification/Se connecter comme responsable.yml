@@ -44,12 +44,6 @@ runtime:
           idUtilisateur
         );
 
-        console.log(
-          "JWT responsable enregistré : longueur=" +
-          token.length +
-          ", préfixe=" +
-          token.substring(0, 3)
-        );
   assertions:
     - expression: res.status
       operator: eq

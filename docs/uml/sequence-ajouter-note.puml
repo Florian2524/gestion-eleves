@@ -36,7 +36,9 @@ else Token valide
     Security -> Controller : Transmettre la requête authentifiée
 
     Controller -> Controller : Valider les données reçues
-    Controller -> Service : ajouterNote(request,\nidEnseignantConnecte)
+    Controller -> Security : Vérifier ADMIN ou propriété de l'évaluation
+    Security --> Controller : Autorisation accordée
+    Controller -> Service : create(NoteRequest)
 
     Service -> EvaluationRepository : findById(idEvaluation)
     EvaluationRepository -> Database : SELECT evaluation
@@ -48,16 +50,16 @@ else Token valide
     Database --> ScolariteRepository : Scolarité trouvée
     ScolariteRepository --> Service : Scolarite
 
-    Service -> Service : Vérifier que l'enseignant assure\nl'enseignement de l'évaluation
     Service -> Service : Vérifier que l'élève appartient\nà la classe concernée
+    Service -> Service : Vérifier la valeur par rapport au barème
 
-    alt Enseignant non autorisé ou classe incorrecte
+    alt Classe incorrecte ou valeur hors barème
 
         Service --> Controller : Erreur métier
         Controller --> Frontend : 403 Forbidden
-        Frontend --> Enseignant : Afficher l'accès refusé
+        Frontend --> Enseignant : Afficher l'erreur de validation
 
-    else Enseignant autorisé
+    else Données métier valides
 
         Service -> NoteRepository : existsByScolariteAndEvaluation(...)
         NoteRepository -> Database : Vérifier l'existence d'une note

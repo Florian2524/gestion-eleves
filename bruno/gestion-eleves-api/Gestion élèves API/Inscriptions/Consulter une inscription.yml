@@ -5,12 +5,7 @@ info:
 
 http:
   method: GET
-  url: "{{baseUrl}}/inscriptions/{{idInscription}}?res.status="
-  params:
-    - name: res.status
-      value: ""
-      type: query
-      description: "200"
+  url: "{{baseUrl}}/inscriptions/{{idInscription}}"
   auth: inherit
 
 runtime:

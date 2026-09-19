@@ -22,14 +22,6 @@ runtime:
           );
         }
 
-        console.log(
-          "JWT injecté : source=" +
-          (runtimeToken ? "runtime" : "environnement") +
-          ", longueur=" +
-          token.length +
-          ", préfixe=" +
-          token.substring(0, 3)
-        );
 
         req.setHeader(
           "Authorization",

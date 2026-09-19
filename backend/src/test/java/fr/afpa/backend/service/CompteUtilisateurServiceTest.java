@@ -286,6 +286,21 @@ class CompteUtilisateurServiceTest {
     }
 
     @Test
+    void shouldCreateTeacherAccountForTeacher() {
+        Personne teacher = new Enseignant("Dupont", "Jean", null, null, null, "ENS-1");
+        var request = new CompteUtilisateurCreateRequest(1L, "teacher@example.com", "MotDePasse123", RoleUtilisateur.ENSEIGNANT);
+        when(personneRepository.findById(1L)).thenReturn(Optional.of(teacher));
+        when(passwordEncoder.encode("MotDePasse123")).thenReturn("encoded");
+        when(compteUtilisateurMapper.toEntity(teacher, "teacher@example.com", "encoded", RoleUtilisateur.ENSEIGNANT))
+                .thenReturn(compteUtilisateur);
+        when(compteUtilisateurRepository.save(compteUtilisateur)).thenReturn(compteUtilisateur);
+        when(compteUtilisateurMapper.toResponse(compteUtilisateur)).thenReturn(response);
+
+        assertThat(compteUtilisateurService.create(request)).isEqualTo(response);
+        verify(compteUtilisateurRepository).save(compteUtilisateur);
+    }
+
+    @Test
     void shouldRejectGuardianRoleForNonGuardian() {
         Personne teacher = new Enseignant("Dupont", "Jean", null, null, null, "ENS-1");
         when(personneRepository.findById(1L)).thenReturn(Optional.of(teacher));

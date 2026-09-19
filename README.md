@@ -164,6 +164,14 @@ docker compose ps
 
 PostgreSQL est exposé sur le port `5432`.
 
+Si le port est déjà occupé, arrêter le service qui l'utilise ou modifier le port
+publié dans `docker-compose.yml` (par exemple `5433:5432`) et définir
+`DB_URL=jdbc:postgresql://localhost:5433/gestion_eleves` pour le backend.
+`docker compose ps` doit indiquer `healthy` avant le lancement des tests.
+Pour arrêter le service sans perdre les données : `docker compose down`.
+Le volume `postgres_data` est conservé. `docker compose down -v` le supprime
+définitivement et efface les données locales : ne l'utiliser que volontairement.
+
 Les migrations Flyway sont exécutées automatiquement lors du démarrage du
 backend.
 
@@ -238,6 +246,28 @@ Les photos sont envoyées en multipart sur `POST /eleves/{id}/photo` (champ `fil
 
 La démarche produit et le backlog se trouvent dans [docs/scrum/README.md](docs/scrum/README.md).
 
+## Vérification et soutenance
+
+Depuis `backend`, `bash mvnw test` puis `bash mvnw package -DskipTests`.
+Depuis `frontend`, `npm ci`, `npm run lint`, `npm test -- --run` et
+`npm run build`. Les tests d'intégration backend exigent PostgreSQL démarré.
+La CI GitHub Actions exécute ces contrôles avec Java 21, Node 22.22.0 et
+PostgreSQL 17.
+
+La collection [Bruno](bruno/gestion-eleves-api) couvre les principaux
+endpoints. Sélectionner l'environnement `local`, renseigner les identifiants
+de démonstration localement et récupérer le JWT par connexion. Le
+[scénario de démonstration](docs/demo/README.md) donne l'ordre de création
+des ressources. Les sources PlantUML se trouvent dans [docs/uml](docs/uml),
+les schémas Merise et le MPD dans [docs/merise](docs/merise).
+Les écarts de conception restants sont consignés dans
+[l'audit des modèles](docs/conception-audit.md).
+
+Limites connues : les bulletins sont calculés à la demande, sans workflow
+de validation ou d'archivage ; les fichiers PNG de conception sont des exports
+statiques à régénérer après modification des sources textuelles ; le secret JWT
+et le mot de passe PostgreSQL par défaut sont réservés au développement local.
+
 ## Exécuter les tests du backend
 
 Sous Windows :
@@ -271,7 +301,7 @@ Le projet est un MVP Full Stack fonctionnel.
 
 Les principales évolutions prévues sont :
 
-- ajouter des tests automatisés pour l’interface React ;
+- étendre les tests automatisés de l’interface React aux autres écrans ;
 - ajouter des scénarios end-to-end ;
 - conteneuriser le backend et le frontend ;
 - préparer une configuration de production.

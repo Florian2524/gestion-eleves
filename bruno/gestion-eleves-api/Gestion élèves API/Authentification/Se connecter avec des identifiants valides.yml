@@ -32,12 +32,6 @@ runtime:
         bru.setEnvVar("jwtToken", token);
         bru.setEnvVar("idUtilisateur", idUtilisateur);
 
-        console.log(
-          "JWT enregistré : longueur=" +
-          token.length +
-          ", préfixe=" +
-          token.substring(0, 3)
-        );
   assertions:
     - expression: res.status
       operator: eq

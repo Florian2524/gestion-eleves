@@ -1,5 +1,5 @@
 info:
-  name: Enregistrer le premier administrateur
+  name: Créer un autre compte administrateur
   type: http
   seq: 1
 
@@ -10,12 +10,14 @@ http:
     type: json
     data: |-
       {
-        "idPersonne": {{idEleve}},
+        "idPersonne": {{idPersonneAdmin}},
         "emailConnexion": "admin.jwt@example.com",
         "motDePasse": "MotDePasseAdmin123",
         "role": "ADMIN"
       }
-  auth: none
+  auth:
+    type: bearer
+    token: "{{jwtToken}}"
 
 runtime:
   scripts:

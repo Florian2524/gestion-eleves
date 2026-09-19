@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: gestion_eleves
+          POSTGRES_USER: gestion_eleves
+          POSTGRES_PASSWORD: gestion_eleves
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U gestion_eleves -d gestion_eleves"
+          --health-interval 10s --health-timeout 5s --health-retries 5
+    env:
+      JWT_SECRET: Z2VzdGlvbi1lbGV2ZXMtY2ktZmFrZS1zZWNyZXQtZm9yLXRlc3Rz
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+          cache-dependency-path: backend/pom.xml
+      - name: Test and package backend
+        working-directory: backend
+        run: bash mvnw verify
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.22.0
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+      - name: Lint
+        working-directory: frontend
+        run: npm run lint
+      - name: Test
+        working-directory: frontend
+        run: npm test -- --run
+      - name: Build
+        working-directory: frontend
+        run: npm run build

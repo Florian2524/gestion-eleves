@@ -31,7 +31,7 @@ Personne <|-- Enseignant
 Personne "1" -- "0..1" CompteUtilisateur : possède
 
 Responsable "1" -- "0..*" ResponsabiliteLegale
-Eleve "1" -- "1..*" ResponsabiliteLegale
+Eleve "1" -- "0..*" ResponsabiliteLegale
 
 Eleve "1" -- "0..*" Inscription
 Eleve "1" -- "0..*" Scolarite

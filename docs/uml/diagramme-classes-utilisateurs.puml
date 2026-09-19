@@ -58,6 +58,6 @@ Personne "1" -- "0..1" CompteUtilisateur : possède
 CompteUtilisateur --> RoleUtilisateur
 
 Responsable "1" -- "0..*" ResponsabiliteLegale
-Eleve "1" -- "1..*" ResponsabiliteLegale
+Eleve "1" -- "0..*" ResponsabiliteLegale
 
 @enduml

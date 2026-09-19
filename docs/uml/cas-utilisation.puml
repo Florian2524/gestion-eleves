@@ -45,6 +45,7 @@ rectangle "Application de gestion des élèves" as Application {
         usecase "Gérer les référentiels scolaires\n(classes, matières, périodes\net enseignements)" as UC_Referentiels
 
         usecase "Gérer les utilisateurs et les rôles\n(comptes, enseignants et\nresponsables légaux)" as UC_Utilisateurs
+        usecase "Gérer les liens\nresponsable–élève" as UC_Responsabilites
     }
 
     package "Suivi pédagogique" {
@@ -54,6 +55,8 @@ rectangle "Application de gestion des élèves" as Application {
         usecase "Gérer les évaluations\n(créer, modifier et supprimer)" as UC_Evaluations
 
         usecase "Saisir les notes\n(ajouter, corriger, supprimer\net commenter)" as UC_Notes
+        usecase "Consulter les notes\ndes élèves rattachés" as UC_ConsulterNotes
+        usecase "Consulter les dossiers\ndes élèves rattachés" as UC_ConsulterEleves
     }
 
     package "Bulletins" {
@@ -76,6 +79,7 @@ Admin --> UC_Eleves
 Admin --> UC_Inscriptions
 Admin --> UC_Referentiels
 Admin --> UC_Utilisateurs
+Admin --> UC_Responsabilites
 Admin --> UC_Bulletins
 
 ' Fonctionnalités de l'enseignant
@@ -86,6 +90,8 @@ Enseignant --> UC_Bulletins
 
 ' Fonctionnalités du responsable légal
 UC_Bulletins <-- Responsable
+UC_ConsulterNotes <-- Responsable
+UC_ConsulterEleves <-- Responsable
 
 ' L'export est une fonctionnalité facultative
 ' proposée pendant la consultation
