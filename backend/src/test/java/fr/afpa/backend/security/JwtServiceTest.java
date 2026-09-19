@@ -9,6 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
@@ -17,6 +18,9 @@ import java.util.Base64;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class JwtServiceTest {
 
@@ -42,8 +46,9 @@ class JwtServiceTest {
         JwtEncoder jwtEncoder =
                 jwtConfig.jwtEncoder(secretKey);
 
-        jwtDecoder =
-                jwtConfig.jwtDecoder(secretKey);
+        ActiveAccountJwtValidator accountValidator = mock(ActiveAccountJwtValidator.class);
+        when(accountValidator.validate(any(Jwt.class))).thenReturn(OAuth2TokenValidatorResult.success());
+        jwtDecoder = jwtConfig.jwtDecoder(secretKey, accountValidator);
 
         jwtService = new JwtService(
                 jwtEncoder,

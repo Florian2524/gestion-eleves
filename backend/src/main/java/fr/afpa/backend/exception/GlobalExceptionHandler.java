@@ -17,6 +17,12 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(InvalidAccountRoleException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidAccountRole(InvalidAccountRoleException exception,
+                                                                      HttpServletRequest request) {
+        return buildResponse(HttpStatus.BAD_REQUEST, exception.getMessage(), request.getRequestURI(), Map.of());
+    }
+
     @ExceptionHandler(InvalidPhotoException.class)
     public ResponseEntity<ApiErrorResponse> handleInvalidPhoto(InvalidPhotoException exception,
                                                                 HttpServletRequest request) {

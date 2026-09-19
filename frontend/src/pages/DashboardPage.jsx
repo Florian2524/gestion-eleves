@@ -48,6 +48,10 @@ const modules = [
   },
   ...[
     ["Classes", "/classes", ["ADMIN"]],
+    ["Enseignants", "/enseignants", ["ADMIN"]],
+    ["Responsables", "/responsables", ["ADMIN"]],
+    ["Responsabilités légales", "/responsabilites-legales", ["ADMIN"]],
+    ["Comptes utilisateurs", "/comptes-utilisateurs", ["ADMIN"]],
     ["Matières", "/matieres", ["ADMIN"]],
     ["Périodes", "/periodes", ["ADMIN"]],
     ["Inscriptions", "/inscriptions", ["ADMIN"]],

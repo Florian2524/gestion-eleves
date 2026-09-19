@@ -6,6 +6,7 @@ export const schoolLookups = {
   classes: (options) => listResource("classes", options),
   matieres: (options) => listResource("matieres", options),
   enseignants: (options) => listResource("enseignants", options),
+  responsables: (options) => listResource("responsables", options),
   enseignements: (options) => listResource("enseignements", options),
   periodes: (options) => listResource("periodes", options),
 };

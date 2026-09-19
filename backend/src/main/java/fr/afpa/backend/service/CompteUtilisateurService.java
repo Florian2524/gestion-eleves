@@ -5,7 +5,11 @@ import fr.afpa.backend.dto.compteutilisateur.CompteUtilisateurResponse;
 import fr.afpa.backend.dto.compteutilisateur.CompteUtilisateurUpdateRequest;
 import fr.afpa.backend.entity.CompteUtilisateur;
 import fr.afpa.backend.entity.Personne;
+import fr.afpa.backend.entity.Enseignant;
+import fr.afpa.backend.entity.Responsable;
+import fr.afpa.backend.entity.RoleUtilisateur;
 import fr.afpa.backend.exception.DuplicateResourceException;
+import fr.afpa.backend.exception.InvalidAccountRoleException;
 import fr.afpa.backend.exception.ResourceNotFoundException;
 import fr.afpa.backend.mapper.CompteUtilisateurMapper;
 import fr.afpa.backend.repository.CompteUtilisateurRepository;
@@ -71,6 +75,8 @@ public class CompteUtilisateurService {
                         )
                 );
 
+        validateRole(personne, request.role());
+
         if (compteUtilisateurRepository
                 .existsByPersonneIdPersonne(
                         request.idPersonne()
@@ -125,6 +131,8 @@ public class CompteUtilisateurService {
     ) {
         CompteUtilisateur compteUtilisateur =
                 findEntityById(idUtilisateur);
+
+        validateRole(compteUtilisateur.getPersonne(), request.role());
 
         String emailConnexion =
                 normalizeEmail(request.emailConnexion());
@@ -196,5 +204,14 @@ public class CompteUtilisateurService {
         return emailConnexion
                 .trim()
                 .toLowerCase(Locale.ROOT);
+    }
+
+    private void validateRole(Personne personne, RoleUtilisateur role) {
+        if (role == RoleUtilisateur.ENSEIGNANT && !(personne instanceof Enseignant)) {
+            throw new InvalidAccountRoleException("Le rôle ENSEIGNANT exige une personne enseignante.");
+        }
+        if (role == RoleUtilisateur.RESPONSABLE && !(personne instanceof Responsable)) {
+            throw new InvalidAccountRoleException("Le rôle RESPONSABLE exige un responsable légal.");
+        }
     }
 }

@@ -5,6 +5,8 @@ const paths = {
   matieres: "/matieres",
   periodes: "/periodes",
   enseignants: "/enseignants",
+  responsables: "/responsables",
+  comptes: "/comptes-utilisateurs",
   enseignements: "/enseignements",
   evaluations: "/evaluations",
   inscriptions: "/inscriptions",

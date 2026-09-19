@@ -59,11 +59,23 @@ const scolarites = {
   columns: [col("Élève", (r, l) => l.eleve(r.idEleve)), col("Classe", (r, l) => l.classe(r.idClasse)), col("Dates", (r) => `${formatDate(r.dateDebut)} au ${r.dateFin ? formatDate(r.dateFin) : "présent"}`), col("Statut", (r) => r.statut)],
   validate: (f) => datesValid(f.dateDebut, f.dateFin),
 };
+const enseignants = {
+  title: "Enseignants", resource: "enseignants", idKey: "idPersonne",
+  fields: [text("nom", "Nom"), text("prenom", "Prénom"), { ...text("emailContact", "E-mail de contact", 255, true), type: "email" }, { ...text("telephone", "Téléphone", 30, true), type: "tel" }, text("adresse", "Adresse", 500, true), text("numeroEmploye", "Numéro d'employé", 50)],
+  columns: [col("Nom", (r) => `${r.prenom} ${r.nom}`), col("E-mail", (r) => r.emailContact || "—"), col("Téléphone", (r) => r.telephone || "—"), col("N° employé", (r) => r.numeroEmploye)],
+};
+const responsables = {
+  title: "Responsables légaux", resource: "responsables", idKey: "idPersonne",
+  fields: [text("nom", "Nom"), text("prenom", "Prénom"), { ...text("emailContact", "E-mail de contact", 255, true), type: "email" }, { ...text("telephone", "Téléphone", 30, true), type: "tel" }, text("adresse", "Adresse", 500, true), text("profession", "Profession", 150, true)],
+  columns: [col("Nom", (r) => `${r.prenom} ${r.nom}`), col("E-mail", (r) => r.emailContact || "—"), col("Téléphone", (r) => r.telephone || "—"), col("Profession", (r) => r.profession || "—")],
+};
 
 export const MatieresPage = () => <ResourcePage {...matieres} />;
 export const ClassesPage = () => <ResourcePage {...classes} />;
 export const PeriodesPage = () => <ResourcePage {...periodes} />;
 export const InscriptionsPage = () => <ResourcePage {...inscriptions} />;
 export const ScolaritesPage = () => <ResourcePage {...scolarites} />;
+export const EnseignantsPage = () => <ResourcePage {...enseignants} />;
+export const ResponsablesPage = () => <ResourcePage {...responsables} />;
 export function EnseignementsPage() { const { auth } = useAuth(); return <ResourcePage {...(auth?.role === "ADMIN" ? enseignementsAdmin : enseignementsRead)} />; }
 export function EvaluationsPage() { const { auth } = useAuth(); return <ResourcePage {...(auth?.role === "ADMIN" ? evaluationsAdmin : evaluationsRead)} canWrite={(role) => role !== "RESPONSABLE"} />; }

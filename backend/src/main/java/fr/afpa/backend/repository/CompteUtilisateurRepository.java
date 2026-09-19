@@ -2,6 +2,7 @@ package fr.afpa.backend.repository;
 
 import fr.afpa.backend.entity.CompteUtilisateur;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.EntityGraph;
 
 import java.util.Optional;
 
@@ -20,4 +21,7 @@ public interface CompteUtilisateurRepository
     Optional<CompteUtilisateur> findByEmailConnexion(
             String emailConnexion
     );
+
+    @EntityGraph(attributePaths = "personne")
+    Optional<CompteUtilisateur> findWithPersonneByIdUtilisateur(Long idUtilisateur);
 }

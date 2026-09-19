@@ -5,8 +5,11 @@ import fr.afpa.backend.dto.compteutilisateur.CompteUtilisateurResponse;
 import fr.afpa.backend.dto.compteutilisateur.CompteUtilisateurUpdateRequest;
 import fr.afpa.backend.entity.CompteUtilisateur;
 import fr.afpa.backend.entity.Personne;
+import fr.afpa.backend.entity.Enseignant;
+import fr.afpa.backend.entity.Responsable;
 import fr.afpa.backend.entity.RoleUtilisateur;
 import fr.afpa.backend.exception.DuplicateResourceException;
+import fr.afpa.backend.exception.InvalidAccountRoleException;
 import fr.afpa.backend.exception.ResourceNotFoundException;
 import fr.afpa.backend.mapper.CompteUtilisateurMapper;
 import fr.afpa.backend.repository.CompteUtilisateurRepository;
@@ -49,7 +52,7 @@ class CompteUtilisateurServiceTest {
     private PasswordEncoder passwordEncoder;
 
     @Mock
-    private Personne personne;
+    private Responsable personne;
 
     @Mock
     private CompteUtilisateur compteUtilisateur;
@@ -254,6 +257,53 @@ class CompteUtilisateurServiceTest {
                 compteUtilisateurMapper,
                 passwordEncoder
         );
+    }
+
+    @Test
+    void shouldRejectTeacherRoleForNonTeacher() {
+        when(personneRepository.findById(1L)).thenReturn(Optional.of(personne));
+        var request = new CompteUtilisateurCreateRequest(1L, "teacher@example.com", "MotDePasse123", RoleUtilisateur.ENSEIGNANT);
+
+        assertThatThrownBy(() -> compteUtilisateurService.create(request))
+                .isInstanceOf(InvalidAccountRoleException.class);
+        verifyNoInteractions(passwordEncoder, compteUtilisateurMapper);
+        verify(compteUtilisateurRepository, never()).save(any(CompteUtilisateur.class));
+    }
+
+    @Test
+    void shouldAllowAdminRoleForPlainPerson() {
+        Personne administrator = new Personne("Martin", "Alice", null, null, null);
+        var request = new CompteUtilisateurCreateRequest(1L, "admin@example.com", "MotDePasse123", RoleUtilisateur.ADMIN);
+        when(personneRepository.findById(1L)).thenReturn(Optional.of(administrator));
+        when(passwordEncoder.encode("MotDePasse123")).thenReturn("encoded");
+        when(compteUtilisateurMapper.toEntity(administrator, "admin@example.com", "encoded", RoleUtilisateur.ADMIN))
+                .thenReturn(compteUtilisateur);
+        when(compteUtilisateurRepository.save(compteUtilisateur)).thenReturn(compteUtilisateur);
+        when(compteUtilisateurMapper.toResponse(compteUtilisateur)).thenReturn(response);
+
+        assertThat(compteUtilisateurService.create(request)).isEqualTo(response);
+        verify(compteUtilisateurRepository).save(compteUtilisateur);
+    }
+
+    @Test
+    void shouldRejectGuardianRoleForNonGuardian() {
+        Personne teacher = new Enseignant("Dupont", "Jean", null, null, null, "ENS-1");
+        when(personneRepository.findById(1L)).thenReturn(Optional.of(teacher));
+
+        assertThatThrownBy(() -> compteUtilisateurService.create(createRequest))
+                .isInstanceOf(InvalidAccountRoleException.class);
+        verifyNoInteractions(passwordEncoder, compteUtilisateurMapper);
+    }
+
+    @Test
+    void shouldRejectIncompatibleRoleChange() {
+        when(compteUtilisateurRepository.findById(10L)).thenReturn(Optional.of(compteUtilisateur));
+        when(compteUtilisateur.getPersonne()).thenReturn(personne);
+        var request = new CompteUtilisateurUpdateRequest("test@example.com", null, RoleUtilisateur.ENSEIGNANT, true);
+
+        assertThatThrownBy(() -> compteUtilisateurService.update(10L, request))
+                .isInstanceOf(InvalidAccountRoleException.class);
+        verify(compteUtilisateurRepository, never()).save(any(CompteUtilisateur.class));
     }
 
     @Test

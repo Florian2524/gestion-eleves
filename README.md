@@ -52,6 +52,7 @@ L’interface React propose actuellement :
 - un espace protégé par authentification ;
 - une page de consultation, recherche et administration des élèves, avec photo ;
 - des écrans de gestion des classes, matières, périodes, inscriptions et scolarités pour l'administrateur ;
+- des écrans d'administration des enseignants, responsables légaux, liens responsable–élève et comptes utilisateurs ;
 - des écrans d'enseignements et d'évaluations adaptés au rôle ;
 - un module de consultation et de gestion des notes avec choix des évaluations et des élèves compatibles ;
 - un module de calcul des bulletins ;
@@ -69,6 +70,9 @@ L’application utilise trois rôles :
 L’authentification JWT et la protection des routes sont opérationnelles.
 
 Les consultations des élèves, enseignements, évaluations, notes, scolarités et bulletins sont filtrées selon les rattachements métier de l'utilisateur. Les écrans d'administration ne sont accessibles qu'au rôle `ADMIN`. L'enseignant peut gérer les évaluations et notes de ses enseignements. Le responsable légal dispose de parcours de consultation uniquement.
+
+Un compte `ENSEIGNANT` doit être associé à une personne enseignante et un compte `RESPONSABLE` à un responsable légal. Le lien responsable–élève se crée dans l'administration avant que le responsable puisse consulter les données de cet élève. Un compte `ADMIN` peut être créé pour une personne existante ; le premier administrateur est créé par les variables de bootstrap.
+Les JWT sont comparés à l'état actuel du compte à chaque requête : désactiver ou supprimer un compte, ou changer son rôle, invalide ses anciens jetons.
 
 ## Technologies utilisées
 
@@ -130,7 +134,7 @@ gestion-eleves/
 Pour exécuter le projet localement :
 
 - Java 21 ou une version compatible ;
-- Node.js et npm ;
+- Node.js 22.22.0 ou plus récent et npm (voir `frontend/.nvmrc` et `frontend/package.json`) ;
 - Docker Desktop ;
 - Git.
 
@@ -191,7 +195,8 @@ Dans un second terminal :
 
 ```bash
 cd frontend
-npm install
+nvm use # si nvm est installé
+npm ci
 npm run dev
 ```
 
@@ -266,7 +271,6 @@ Le projet est un MVP Full Stack fonctionnel.
 
 Les principales évolutions prévues sont :
 
-- compléter les écrans d’administration des enseignants, responsables légaux et comptes utilisateurs dans React ;
 - ajouter des tests automatisés pour l’interface React ;
 - ajouter des scénarios end-to-end ;
 - conteneuriser le backend et le frontend ;
