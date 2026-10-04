@@ -51,7 +51,6 @@ async function deleteBestEffort(
 test("un administrateur peut créer, modifier, rechercher et supprimer une note", async ({
   page,
 }) => {
-  test.setTimeout(60_000);
   const suffix = Date.now().toString().slice(-8);
 
   const eleveNom = `NoteEleve${suffix}`;

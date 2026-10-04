@@ -106,13 +106,16 @@ Les JWT sont comparés à l'état actuel du compte à chaque requête : désacti
 - Mockito ;
 - AssertJ ;
 - MockMvc ;
-- Spring Security Test.
+- Spring Security Test ;
+- Vitest ;
+- Playwright.
 
 ### Infrastructure et outils
 
 - Docker Compose ;
 - Git ;
 - GitHub ;
+- GitHub Actions ;
 - Bruno pour les requêtes API.
 
 ## Organisation du projet
@@ -251,8 +254,14 @@ La démarche produit et le backlog se trouvent dans [docs/scrum/README.md](docs/
 Depuis `backend`, `bash mvnw test` puis `bash mvnw package -DskipTests`.
 Depuis `frontend`, `npm ci`, `npm run lint`, `npm test -- --run` et
 `npm run build`. Les tests d'intégration backend exigent PostgreSQL démarré.
-La CI GitHub Actions exécute ces contrôles avec Java 21, Node 22.22.0 et
-PostgreSQL 17.
+
+Les scénarios end-to-end Playwright se trouvent dans `frontend/e2e`.
+Après installation des dépendances et de Chromium pour Playwright, la recette
+complète peut être lancée depuis la racine avec `./scripts/test-e2e.sh`.
+
+La CI GitHub Actions exécute les contrôles backend et frontend avec Java 21,
+Node 22.22.0 et PostgreSQL 17, puis lance également la recette Playwright
+dans Chromium sur une base PostgreSQL dédiée au job E2E.
 
 La collection [Bruno](bruno/gestion-eleves-api) couvre les principaux
 endpoints. Sélectionner l'environnement `local`, renseigner les identifiants
@@ -302,7 +311,7 @@ Le projet est un MVP Full Stack fonctionnel.
 Les principales évolutions prévues sont :
 
 - étendre les tests automatisés de l’interface React aux autres écrans ;
-- ajouter des scénarios end-to-end ;
+- étendre les scénarios end-to-end aux autres parcours métier et rôles ;
 - conteneuriser le backend et le frontend ;
 - préparer une configuration de production.
 
