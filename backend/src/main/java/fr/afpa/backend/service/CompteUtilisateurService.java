@@ -11,6 +11,7 @@ import fr.afpa.backend.entity.RoleUtilisateur;
 import fr.afpa.backend.exception.DuplicateResourceException;
 import fr.afpa.backend.exception.InvalidAccountRoleException;
 import fr.afpa.backend.exception.ResourceNotFoundException;
+import fr.afpa.backend.exception.ResourceInUseException;
 import fr.afpa.backend.mapper.CompteUtilisateurMapper;
 import fr.afpa.backend.repository.CompteUtilisateurRepository;
 import fr.afpa.backend.repository.PersonneRepository;
@@ -24,6 +25,10 @@ import java.util.Locale;
 @Service
 @Transactional(readOnly = true)
 public class CompteUtilisateurService {
+
+    private static final String
+            LAST_ACTIVE_ADMIN_MESSAGE =
+            "Au moins un compte ADMIN actif doit être conservé.";
 
     private final CompteUtilisateurRepository
             compteUtilisateurRepository;
@@ -134,6 +139,12 @@ public class CompteUtilisateurService {
 
         validateRole(compteUtilisateur.getPersonne(), request.role());
 
+        protectLastActiveAdminOnUpdate(
+                compteUtilisateur,
+                request.role(),
+                Boolean.TRUE.equals(request.actif())
+        );
+
         String emailConnexion =
                 normalizeEmail(request.emailConnexion());
 
@@ -181,9 +192,65 @@ public class CompteUtilisateurService {
         CompteUtilisateur compteUtilisateur =
                 findEntityById(idUtilisateur);
 
+        protectLastActiveAdminOnDelete(
+                compteUtilisateur
+        );
+
         compteUtilisateurRepository.delete(
                 compteUtilisateur
         );
+    }
+
+    private void protectLastActiveAdminOnUpdate(
+            CompteUtilisateur compteUtilisateur,
+            RoleUtilisateur requestedRole,
+            boolean requestedActive
+    ) {
+        if (!isActiveAdmin(compteUtilisateur)) {
+            return;
+        }
+
+        boolean remainsActiveAdmin =
+                requestedRole == RoleUtilisateur.ADMIN
+                        && requestedActive;
+
+        if (remainsActiveAdmin) {
+            return;
+        }
+
+        ensureAnotherActiveAdminExists();
+    }
+
+    private void protectLastActiveAdminOnDelete(
+            CompteUtilisateur compteUtilisateur
+    ) {
+        if (!isActiveAdmin(compteUtilisateur)) {
+            return;
+        }
+
+        ensureAnotherActiveAdminExists();
+    }
+
+    private boolean isActiveAdmin(
+            CompteUtilisateur compteUtilisateur
+    ) {
+        return compteUtilisateur.getRole()
+                == RoleUtilisateur.ADMIN
+                && compteUtilisateur.isActif();
+    }
+
+    private void ensureAnotherActiveAdminExists() {
+        List<CompteUtilisateur> activeAdmins =
+                compteUtilisateurRepository
+                        .findAllByRoleAndActifTrue(
+                                RoleUtilisateur.ADMIN
+                        );
+
+        if (activeAdmins.size() <= 1) {
+            throw new ResourceInUseException(
+                    LAST_ACTIVE_ADMIN_MESSAGE
+            );
+        }
     }
 
     private CompteUtilisateur findEntityById(

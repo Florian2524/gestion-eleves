@@ -11,6 +11,7 @@ import fr.afpa.backend.entity.RoleUtilisateur;
 import fr.afpa.backend.exception.DuplicateResourceException;
 import fr.afpa.backend.exception.InvalidAccountRoleException;
 import fr.afpa.backend.exception.ResourceNotFoundException;
+import fr.afpa.backend.exception.ResourceInUseException;
 import fr.afpa.backend.mapper.CompteUtilisateurMapper;
 import fr.afpa.backend.repository.CompteUtilisateurRepository;
 import fr.afpa.backend.repository.PersonneRepository;
@@ -575,6 +576,233 @@ class CompteUtilisateurServiceTest {
                 compteUtilisateurMapper,
                 passwordEncoder
         );
+    }
+
+    @Test
+    void shouldRejectDeactivationOfLastActiveAdmin() {
+        CompteUtilisateurUpdateRequest request =
+                new CompteUtilisateurUpdateRequest(
+                        "admin@example.com",
+                        null,
+                        RoleUtilisateur.ADMIN,
+                        false
+                );
+
+        when(compteUtilisateurRepository.findById(10L))
+                .thenReturn(Optional.of(compteUtilisateur));
+
+        when(compteUtilisateur.getRole())
+                .thenReturn(RoleUtilisateur.ADMIN);
+
+        when(compteUtilisateur.isActif())
+                .thenReturn(true);
+
+        when(compteUtilisateurRepository
+                .findAllByRoleAndActifTrue(
+                        RoleUtilisateur.ADMIN
+                ))
+                .thenReturn(List.of(compteUtilisateur));
+
+        assertThatThrownBy(() ->
+                compteUtilisateurService.update(
+                        10L,
+                        request
+                )
+        )
+                .isInstanceOf(
+                        ResourceInUseException.class
+                )
+                .hasMessage(
+                        "Au moins un compte ADMIN actif doit être conservé."
+                );
+
+        verify(compteUtilisateurRepository, never())
+                .save(any(CompteUtilisateur.class));
+
+        verify(compteUtilisateurMapper, never())
+                .updateEntity(
+                        any(),
+                        anyString(),
+                        any(),
+                        any(Boolean.class),
+                        any()
+                );
+    }
+
+    @Test
+    void shouldRejectRoleChangeOfLastActiveAdmin() {
+        CompteUtilisateurUpdateRequest request =
+                new CompteUtilisateurUpdateRequest(
+                        "admin@example.com",
+                        null,
+                        RoleUtilisateur.RESPONSABLE,
+                        true
+                );
+
+        when(compteUtilisateurRepository.findById(10L))
+                .thenReturn(Optional.of(compteUtilisateur));
+
+        when(compteUtilisateur.getPersonne())
+                .thenReturn(personne);
+
+        when(compteUtilisateur.getRole())
+                .thenReturn(RoleUtilisateur.ADMIN);
+
+        when(compteUtilisateur.isActif())
+                .thenReturn(true);
+
+        when(compteUtilisateurRepository
+                .findAllByRoleAndActifTrue(
+                        RoleUtilisateur.ADMIN
+                ))
+                .thenReturn(List.of(compteUtilisateur));
+
+        assertThatThrownBy(() ->
+                compteUtilisateurService.update(
+                        10L,
+                        request
+                )
+        )
+                .isInstanceOf(
+                        ResourceInUseException.class
+                )
+                .hasMessage(
+                        "Au moins un compte ADMIN actif doit être conservé."
+                );
+
+        verify(compteUtilisateurRepository, never())
+                .save(any(CompteUtilisateur.class));
+    }
+
+    @Test
+    void shouldAllowDeactivationWhenAnotherAdminIsActive() {
+        CompteUtilisateurUpdateRequest request =
+                new CompteUtilisateurUpdateRequest(
+                        "admin@example.com",
+                        null,
+                        RoleUtilisateur.ADMIN,
+                        false
+                );
+
+        CompteUtilisateur anotherAdmin =
+                org.mockito.Mockito.mock(
+                        CompteUtilisateur.class
+                );
+
+        when(compteUtilisateurRepository.findById(10L))
+                .thenReturn(Optional.of(compteUtilisateur));
+
+        when(compteUtilisateur.getRole())
+                .thenReturn(RoleUtilisateur.ADMIN);
+
+        when(compteUtilisateur.isActif())
+                .thenReturn(true);
+
+        when(compteUtilisateurRepository
+                .findAllByRoleAndActifTrue(
+                        RoleUtilisateur.ADMIN
+                ))
+                .thenReturn(
+                        List.of(
+                                compteUtilisateur,
+                                anotherAdmin
+                        )
+                );
+
+        when(compteUtilisateurRepository
+                .existsByEmailConnexionAndIdUtilisateurNot(
+                        "admin@example.com",
+                        10L
+                ))
+                .thenReturn(false);
+
+        when(compteUtilisateurRepository.save(
+                compteUtilisateur
+        )).thenReturn(compteUtilisateur);
+
+        when(compteUtilisateurMapper.toResponse(
+                compteUtilisateur
+        )).thenReturn(response);
+
+        assertThat(
+                compteUtilisateurService.update(
+                        10L,
+                        request
+                )
+        ).isEqualTo(response);
+
+        verify(compteUtilisateurMapper)
+                .updateEntity(
+                        compteUtilisateur,
+                        "admin@example.com",
+                        RoleUtilisateur.ADMIN,
+                        false,
+                        null
+                );
+    }
+
+    @Test
+    void shouldRejectDeletionOfLastActiveAdmin() {
+        when(compteUtilisateurRepository.findById(10L))
+                .thenReturn(Optional.of(compteUtilisateur));
+
+        when(compteUtilisateur.getRole())
+                .thenReturn(RoleUtilisateur.ADMIN);
+
+        when(compteUtilisateur.isActif())
+                .thenReturn(true);
+
+        when(compteUtilisateurRepository
+                .findAllByRoleAndActifTrue(
+                        RoleUtilisateur.ADMIN
+                ))
+                .thenReturn(List.of(compteUtilisateur));
+
+        assertThatThrownBy(() ->
+                compteUtilisateurService.delete(10L)
+        )
+                .isInstanceOf(
+                        ResourceInUseException.class
+                )
+                .hasMessage(
+                        "Au moins un compte ADMIN actif doit être conservé."
+                );
+
+        verify(compteUtilisateurRepository, never())
+                .delete(any(CompteUtilisateur.class));
+    }
+
+    @Test
+    void shouldAllowDeletionWhenAnotherAdminIsActive() {
+        CompteUtilisateur anotherAdmin =
+                org.mockito.Mockito.mock(
+                        CompteUtilisateur.class
+                );
+
+        when(compteUtilisateurRepository.findById(10L))
+                .thenReturn(Optional.of(compteUtilisateur));
+
+        when(compteUtilisateur.getRole())
+                .thenReturn(RoleUtilisateur.ADMIN);
+
+        when(compteUtilisateur.isActif())
+                .thenReturn(true);
+
+        when(compteUtilisateurRepository
+                .findAllByRoleAndActifTrue(
+                        RoleUtilisateur.ADMIN
+                ))
+                .thenReturn(
+                        List.of(
+                                compteUtilisateur,
+                                anotherAdmin
+                        )
+                );
+
+        compteUtilisateurService.delete(10L);
+
+        verify(compteUtilisateurRepository)
+                .delete(compteUtilisateur);
     }
 
     @Test
