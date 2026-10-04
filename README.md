@@ -259,6 +259,13 @@ Les scénarios end-to-end Playwright se trouvent dans `frontend/e2e`.
 Après installation des dépendances et de Chromium pour Playwright, la recette
 complète peut être lancée depuis la racine avec `./scripts/test-e2e.sh`.
 
+La recette E2E couvre les principaux parcours d'administration, la chaîne
+élève → scolarité → enseignement → évaluation → note → bulletin → PDF ainsi
+que les parcours réels `ENSEIGNANT` et `RESPONSABLE`. Elle vérifie notamment
+le filtrage des données selon les rattachements métier, les écritures autorisées
+à l'enseignant, la lecture seule du responsable et le refus des accès hors
+périmètre.
+
 La CI GitHub Actions exécute les contrôles backend et frontend avec Java 21,
 Node 22.22.0 et PostgreSQL 17, puis lance également la recette Playwright
 dans Chromium sur une base PostgreSQL dédiée au job E2E.
@@ -300,20 +307,27 @@ Les tests couvrent notamment :
 - les contrôleurs REST ;
 - les statuts HTTP ;
 - l’authentification JWT ;
-- certaines restrictions de rôle ;
+- les restrictions de rôle et le cloisonnement des données selon les rattachements métier ;
 - le calcul des bulletins ;
 - la génération des PDF.
 
 ## État actuel
 
-Le projet est un MVP Full Stack fonctionnel.
+Le projet est un MVP Full Stack fonctionnel dont le socle de sécurité,
+les parcours métier principaux et la recette automatisée sont stabilisés
+pour la soutenance.
 
-Les principales évolutions prévues sont :
+La recette automatisée comprend les tests backend, les tests React,
+les contrôles de qualité frontend et les scénarios Playwright couvrant
+les trois rôles de l'application.
 
-- étendre les tests automatisés de l’interface React aux autres écrans ;
-- étendre les scénarios end-to-end aux autres parcours métier et rôles ;
+Les principales évolutions hors du périmètre actuel sont :
+
+- étendre encore les tests unitaires React aux écrans les plus complexes ;
 - conteneuriser le backend et le frontend ;
-- préparer une configuration de production.
+- préparer une configuration de production ;
+- ajouter, si le produit évolue, un workflow de validation et d'archivage
+  des bulletins.
 
 ## Auteur
 
