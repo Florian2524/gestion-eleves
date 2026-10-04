@@ -17,6 +17,20 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(BusinessRuleViolationException.class)
+    public ResponseEntity<ApiErrorResponse>
+    handleBusinessRuleViolation(
+            BusinessRuleViolationException exception,
+            HttpServletRequest request
+    ) {
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                exception.getMessage(),
+                request.getRequestURI(),
+                Map.of()
+        );
+    }
+
     @ExceptionHandler(InvalidAccountRoleException.class)
     public ResponseEntity<ApiErrorResponse> handleInvalidAccountRole(InvalidAccountRoleException exception,
                                                                       HttpServletRequest request) {

@@ -8,7 +8,7 @@ import fr.afpa.backend.entity.Enseignement;
 import fr.afpa.backend.entity.Note;
 import fr.afpa.backend.entity.Scolarite;
 import fr.afpa.backend.exception.DuplicateResourceException;
-import fr.afpa.backend.exception.ForbiddenOperationException;
+import fr.afpa.backend.exception.BusinessRuleViolationException;
 import fr.afpa.backend.exception.ResourceNotFoundException;
 import fr.afpa.backend.mapper.NoteMapper;
 import fr.afpa.backend.repository.EvaluationRepository;
@@ -228,7 +228,7 @@ class NoteServiceTest {
         when(autreClasse.getIdClasse()).thenReturn(2L);
 
         assertThatThrownBy(() -> noteService.create(request))
-                .isInstanceOf(ForbiddenOperationException.class);
+                .isInstanceOf(BusinessRuleViolationException.class);
         verify(noteRepository, never()).save(any());
     }
 
@@ -239,7 +239,7 @@ class NoteServiceTest {
         when(evaluation.getBareme()).thenReturn(BigDecimal.TEN);
 
         assertThatThrownBy(() -> noteService.create(request))
-                .isInstanceOf(ForbiddenOperationException.class)
+                .isInstanceOf(BusinessRuleViolationException.class)
                 .hasMessageContaining("barème");
         verify(noteRepository, never()).save(any());
     }
@@ -252,7 +252,7 @@ class NoteServiceTest {
         when(evaluation.getBareme()).thenReturn(BigDecimal.TEN);
 
         assertThatThrownBy(() -> noteService.update(200L, request))
-                .isInstanceOf(ForbiddenOperationException.class)
+                .isInstanceOf(BusinessRuleViolationException.class)
                 .hasMessageContaining("barème");
         verify(noteRepository, never()).save(any());
     }

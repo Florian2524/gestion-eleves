@@ -6,7 +6,7 @@ import fr.afpa.backend.entity.Evaluation;
 import fr.afpa.backend.entity.Note;
 import fr.afpa.backend.entity.Scolarite;
 import fr.afpa.backend.exception.DuplicateResourceException;
-import fr.afpa.backend.exception.ForbiddenOperationException;
+import fr.afpa.backend.exception.BusinessRuleViolationException;
 import fr.afpa.backend.exception.ResourceNotFoundException;
 import fr.afpa.backend.mapper.NoteMapper;
 import fr.afpa.backend.repository.EvaluationRepository;
@@ -182,7 +182,7 @@ public class NoteService {
     private void verifierClasse(Scolarite scolarite, Evaluation evaluation) {
         if (!scolarite.getClasse().getIdClasse().equals(
                 evaluation.getEnseignement().getClasse().getIdClasse())) {
-            throw new ForbiddenOperationException(
+            throw new BusinessRuleViolationException(
                     "La scolarité ne concerne pas la classe de l'évaluation."
             );
         }
@@ -190,7 +190,7 @@ public class NoteService {
 
     private void verifierBareme(NoteRequest request, Evaluation evaluation) {
         if (request.valeur().compareTo(evaluation.getBareme()) > 0) {
-            throw new ForbiddenOperationException(
+            throw new BusinessRuleViolationException(
                     "La note ne peut pas dépasser le barème de l'évaluation."
             );
         }

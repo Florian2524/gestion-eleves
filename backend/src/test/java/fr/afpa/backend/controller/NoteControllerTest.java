@@ -3,6 +3,7 @@ package fr.afpa.backend.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.afpa.backend.dto.note.NoteRequest;
 import fr.afpa.backend.dto.note.NoteResponse;
+import fr.afpa.backend.exception.BusinessRuleViolationException;
 import fr.afpa.backend.exception.DuplicateResourceException;
 import fr.afpa.backend.exception.GlobalExceptionHandler;
 import fr.afpa.backend.exception.ResourceNotFoundException;
@@ -306,6 +307,49 @@ class NoteControllerTest {
                 ).value(
                         "Une note existe déjà pour la scolarité "
                                 + "20 et l'évaluation 100."
+                ))
+                .andExpect(jsonPath(
+                        "$.path"
+                ).value("/notes"));
+
+        verify(noteService)
+                .create(any(NoteRequest.class));
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenBusinessRuleIsViolated()
+            throws Exception {
+
+        when(noteService.create(
+                any(NoteRequest.class)
+        )).thenThrow(
+                new BusinessRuleViolationException(
+                        "La note ne peut pas dépasser "
+                                + "le barème de l'évaluation."
+                )
+        );
+
+        mockMvc.perform(post("/notes")
+                        .contentType(
+                                MediaType.APPLICATION_JSON
+                        )
+                        .content(
+                                objectMapper.writeValueAsString(
+                                        request
+                                )
+                        ))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath(
+                        "$.status"
+                ).value(400))
+                .andExpect(jsonPath(
+                        "$.error"
+                ).value("Bad Request"))
+                .andExpect(jsonPath(
+                        "$.message"
+                ).value(
+                        "La note ne peut pas dépasser "
+                                + "le barème de l'évaluation."
                 ))
                 .andExpect(jsonPath(
                         "$.path"
