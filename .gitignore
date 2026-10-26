@@ -6,3 +6,6 @@ uploads/
 
 # Maven build output
 backend/target/
+
+# Sauvegardes locales contenant des données personnelles
+.validation-backups/

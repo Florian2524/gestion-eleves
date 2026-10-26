@@ -8,21 +8,6 @@ jobs:
   backend:
     runs-on: ubuntu-24.04
 
-    services:
-      postgres:
-        image: postgres:17
-        env:
-          POSTGRES_DB: gestion_eleves
-          POSTGRES_USER: gestion_eleves
-          POSTGRES_PASSWORD: gestion_eleves
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U gestion_eleves -d gestion_eleves"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     env:
       JWT_SECRET: Z2VzdGlvbi1lbGV2ZXMtY2ktZmFrZS1zZWNyZXQtZm9yLXRlc3Rz
 
@@ -36,9 +21,10 @@ jobs:
           cache: maven
           cache-dependency-path: backend/pom.xml
 
-      - name: Test and package backend
-        working-directory: backend
-        run: bash mvnw verify
+      - name: Test and package backend on isolated PostgreSQL
+        run: |
+          ./scripts/test-ponderer.sh
+          ./backend/mvnw -f backend/pom.xml -DskipTests package
 
   frontend:
     runs-on: ubuntu-24.04
@@ -79,36 +65,6 @@ jobs:
 
     runs-on: ubuntu-24.04
 
-    services:
-      postgres:
-        image: postgres:17
-        env:
-          POSTGRES_DB: gestion_eleves
-          POSTGRES_USER: gestion_eleves
-          POSTGRES_PASSWORD: gestion_eleves
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U gestion_eleves -d gestion_eleves"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-    env:
-      DB_URL: jdbc:postgresql://127.0.0.1:5432/gestion_eleves
-      DB_USER: gestion_eleves
-      DB_PASSWORD: gestion_eleves
-
-      JWT_SECRET: Z2VzdGlvbi1lbGV2ZXMtY2ktZTJlLXNlY3JldC0yMDI2
-
-      BOOTSTRAP_ADMIN_EMAIL: admin@gestion-eleves.local
-      BOOTSTRAP_ADMIN_PASSWORD: AdminTest2026!
-      BOOTSTRAP_ADMIN_NOM: Administrateur
-      BOOTSTRAP_ADMIN_PRENOM: CI
-
-      E2E_ADMIN_EMAIL: admin@gestion-eleves.local
-      E2E_ADMIN_PASSWORD: AdminTest2026!
-
     steps:
       - uses: actions/checkout@v7
 
@@ -133,78 +89,8 @@ jobs:
         working-directory: frontend
         run: npx playwright install --with-deps chromium
 
-      - name: Start backend
-        working-directory: backend
-        run: |
-          nohup bash mvnw spring-boot:run \
-            > /tmp/gestion-eleves-backend.log 2>&1 &
-          echo $! > /tmp/gestion-eleves-backend.pid
-
-      - name: Wait for backend
-        run: |
-          for attempt in {1..60}; do
-            status="$(
-              curl -s \
-                -o /dev/null \
-                -w '%{http_code}' \
-                http://127.0.0.1:8080/matieres \
-                || true
-            )"
-
-            if [ "$status" = "401" ]; then
-              echo "Backend ready."
-              exit 0
-            fi
-
-            echo "Waiting for backend ($attempt/60)..."
-            sleep 2
-          done
-
-          echo "Backend did not become ready."
-          cat /tmp/gestion-eleves-backend.log || true
-          exit 1
-
-      - name: Start frontend
-        working-directory: frontend
-        run: |
-          nohup npm run dev -- --host 127.0.0.1 \
-            > /tmp/gestion-eleves-frontend.log 2>&1 &
-          echo $! > /tmp/gestion-eleves-frontend.pid
-
-      - name: Wait for frontend
-        run: |
-          for attempt in {1..60}; do
-            if curl -fsS \
-              http://127.0.0.1:5173/ \
-              > /dev/null; then
-              echo "Frontend ready."
-              exit 0
-            fi
-
-            echo "Waiting for frontend ($attempt/60)..."
-            sleep 2
-          done
-
-          echo "Frontend did not become ready."
-          cat /tmp/gestion-eleves-frontend.log || true
-          exit 1
-
-      - name: Run Playwright E2E
-        working-directory: frontend
-        run: npm run test:e2e
-
-      - name: Collect logs on failure
-        if: failure()
-        run: |
-          mkdir -p frontend/test-results
-
-          cp /tmp/gestion-eleves-backend.log \
-            frontend/test-results/ci-backend.log \
-            2>/dev/null || true
-
-          cp /tmp/gestion-eleves-frontend.log \
-            frontend/test-results/ci-frontend.log \
-            2>/dev/null || true
+      - name: Run isolated Playwright E2E
+        run: ./scripts/test-e2e.sh
 
       - name: Upload Playwright report on failure
         if: failure()

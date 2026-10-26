@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 const adminEmail = process.env.E2E_ADMIN_EMAIL;
 const adminPassword = process.env.E2E_ADMIN_PASSWORD;
-const apiBase = "http://127.0.0.1:8080";
+const apiBase = "/api";
 
 test.beforeAll(() => {
   if (!adminEmail || !adminPassword) {
@@ -89,6 +89,9 @@ test(
     let scolarite;
     let evaluation;
     let note;
+    let replacement;
+    let secondEvaluation;
+    let secondNote;
 
     /*
      * Connexion ADMIN.
@@ -285,6 +288,22 @@ test(
         },
       );
 
+      // Deux enseignements d'une même matière : agréger les notes, pas les moyennes.
+      replacement = await postJson(page.request, "enseignements", headers, {
+        idEnseignant: enseignant.idPersonne, idClasse: classe.idClasse,
+        idMatiere: matiere.idMatiere, coefficientMatiere: 2,
+        dateDebut: "2026-10-01", dateFin: null, actif: true,
+      });
+      secondEvaluation = await postJson(page.request, "evaluations", headers, {
+        idEnseignement: replacement.idEnseignement, idPeriode: periode.idPeriode,
+        libelle: "Remplacement", dateEvaluation: "2026-10-21", typeEvaluation: "Contrôle",
+        coefficientEvaluation: 1, bareme: 10,
+      });
+      secondNote = await postJson(page.request, "notes", headers, {
+        idEvaluation: secondEvaluation.idEvaluation, idScolarite: scolarite.idScolarite,
+        valeur: 4.5, commentaire: null, statutNote: "VALIDEE",
+      });
+      // (15*2 + (4.5/10*20)*1) / 3 = 13, coefficient matière appliqué une seule fois.
       /*
        * Ouverture du module Bulletins.
        */
@@ -390,7 +409,7 @@ test(
         Number(
           bulletin.moyenneGenerale,
         ),
-      ).toBe(15);
+      ).toBe(13);
 
       expect(
         bulletin.lignes,
@@ -406,8 +425,10 @@ test(
           bulletin.lignes[0]
             .moyenneSur20,
         ),
-      ).toBe(15);
+      ).toBe(13);
 
+      expect(bulletin.lignes[0].nombreNotes).toBe(2);
+      expect(bulletin.lignes[0].coefficientMatiere).toBe(2);
       /*
        * Vérification du rendu.
        */
@@ -439,7 +460,7 @@ test(
       await expect(
         moyenneCard,
       ).toContainText(
-        "15 / 20",
+        "13 / 20",
       );
 
       const ligneMatiere =
@@ -462,7 +483,7 @@ test(
       await expect(
         ligneMatiere,
       ).toContainText(
-        "15 / 20",
+        "13 / 20",
       );
 
       /*
@@ -564,6 +585,9 @@ test(
       /*
        * Nettoyage inverse des dépendances.
        */
+      if (secondNote?.idNote) await deleteBestEffort(page.request, `notes/${secondNote.idNote}`, headers);
+      if (secondEvaluation?.idEvaluation) await deleteBestEffort(page.request, `evaluations/${secondEvaluation.idEvaluation}`, headers);
+      if (replacement?.idEnseignement) await deleteBestEffort(page.request, `enseignements/${replacement.idEnseignement}`, headers);
       if (note?.idNote) {
         await deleteBestEffort(
           page.request,
@@ -604,6 +628,9 @@ test(
         );
       }
 
+      if (classe?.idClasse && matiere?.idMatiere) {
+        await deleteBestEffort(page.request, `ponderations/${classe.idClasse}/${matiere.idMatiere}`, headers);
+      }
       if (matiere?.idMatiere) {
         await deleteBestEffort(
           page.request,

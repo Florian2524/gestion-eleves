@@ -929,7 +929,7 @@ export default function BulletinsPage() {
                           (line) => (
                             <tr
                               key={
-                                line.idEnseignement
+                                line.idMatiere
                               }
                               className="border-b border-slate-200"
                             >
@@ -973,7 +973,7 @@ export default function BulletinsPage() {
                       (line) => (
                         <article
                           key={
-                            line.idEnseignement
+                            line.idMatiere
                           }
                           className="border border-slate-200 p-5"
                         >

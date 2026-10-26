@@ -9,6 +9,9 @@ import fr.afpa.backend.entity.Evaluation;
 import fr.afpa.backend.entity.Matiere;
 import fr.afpa.backend.entity.Note;
 import fr.afpa.backend.entity.Periode;
+import fr.afpa.backend.entity.Ponderer;
+import fr.afpa.backend.exception.BusinessRuleViolationException;
+import fr.afpa.backend.repository.PondererRepository;
 import fr.afpa.backend.entity.Scolarite;
 import fr.afpa.backend.exception.ResourceNotFoundException;
 import fr.afpa.backend.repository.EnseignementRepository;
@@ -26,6 +29,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.LinkedHashMap;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -41,17 +46,20 @@ public class BulletinCalculService {
     private final PeriodeRepository periodeRepository;
     private final EnseignementRepository enseignementRepository;
     private final NoteRepository noteRepository;
+    private final PondererRepository pondererRepository;
 
     public BulletinCalculService(
             ScolariteRepository scolariteRepository,
             PeriodeRepository periodeRepository,
             EnseignementRepository enseignementRepository,
-            NoteRepository noteRepository
+            NoteRepository noteRepository,
+            PondererRepository pondererRepository
     ) {
         this.scolariteRepository = scolariteRepository;
         this.periodeRepository = periodeRepository;
         this.enseignementRepository = enseignementRepository;
         this.noteRepository = noteRepository;
+        this.pondererRepository = pondererRepository;
     }
 
     public BulletinDto calculer(
@@ -106,26 +114,25 @@ public class BulletinCalculService {
         BigDecimal sommeCoefficientsMatieres =
                 BigDecimal.ZERO;
 
-        for (Enseignement enseignement : enseignements) {
-            Long idEnseignement =
-                    enseignement.getIdEnseignement();
+        Map<Long, BigDecimal> coefficients = pondererRepository.findAllById_IdClasse(classe.getIdClasse())
+                .stream().collect(Collectors.toMap(p -> p.getId().getIdMatiere(), Ponderer::getCoefficientMatiere));
+        Map<Long, List<Enseignement>> enseignementsParMatiere = enseignements.stream()
+                .collect(Collectors.groupingBy(e -> e.getMatiere().getIdMatiere(), LinkedHashMap::new, Collectors.toList()));
 
-            List<Note> notesEnseignement =
-                    notesParEnseignement.getOrDefault(
-                            idEnseignement,
-                            List.of()
-                    );
-
-            ResultatMoyenne resultatMoyenne =
-                    calculerMoyenneMatiere(
-                            notesEnseignement
-                    );
-
-            Matiere matiere =
-                    enseignement.getMatiere();
-
-            BigDecimal coefficientMatiere =
-                    enseignement.getCoefficientMatiere();
+        for (List<Enseignement> groupe : enseignementsParMatiere.values()) {
+            // Identifiant de compatibilité déterministe ; la matière identifie désormais la ligne.
+            Long idEnseignement = groupe.stream().map(Enseignement::getIdEnseignement)
+                    .min(Long::compareTo).orElseThrow();
+            Matiere matiere = groupe.getFirst().getMatiere();
+            List<Note> notesMatiere = groupe.stream()
+                    .flatMap(e -> notesParEnseignement.getOrDefault(e.getIdEnseignement(), List.of()).stream())
+                    .toList();
+            ResultatMoyenne resultatMoyenne = calculerMoyenneMatiere(notesMatiere);
+            BigDecimal coefficientMatiere = coefficients.get(matiere.getIdMatiere());
+            if (!estStrictementPositif(coefficientMatiere)) {
+                throw new BusinessRuleViolationException("Pondération absente ou invalide pour la classe "
+                        + classe.getIdClasse() + " et la matière " + matiere.getIdMatiere() + ".");
+            }
 
             lignes.add(
                     new LigneBulletinDto(

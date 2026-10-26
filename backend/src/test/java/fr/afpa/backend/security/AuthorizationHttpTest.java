@@ -31,7 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class AuthorizationHttpTest {
+class AuthorizationHttpTest extends fr.afpa.backend.support.IsolatedPostgres {
     @Autowired MockMvc mvc;
     @MockitoBean SecurityExpressions expressions;
     @MockitoBean EleveService eleves;
@@ -40,6 +40,7 @@ class AuthorizationHttpTest {
     @MockitoBean NoteService notes;
     @MockitoBean ScolariteService scolarites;
     @MockitoBean BulletinCalculService bulletins;
+    @MockitoBean fr.afpa.backend.service.PondererService ponderations;
 
     private static final String NOTE = """
             {"idScolarite":10,"idEvaluation":20,"valeur":15,"statutNote":"SAISIE"}
@@ -176,4 +177,14 @@ class AuthorizationHttpTest {
         mvc.perform(delete("/notes/2").with(role("RESPONSABLE")))
                 .andExpect(status().isForbidden());
     }
+    @Test void concurrentCoefficientWriteReturnsConflictWithoutSqlDetails() throws Exception {
+        when(ponderations.update(eq(1L), eq(2L), any()))
+                .thenThrow(new org.springframework.dao.CannotAcquireLockException("internal SQL details"));
+        mvc.perform(put("/ponderations/1/2").with(role("ADMIN"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"idClasse\":1,\"idMatiere\":2,\"coefficientMatiere\":3}"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value("Une écriture concurrente a annulé cette opération. Rechargez les données avant de réessayer."));
+    }
+
 }

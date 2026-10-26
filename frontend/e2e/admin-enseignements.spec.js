@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 const adminEmail = process.env.E2E_ADMIN_EMAIL;
 const adminPassword = process.env.E2E_ADMIN_PASSWORD;
 
-const apiBase = "http://127.0.0.1:8080";
+const apiBase = "/api";
 
 test.beforeAll(() => {
   if (!adminEmail || !adminPassword) {
@@ -216,6 +216,32 @@ test("un administrateur peut créer, modifier et supprimer un enseignement", asy
       .getByRole("button", { name: "Enregistrer" })
       .click();
 
+    // Le coefficient appartient désormais au couple classe–matière.
+    await expect(page.getByRole("alert")).toContainText("modifiez la pondération");
+    const unchanged = await page.request.get(`${apiBase}/enseignements`, { headers });
+    const current = (await unchanged.json()).find((item) => item.idClasse === classe.idClasse && item.idMatiere === matiere.idMatiere);
+    expect(current.coefficientMatiere).toBe(2.5);
+    expect(current.actif).toBe(true);
+    const protectedWeight = await page.request.delete(`${apiBase}/ponderations/${classe.idClasse}/${matiere.idMatiere}`, { headers });
+    expect(protectedWeight.status()).toBe(409);
+
+    await page.goto("/ponderations");
+    const weight = page.locator("article").filter({ hasText: matiereNom }).filter({ hasText: classeNom });
+    await weight.getByRole("button", { name: "Modifier" }).click();
+    await expect(page.getByRole("combobox", { name: "Classe", exact: true })).toBeDisabled();
+    await expect(page.getByRole("combobox", { name: "Matière", exact: true })).toBeDisabled();
+    await page.getByLabel("Coefficient", { exact: true }).fill("3");
+    await page.getByRole("button", { name: "Enregistrer" }).click();
+    await expect(page.getByText("Modification enregistrée.")).toBeVisible();
+    const synchronized = await page.request.get(`${apiBase}/enseignements/${current.idEnseignement}`, { headers });
+    expect((await synchronized.json()).coefficientMatiere).toBe(3);
+
+    await page.goto("/enseignements");
+    enseignement = page.locator("article").filter({ hasText: matiereNom }).filter({ hasText: classeNom });
+    await enseignement.getByRole("button", { name: "Modifier" }).click();
+    await page.getByLabel("Fin", { exact: true }).fill(dateFin);
+    await page.locator('form input[type="checkbox"]').uncheck();
+    await page.getByRole("button", { name: "Enregistrer" }).click();
     await expect(
       page.getByText("Modification enregistrée."),
     ).toBeVisible();
@@ -275,6 +301,10 @@ test("un administrateur peut créer, modifier et supprimer un enseignement", asy
       }
     } catch {
       // Nettoyage best effort.
+    }
+
+    if (classe?.idClasse && matiere?.idMatiere) {
+      await page.request.delete(`${apiBase}/ponderations/${classe.idClasse}/${matiere.idMatiere}`, { headers });
     }
 
     if (matiere?.idMatiere) {

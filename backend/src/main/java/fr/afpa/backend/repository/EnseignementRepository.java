@@ -11,6 +11,8 @@ public interface EnseignementRepository
     @org.springframework.data.jpa.repository.Query("select count(e) > 0 from Enseignement e, Scolarite s, ResponsabiliteLegale r where e.idEnseignement = :idEnseignement and s.classe = e.classe and r.eleve = s.eleve and r.responsable.idPersonne = :idResponsable")
     boolean concerneResponsable(Long idEnseignement, Long idResponsable);
 
+    boolean existsByClasse_IdClasseAndMatiere_IdMatiere(Long idClasse, Long idMatiere);
+
     List<Enseignement> findAllByClasse_IdClasse(
             Long idClasse
     );

@@ -9,6 +9,7 @@ import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+/** coefficientMatiere reste compatible : initialisation/vérification du couple PONDERER. */
 public record EnseignementRequest(
 
         @NotNull(message = "L'identifiant de l'enseignant est obligatoire.")

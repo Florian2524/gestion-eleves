@@ -8,6 +8,8 @@ import fr.afpa.backend.exception.DuplicateResourceException;
 import fr.afpa.backend.exception.ResourceNotFoundException;
 import fr.afpa.backend.mapper.ClasseMapper;
 import fr.afpa.backend.repository.ClasseRepository;
+import fr.afpa.backend.repository.PondererRepository;
+import fr.afpa.backend.exception.ResourceInUseException;
 import fr.afpa.backend.repository.EnseignantRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,15 +23,18 @@ public class ClasseService {
     private final ClasseRepository classeRepository;
     private final EnseignantRepository enseignantRepository;
     private final ClasseMapper classeMapper;
+    private final PondererRepository pondererRepository;
 
     public ClasseService(
             ClasseRepository classeRepository,
             EnseignantRepository enseignantRepository,
-            ClasseMapper classeMapper
+            ClasseMapper classeMapper,
+            PondererRepository pondererRepository
     ) {
         this.classeRepository = classeRepository;
         this.enseignantRepository = enseignantRepository;
         this.classeMapper = classeMapper;
+        this.pondererRepository = pondererRepository;
     }
 
     public List<ClasseResponse> findAll() {
@@ -116,6 +121,9 @@ public class ClasseService {
     @Transactional
     public void delete(Long id) {
         Classe classe = findEntityById(id);
+        if (pondererRepository.existsById_IdClasse(id)) {
+            throw new ResourceInUseException("Suppression impossible : une pondération référence cette classe.");
+        }
         classeRepository.delete(classe);
     }
 

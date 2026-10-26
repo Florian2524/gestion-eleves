@@ -11,7 +11,7 @@ import ElevesPage from "./pages/ElevesPage";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import NotesPage from "./pages/NotesPage";
-import { ClassesPage, EnseignementsPage, EvaluationsPage, InscriptionsPage, MatieresPage, PeriodesPage, ScolaritesPage } from "./pages/AdministrationPages";
+import { PonderationsPage, ClassesPage, EnseignementsPage, EvaluationsPage, InscriptionsPage, MatieresPage, PeriodesPage, ScolaritesPage } from "./pages/AdministrationPages";
 import { EnseignantsPage, ResponsablesPage } from "./pages/AdministrationPages";
 import ResponsabilitesLegalesPage from "./pages/ResponsabilitesLegalesPage";
 import ComptesUtilisateursPage from "./pages/ComptesUtilisateursPage";
@@ -69,6 +69,7 @@ export default function App() {
 
       {[
         ["/classes", ClassesPage, ["ADMIN"]],
+        ["/ponderations", PonderationsPage, ["ADMIN"]],
         ["/enseignants", EnseignantsPage, ["ADMIN"]],
         ["/responsables", ResponsablesPage, ["ADMIN"]],
         ["/responsabilites-legales", ResponsabilitesLegalesPage, ["ADMIN"]],

@@ -1,0 +1,24 @@
+# Les tests ne peuvent pas hériter de la datasource de développement ni de DB_URL.
+# Valeur par défaut fermée ; le script fournit explicitement le PostgreSQL jetable.
+spring:
+  datasource:
+    url: ${PONDERER_TEST_DB_URL:jdbc:postgresql://127.0.0.1:1/ponderer_test}
+    username: ponderer_test
+    password: ponderer_test
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+application:
+  upload:
+    directory: ${java.io.tmpdir}/gestion-eleves-tests-uploads
+  bootstrap:
+    admin:
+      email: ''
+      password: ''
+      nom: ''
+      prenom: ''
+  security:
+    jwt:
+      secret: Z2VzdGlvbi1lbGV2ZXMtZGV2ZWxvcG1lbnQtand0LXNlY3JldC0yMDI2
+      expiration-seconds: 3600

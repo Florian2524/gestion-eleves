@@ -7,7 +7,8 @@ import { schoolLabels, schoolLookups } from "./schoolData";
 const fieldClass = "mt-2 min-h-11 w-full border border-slate-300 bg-white px-3 text-school-ink focus:border-school-blue";
 const emptyLookups = [];
 
-export default function ResourcePage({ title, resource, idKey, fields, columns, lookups = emptyLookups, canWrite = (role) => role === "ADMIN", validate }) {
+export default function ResourcePage({ title, resource, idKey, getId, description, fields, columns, lookups = emptyLookups, canWrite = (role) => role === "ADMIN", validate }) {
+  const rowId = getId ?? ((row) => row[idKey]);
   const { auth } = useAuth();
   const writable = canWrite(auth?.role);
   const [rows, setRows] = useState([]);
@@ -61,7 +62,7 @@ export default function ResourcePage({ title, resource, idKey, fields, columns, 
         setError("Renseignez tous les champs obligatoires."); return;
       }
       setBusy(true);
-      if (editing) await updateResource(resource, editing[idKey], body);
+      if (editing) await updateResource(resource, rowId(editing), body);
       else await createResource(resource, body);
       setForm(null); setEditing(null); setSuccess(editing ? "Modification enregistrée." : "Création enregistrée.");
       await reload();
@@ -72,7 +73,7 @@ export default function ResourcePage({ title, resource, idKey, fields, columns, 
   async function remove(row) {
     if (!window.confirm(`Supprimer cet élément de ${title.toLowerCase()} ?`)) return;
     setBusy(true); setError(""); setSuccess("");
-    try { await deleteResource(resource, row[idKey]); setSuccess("Suppression effectuée."); await reload(); }
+    try { await deleteResource(resource, rowId(row)); setSuccess("Suppression effectuée."); await reload(); }
     catch (failure) { setError(failure.message || "Suppression impossible."); }
     finally { setBusy(false); }
   }
@@ -85,6 +86,7 @@ export default function ResourcePage({ title, resource, idKey, fields, columns, 
         <h1 className="font-display text-4xl font-bold uppercase text-school-blue">{title}</h1>
         {writable && <button type="button" disabled={busy} onClick={() => open()} className="bg-school-blue px-5 py-3 font-bold text-white disabled:opacity-50">Ajouter</button>}
       </div>
+      {description && <p className="mt-4 text-school-muted">{description}</p>}
       {loading && <p role="status" className="mt-6">Chargement…</p>}
       {error && <p role="alert" className="mt-6 border border-red-300 bg-red-50 p-4 text-red-800">{error}</p>}
       {loadError && <p role="alert" className="mt-6 border border-red-300 bg-red-50 p-4 text-red-800">{loadError}</p>}
@@ -93,7 +95,7 @@ export default function ResourcePage({ title, resource, idKey, fields, columns, 
         <h2 className="font-display text-2xl font-bold uppercase text-school-blue">{editing ? "Modifier" : "Créer"}</h2>
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           {fields.map((field) => <label key={field.name} className="block font-semibold text-school-ink">{field.label}
-            {field.type === "select" ? <select className={fieldClass} required={!field.optional} value={form[field.name]} onChange={(event) => setForm({ ...form, [field.name]: event.target.value })}>
+            {field.type === "select" ? <select className={fieldClass} disabled={Boolean(editing && field.immutable)} required={!field.optional} value={form[field.name]} onChange={(event) => setForm({ ...form, [field.name]: event.target.value })}>
               <option value="">Choisir…</option>
               {(data[field.lookup] ?? []).map((item) => <option key={item[field.optionId]} value={item[field.optionId]}>{field.optionLabel(item, labels)}</option>)}
             </select> : field.type === "checkbox" ? <input className="ml-3" type="checkbox" checked={Boolean(form[field.name])} onChange={(event) => setForm({ ...form, [field.name]: event.target.checked })} />
@@ -107,7 +109,7 @@ export default function ResourcePage({ title, resource, idKey, fields, columns, 
       </form>}
       {!loading && !loadError && rows.length === 0 && <p className="mt-6 bg-white p-6 text-school-muted">Aucune donnée disponible.</p>}
       {!loading && !loadError && rows.length > 0 && <div className="mt-6 grid gap-4 md:grid-cols-2">
-        {rows.map((row) => <article key={row[idKey]} className="bg-white p-5 shadow-sm">
+        {rows.map((row) => <article key={rowId(row)} className="bg-white p-5 shadow-sm">
           <dl className="grid gap-2">{columns.map((column) => <div key={column.label} className="flex flex-wrap justify-between gap-2 border-b border-slate-100 py-2"><dt className="font-semibold text-school-muted">{column.label}</dt><dd className="text-right text-school-ink">{column.render(row, labels) ?? "—"}</dd></div>)}</dl>
           {writable && <div className="mt-4 flex gap-4 font-semibold"><button type="button" disabled={busy} onClick={() => open(row)} className="text-school-blue underline disabled:opacity-50">Modifier</button><button type="button" disabled={busy} onClick={() => remove(row)} className="text-red-700 underline disabled:opacity-50">Supprimer</button></div>}
         </article>)}
