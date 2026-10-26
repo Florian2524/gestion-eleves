@@ -15,7 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class SecurityIntegrationTest {
+class SecurityIntegrationTest extends fr.afpa.backend.support.IsolatedPostgres {
 
     @Autowired
     private MockMvc mockMvc;

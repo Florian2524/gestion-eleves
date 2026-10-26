@@ -9,6 +9,10 @@ import fr.afpa.backend.entity.Evaluation;
 import fr.afpa.backend.entity.Matiere;
 import fr.afpa.backend.entity.Note;
 import fr.afpa.backend.entity.Periode;
+import fr.afpa.backend.entity.Ponderer;
+import fr.afpa.backend.entity.PondererId;
+import fr.afpa.backend.repository.PondererRepository;
+import fr.afpa.backend.exception.BusinessRuleViolationException;
 import fr.afpa.backend.entity.Scolarite;
 import fr.afpa.backend.exception.ResourceNotFoundException;
 import fr.afpa.backend.repository.EnseignementRepository;
@@ -53,6 +57,10 @@ class BulletinCalculServiceTest {
     @Mock
     private NoteRepository noteRepository;
 
+    @Mock
+    private PondererRepository pondererRepository;
+    private final java.util.Map<Long, Ponderer> ponderations = new java.util.HashMap<>();
+
     private BulletinCalculService bulletinCalculService;
 
     @BeforeEach
@@ -62,7 +70,8 @@ class BulletinCalculServiceTest {
                         scolariteRepository,
                         periodeRepository,
                         enseignementRepository,
-                        noteRepository
+                        noteRepository,
+                        pondererRepository
                 );
     }
 
@@ -489,7 +498,60 @@ class BulletinCalculServiceTest {
                 .isNull();
     }
 
+    @Test
+    void shouldAggregateNotesAcrossTeachersAndWeightSubjectOnlyOnce() {
+        preparerContexte();
+        var first = creerEnseignement(100L, 1000L, "M", "Maths", new BigDecimal("4"), LocalDate.of(2026,9,1), null);
+        var replacement = creerEnseignement(101L, 1000L, "M", "Maths", new BigDecimal("4"), LocalDate.of(2026,10,1), null);
+        var french = creerEnseignement(200L, 2000L, "F", "Français", new BigDecimal("2"), LocalDate.of(2026,9,1), null);
+        when(enseignementRepository.findAllByClasse_IdClasse(ID_CLASSE)).thenReturn(List.of(replacement, french, first));
+        var notes = List.of(creerNote(first, BigDecimal.TEN, BigDecimal.ONE, new BigDecimal("20")),
+                creerNote(replacement, new BigDecimal("10"), new BigDecimal("3"), BigDecimal.TEN),
+                creerNote(french, BigDecimal.TEN, BigDecimal.ONE, new BigDecimal("20")));
+        when(noteRepository.findAllByScolarite_IdScolariteAndEvaluation_Periode_IdPeriode(ID_SCOLARITE, ID_PERIODE))
+                .thenReturn(notes);
+        var result = bulletinCalculService.calculer(ID_SCOLARITE, ID_PERIODE);
+        assertThat(result.lignes()).hasSize(2);
+        var maths = trouverLigne(result, 100L);
+        assertThat(maths.idMatiere()).isEqualTo(1000L);
+        assertThat(maths.nombreNotes()).isEqualTo(2);
+        assertThat(maths.moyenneSur20()).isEqualByComparingTo("17.50");
+        assertThat(result.moyenneGenerale()).isEqualByComparingTo("15.00");
+    }
+
+    @Test
+    void shouldReadCoefficientFromPondererRatherThanLegacyField() {
+        preparerContexte();
+        var maths = creerEnseignement(100L, 1000L, "M", "Maths", new BigDecimal("4"), LocalDate.of(2026,9,1), null);
+        var french = creerEnseignement(200L, 2000L, "F", "Français", new BigDecimal("2"), LocalDate.of(2026,9,1), null);
+        lenient().when(maths.getCoefficientMatiere()).thenReturn(new BigDecimal("99"));
+        when(enseignementRepository.findAllByClasse_IdClasse(ID_CLASSE)).thenReturn(List.of(maths, french));
+        var notes = List.of(creerNote(maths, new BigDecimal("20"), BigDecimal.ONE, new BigDecimal("20")),
+                creerNote(french, new BigDecimal("8"), BigDecimal.ONE, new BigDecimal("20")));
+        when(noteRepository.findAllByScolarite_IdScolariteAndEvaluation_Periode_IdPeriode(ID_SCOLARITE, ID_PERIODE))
+                .thenReturn(notes);
+        var result = bulletinCalculService.calculer(ID_SCOLARITE, ID_PERIODE);
+        assertThat(trouverLigne(result, 100L).coefficientMatiere()).isEqualByComparingTo("4");
+        assertThat(result.moyenneGenerale()).isEqualByComparingTo("16");
+    }
+
+    @Test
+    void shouldFailExplicitlyWhenPondererIsMissingEvenWithoutNotes() {
+        var scolarite = mock(Scolarite.class);
+        var classe = mock(Classe.class);
+        when(scolariteRepository.findById(ID_SCOLARITE)).thenReturn(Optional.of(scolarite));
+        when(periodeRepository.findById(ID_PERIODE)).thenReturn(Optional.of(mock(Periode.class)));
+        when(scolarite.getClasse()).thenReturn(classe);
+        when(classe.getIdClasse()).thenReturn(ID_CLASSE);
+        var maths = creerEnseignement(100L, 1000L, "M", "Maths", BigDecimal.ONE, null, null);
+        when(enseignementRepository.findAllByClasse_IdClasse(ID_CLASSE)).thenReturn(List.of(maths));
+        assertThatThrownBy(() -> bulletinCalculService.calculer(ID_SCOLARITE, ID_PERIODE))
+                .isInstanceOf(BusinessRuleViolationException.class).hasMessageContaining("Pondération absente");
+    }
+
     private void preparerContexte() {
+        lenient().when(pondererRepository.findAllById_IdClasse(ID_CLASSE))
+                .thenAnswer(invocation -> List.copyOf(ponderations.values()));
         Scolarite scolarite =
                 mock(Scolarite.class);
 
@@ -601,6 +663,10 @@ class BulletinCalculServiceTest {
                 matiere.getNom()
         ).thenReturn(nomMatiere);
 
+        Ponderer ponderation = mock(Ponderer.class);
+        lenient().when(ponderation.getId()).thenReturn(new PondererId(ID_CLASSE, idMatiere));
+        lenient().when(ponderation.getCoefficientMatiere()).thenReturn(coefficientMatiere);
+        ponderations.put(idMatiere, ponderation);
         return enseignement;
     }
 

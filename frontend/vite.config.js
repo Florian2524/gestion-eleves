@@ -22,7 +22,7 @@ export default defineConfig({
 
     proxy: {
       "/api": {
-        target: "http://localhost:8080",
+        target: process.env.E2E_API_URL || "http://localhost:8080",
         changeOrigin: true,
         secure: false,
 

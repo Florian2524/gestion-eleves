@@ -251,13 +251,18 @@ La démarche produit et le backlog se trouvent dans [docs/scrum/README.md](docs/
 
 ## Vérification et soutenance
 
-Depuis `backend`, `bash mvnw test` puis `bash mvnw package -DskipTests`.
-Depuis `frontend`, `npm ci`, `npm run lint`, `npm test -- --run` et
-`npm run build`. Les tests d'intégration backend exigent PostgreSQL démarré.
+Depuis la racine, `./scripts/test-ponderer.sh` exécute toute la suite backend
+sur PostgreSQL 17 jetable, puis `./backend/mvnw -f backend/pom.xml package -DskipTests`
+produit le JAR. Docker est requis ; le conteneur et le port sont créés par le script.
+Depuis `frontend`, exécuter `npm ci`, `npm run lint`, `npm test -- --run` et
+`npm run build`. Aucun test ne doit utiliser la base PostgreSQL de développement.
 
 Les scénarios end-to-end Playwright se trouvent dans `frontend/e2e`.
 Après installation des dépendances et de Chromium pour Playwright, la recette
-complète peut être lancée depuis la racine avec `./scripts/test-e2e.sh`.
+complète se lance depuis la racine avec `./scripts/test-e2e.sh`. Le script crée
+une base de fixtures, un backend et un frontend sur des ports dédiés, puis les
+supprime. Il ne démarre pas Compose et ne réutilise aucun service existant.
+La configuration Playwright refuse un lancement sans ces cibles isolées.
 
 La recette E2E couvre les principaux parcours d'administration, la chaîne
 élève → scolarité → enseignement → évaluation → note → bulletin → PDF ainsi
@@ -286,19 +291,21 @@ et le mot de passe PostgreSQL par défaut sont réservés au développement loca
 
 ## Exécuter les tests du backend
 
-Sous Windows :
-
-```powershell
-cd backend
-.\mvnw.cmd test
-```
-
-Sous Linux ou macOS :
+Pour la suite complète, avec Docker disponible et Bash (Linux, macOS ou WSL) :
 
 ```bash
-cd backend
-./mvnw test
+./scripts/test-ponderer.sh
 ```
+
+Pour un test unitaire seul, sans base de données, depuis `backend` :
+
+```bash
+./mvnw -Dtest=BulletinCalculServiceTest test
+```
+
+Sous PowerShell, utiliser `./mvnw.cmd` pour ce test unitaire. Les tests de contexte
+et de migration exigent la configuration isolée fournie par le script ; ils
+échouent volontairement si elle est absente.
 
 Les tests couvrent notamment :
 

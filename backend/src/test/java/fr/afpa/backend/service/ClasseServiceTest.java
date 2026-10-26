@@ -8,6 +8,7 @@ import fr.afpa.backend.exception.DuplicateResourceException;
 import fr.afpa.backend.exception.ResourceNotFoundException;
 import fr.afpa.backend.mapper.ClasseMapper;
 import fr.afpa.backend.repository.ClasseRepository;
+import fr.afpa.backend.repository.PondererRepository;
 import fr.afpa.backend.repository.EnseignantRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,6 +38,9 @@ class ClasseServiceTest {
     @Mock
     private ClasseMapper classeMapper;
 
+    @Mock
+    private PondererRepository pondererRepository;
+
     private ClasseService classeService;
 
     private ClasseRequest request;
@@ -50,7 +54,8 @@ class ClasseServiceTest {
         classeService = new ClasseService(
                 classeRepository,
                 enseignantRepository,
-                classeMapper
+                classeMapper,
+                pondererRepository
         );
 
         request = new ClasseRequest(

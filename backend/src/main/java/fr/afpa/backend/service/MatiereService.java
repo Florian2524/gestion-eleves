@@ -7,6 +7,8 @@ import fr.afpa.backend.exception.DuplicateResourceException;
 import fr.afpa.backend.exception.ResourceNotFoundException;
 import fr.afpa.backend.mapper.MatiereMapper;
 import fr.afpa.backend.repository.MatiereRepository;
+import fr.afpa.backend.repository.PondererRepository;
+import fr.afpa.backend.exception.ResourceInUseException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,13 +20,16 @@ public class MatiereService {
 
     private final MatiereRepository matiereRepository;
     private final MatiereMapper matiereMapper;
+    private final PondererRepository pondererRepository;
 
     public MatiereService(
             MatiereRepository matiereRepository,
-            MatiereMapper matiereMapper
+            MatiereMapper matiereMapper,
+            PondererRepository pondererRepository
     ) {
         this.matiereRepository = matiereRepository;
         this.matiereMapper = matiereMapper;
+        this.pondererRepository = pondererRepository;
     }
 
     public List<MatiereResponse> findAll() {
@@ -85,6 +90,9 @@ public class MatiereService {
     @Transactional
     public void delete(Long id) {
         Matiere matiere = findEntityById(id);
+        if (pondererRepository.existsById_IdMatiere(id)) {
+            throw new ResourceInUseException("Suppression impossible : une pondération référence cette matière.");
+        }
         matiereRepository.delete(matiere);
     }
 

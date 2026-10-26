@@ -28,7 +28,14 @@ const periodes = {
   columns: [col("Période", (r) => r.libelle), col("Dates", (r) => `${formatDate(r.dateDebut)} au ${formatDate(r.dateFin)}`), col("Saisie", (r) => r.dateDebutSaisie ? `${formatDate(r.dateDebutSaisie)} au ${formatDate(r.dateFinSaisie)}` : "Non définie"), col("Statut", (r) => r.statut)],
   validate: (f) => datesValid(f.dateDebut, f.dateFin) || (f.dateDebutSaisie && f.dateFinSaisie ? datesValid(f.dateDebutSaisie, f.dateFinSaisie) : ""),
 };
+const ponderations = {
+  title: "Pondérations", resource: "ponderations", getId: (r) => `${r.idClasse}/${r.idMatiere}`, lookups: ["classes", "matieres"],
+  description: "Un coefficient commun à tous les enseignements d’une matière dans une classe. Sa modification s’applique aux bulletins calculés à nouveau.",
+  fields: [{ ...select("idClasse", "Classe", "classes", "idClasse", classOption), immutable: true }, { ...select("idMatiere", "Matière", "matieres", "idMatiere", (i) => i.nom), immutable: true }, number("coefficientMatiere", "Coefficient")],
+  columns: [col("Classe", (r, l) => l.classe(r.idClasse)), col("Matière", (r, l) => l.matiere(r.idMatiere)), col("Coefficient", (r) => r.coefficientMatiere)],
+};
 const enseignementsAdmin = {
+  description: "Le coefficient doit correspondre à la pondération classe–matière existante. Modifiez le coefficient commun dans Pondérations ; un nouveau couple reprend le coefficient saisi ici.",
   title: "Enseignements", resource: "enseignements", idKey: "idEnseignement", lookups: ["enseignants", "classes", "matieres"],
   fields: [select("idEnseignant", "Enseignant", "enseignants", "idPersonne", personOption), select("idClasse", "Classe", "classes", "idClasse", classOption), select("idMatiere", "Matière", "matieres", "idMatiere", (i) => i.nom), number("coefficientMatiere", "Coefficient"), date("dateDebut", "Début"), date("dateFin", "Fin", true), { name: "actif", label: "Actif", type: "checkbox", defaultValue: true }],
   columns: [col("Matière", (r, l) => l.matiere(r.idMatiere)), col("Classe", (r, l) => l.classe(r.idClasse)), col("Enseignant", (r, l) => l.enseignant(r.idEnseignant)), col("Période", (r) => `${formatDate(r.dateDebut)} au ${r.dateFin ? formatDate(r.dateFin) : "présent"}`), col("Statut", (r) => r.actif ? "Actif" : "Inactif")],
@@ -70,6 +77,7 @@ const responsables = {
   columns: [col("Nom", (r) => `${r.prenom} ${r.nom}`), col("E-mail", (r) => r.emailContact || "—"), col("Téléphone", (r) => r.telephone || "—"), col("Profession", (r) => r.profession || "—")],
 };
 
+export const PonderationsPage = () => <ResourcePage {...ponderations} />;
 export const MatieresPage = () => <ResourcePage {...matieres} />;
 export const ClassesPage = () => <ResourcePage {...classes} />;
 export const PeriodesPage = () => <ResourcePage {...periodes} />;

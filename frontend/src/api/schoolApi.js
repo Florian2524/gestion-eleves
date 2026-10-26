@@ -2,6 +2,7 @@ import { apiRequest } from "./http";
 
 const paths = {
   classes: "/classes",
+  ponderations: "/ponderations",
   matieres: "/matieres",
   periodes: "/periodes",
   enseignants: "/enseignants",

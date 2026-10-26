@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 const adminEmail = process.env.E2E_ADMIN_EMAIL;
 const adminPassword = process.env.E2E_ADMIN_PASSWORD;
 
-const apiBase = "http://127.0.0.1:8080";
+const apiBase = "/api";
 
 test.beforeAll(() => {
   if (!adminEmail || !adminPassword) {

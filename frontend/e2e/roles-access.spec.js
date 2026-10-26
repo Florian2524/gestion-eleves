@@ -7,7 +7,7 @@ const adminPassword =
   process.env.E2E_ADMIN_PASSWORD;
 
 const apiBase =
-  "http://127.0.0.1:8080";
+  "/api";
 
 const rolePassword =
   "RoleTest2026!";

@@ -32,6 +32,7 @@ public class EnseignementService {
     private final EvaluationRepository evaluationRepository;
     private final LigneBulletinRepository ligneBulletinRepository;
     private final EnseignementMapper enseignementMapper;
+    private final PondererService pondererService;
 
     public EnseignementService(
             EnseignementRepository enseignementRepository,
@@ -40,7 +41,8 @@ public class EnseignementService {
             MatiereRepository matiereRepository,
             EvaluationRepository evaluationRepository,
             LigneBulletinRepository ligneBulletinRepository,
-            EnseignementMapper enseignementMapper
+            EnseignementMapper enseignementMapper,
+            PondererService pondererService
     ) {
         this.enseignementRepository = enseignementRepository;
         this.enseignantRepository = enseignantRepository;
@@ -49,6 +51,7 @@ public class EnseignementService {
         this.evaluationRepository = evaluationRepository;
         this.ligneBulletinRepository = ligneBulletinRepository;
         this.enseignementMapper = enseignementMapper;
+        this.pondererService = pondererService;
     }
 
     public List<EnseignementResponse> findAll() {
@@ -100,6 +103,8 @@ public class EnseignementService {
         Matiere matiere =
                 findMatiereById(request.idMatiere());
 
+        pondererService.ensureCompatible(request.idClasse(), request.idMatiere(), request.coefficientMatiere());
+
         Enseignement enseignement =
                 enseignementMapper.toEntity(
                         request,
@@ -109,7 +114,7 @@ public class EnseignementService {
                 );
 
         Enseignement savedEnseignement =
-                enseignementRepository.save(enseignement);
+                enseignementRepository.saveAndFlush(enseignement);
 
         return enseignementMapper.toResponse(
                 savedEnseignement
@@ -157,6 +162,8 @@ public class EnseignementService {
         Matiere matiere =
                 findMatiereById(request.idMatiere());
 
+        pondererService.ensureCompatible(request.idClasse(), request.idMatiere(), request.coefficientMatiere());
+
         enseignementMapper.updateEntity(
                 request,
                 enseignant,
@@ -166,7 +173,7 @@ public class EnseignementService {
         );
 
         Enseignement updatedEnseignement =
-                enseignementRepository.save(enseignement);
+                enseignementRepository.saveAndFlush(enseignement);
 
         return enseignementMapper.toResponse(
                 updatedEnseignement

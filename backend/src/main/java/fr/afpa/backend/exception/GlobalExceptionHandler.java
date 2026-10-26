@@ -17,6 +17,22 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(org.springframework.dao.ConcurrencyFailureException.class)
+    public ResponseEntity<ApiErrorResponse> handleConcurrentWrite(
+            org.springframework.dao.ConcurrencyFailureException exception, HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT,
+                "Une écriture concurrente a annulé cette opération. Rechargez les données avant de réessayer.",
+                request.getRequestURI(), Map.of());
+    }
+
+    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    public ResponseEntity<ApiErrorResponse> handleIntegrityConflict(
+            org.springframework.dao.DataIntegrityViolationException exception, HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT,
+                "Écriture incompatible avec les données existantes. Rechargez les références et vérifiez les coefficients.",
+                request.getRequestURI(), Map.of());
+    }
+
     @ExceptionHandler(BusinessRuleViolationException.class)
     public ResponseEntity<ApiErrorResponse>
     handleBusinessRuleViolation(

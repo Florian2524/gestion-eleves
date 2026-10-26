@@ -58,6 +58,9 @@ class EnseignementServiceTest {
     @Mock
     private EnseignementMapper enseignementMapper;
 
+    @Mock
+    private PondererService pondererService;
+
     private EnseignementService enseignementService;
 
     private EnseignementRequest request;
@@ -76,7 +79,8 @@ class EnseignementServiceTest {
                 matiereRepository,
                 evaluationRepository,
                 ligneBulletinRepository,
-                enseignementMapper
+                enseignementMapper,
+                pondererService
         );
 
         request = new EnseignementRequest(
@@ -217,7 +221,7 @@ class EnseignementServiceTest {
                 matiere
         )).thenReturn(enseignement);
 
-        when(enseignementRepository.save(enseignement))
+        when(enseignementRepository.saveAndFlush(enseignement))
                 .thenReturn(enseignement);
 
         when(enseignementMapper.toResponse(enseignement))
@@ -252,7 +256,7 @@ class EnseignementServiceTest {
                 matiere
         );
 
-        verify(enseignementRepository).save(enseignement);
+        verify(enseignementRepository).saveAndFlush(enseignement);
         verify(enseignementMapper).toResponse(enseignement);
     }
 
@@ -295,11 +299,12 @@ class EnseignementServiceTest {
                 enseignantRepository,
                 classeRepository,
                 matiereRepository,
-                enseignementMapper
+                enseignementMapper,
+                pondererService
         );
 
         verify(enseignementRepository, never())
-                .save(enseignement);
+                .saveAndFlush(enseignement);
     }
 
     @Test
@@ -333,11 +338,12 @@ class EnseignementServiceTest {
         verifyNoInteractions(
                 classeRepository,
                 matiereRepository,
-                enseignementMapper
+                enseignementMapper,
+                pondererService
         );
 
         verify(enseignementRepository, never())
-                .save(enseignement);
+                .saveAndFlush(enseignement);
     }
 
     @Test
@@ -377,11 +383,12 @@ class EnseignementServiceTest {
 
         verifyNoInteractions(
                 matiereRepository,
-                enseignementMapper
+                enseignementMapper,
+                pondererService
         );
 
         verify(enseignementRepository, never())
-                .save(enseignement);
+                .saveAndFlush(enseignement);
     }
 
     @Test
@@ -429,7 +436,7 @@ class EnseignementServiceTest {
         verifyNoInteractions(enseignementMapper);
 
         verify(enseignementRepository, never())
-                .save(enseignement);
+                .saveAndFlush(enseignement);
     }
 
     @Test
@@ -459,7 +466,7 @@ class EnseignementServiceTest {
                 request.idMatiere()
         )).thenReturn(Optional.of(matiere));
 
-        when(enseignementRepository.save(enseignement))
+        when(enseignementRepository.saveAndFlush(enseignement))
                 .thenReturn(enseignement);
 
         when(enseignementMapper.toResponse(enseignement))
@@ -489,7 +496,7 @@ class EnseignementServiceTest {
                 enseignement
         );
 
-        verify(enseignementRepository).save(enseignement);
+        verify(enseignementRepository).saveAndFlush(enseignement);
         verify(enseignementMapper).toResponse(enseignement);
     }
 
@@ -551,7 +558,7 @@ class EnseignementServiceTest {
                 );
 
         verify(enseignementRepository, never())
-                .save(enseignement);
+                .saveAndFlush(enseignement);
     }
 
     @Test

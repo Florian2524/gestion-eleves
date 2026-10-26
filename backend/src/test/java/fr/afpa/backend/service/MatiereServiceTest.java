@@ -7,6 +7,7 @@ import fr.afpa.backend.exception.DuplicateResourceException;
 import fr.afpa.backend.exception.ResourceNotFoundException;
 import fr.afpa.backend.mapper.MatiereMapper;
 import fr.afpa.backend.repository.MatiereRepository;
+import fr.afpa.backend.repository.PondererRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,6 +33,9 @@ class MatiereServiceTest {
     @Mock
     private MatiereMapper matiereMapper;
 
+    @Mock
+    private PondererRepository pondererRepository;
+
     private MatiereService matiereService;
 
     private MatiereRequest request;
@@ -42,7 +46,8 @@ class MatiereServiceTest {
     void setUp() {
         matiereService = new MatiereService(
                 matiereRepository,
-                matiereMapper
+                matiereMapper,
+                pondererRepository
         );
 
         request = new MatiereRequest(

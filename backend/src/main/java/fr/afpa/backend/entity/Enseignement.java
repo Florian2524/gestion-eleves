@@ -67,6 +67,8 @@ public class Enseignement {
     )
     private Matiere matiere;
 
+    // Miroir transitoire de PONDERER, maintenu par la FK ON UPDATE CASCADE.
+    // L'API enseignement initialise/vérifie le couple ; elle ne change pas sa pondération.
     @Column(
             name = "coefficient_matiere",
             nullable = false,
