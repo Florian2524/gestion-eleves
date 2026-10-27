@@ -75,7 +75,7 @@ public class SecurityConfig {
                                 )
                                 .permitAll()
                                 .requestMatchers(
-                                        "/comptes-utilisateurs/**", "/ponderations/**"
+                                        "/comptes-utilisateurs/**", "/ponderations/**", "/personnes", "/personnes/**"
                                 )
                                 .hasRole("ADMIN")
                                 .requestMatchers("/enseignants/**", "/responsables/**", "/responsabilites-legales/**", "/inscriptions/**")

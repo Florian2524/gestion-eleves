@@ -2,16 +2,36 @@ package fr.afpa.backend.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.PrimaryKeyJoinColumn;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.MapsId;
+import jakarta.persistence.OneToOne;
+import java.util.Objects;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "enseignant")
-@PrimaryKeyJoinColumn(
-        name = "id_personne",
-        referencedColumnName = "id_personne"
-)
-public class Enseignant extends Personne {
+public class Enseignant {
+
+    @Id
+    @Column(name = "id_personne")
+    private Long idPersonne;
+
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @MapsId
+    @JoinColumn(name = "id_personne", nullable = false,
+            foreignKey = @ForeignKey(name = "fk_enseignant_personne"))
+    private Personne personne;
+
+    public Long getIdPersonne() {
+        return idPersonne;
+    }
+
+    public Personne getPersonne() {
+        return personne;
+    }
 
     @Column(
             name = "numero_employe",
@@ -25,14 +45,10 @@ public class Enseignant extends Personne {
     }
 
     public Enseignant(
-            String nom,
-            String prenom,
-            String emailContact,
-            String telephone,
-            String adresse,
+            Personne personne,
             String numeroEmploye
     ) {
-        super(nom, prenom, emailContact, telephone, adresse);
+        this.personne = Objects.requireNonNull(personne, "La personne est obligatoire");
         this.numeroEmploye = numeroEmploye;
     }
 

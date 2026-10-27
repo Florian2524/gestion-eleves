@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
 import { createResource, deleteResource, listResource, updateResource } from "../api/schoolApi";
 
+import { profileLabels } from "../components/school/personneProfiles";
+
 const control = "mt-2 min-h-11 w-full border border-slate-300 bg-white px-3 text-school-ink focus:border-school-blue";
 const roles = { ADMIN: "Administrateur", ENSEIGNANT: "Enseignant", RESPONSABLE: "Responsable légal" };
 const emptyForm = { idPersonne: "", emailConnexion: "", motDePasse: "", nouveauMotDePasse: "", role: "", actif: true };
@@ -19,12 +21,12 @@ export default function ComptesUtilisateursPage() {
   const reload = useCallback(async (signal) => {
     setLoading(true);
     try {
-      const [currentAccounts, teachers, guardians] = await Promise.all([
-        listResource("comptes", { signal }), listResource("enseignants", { signal }), listResource("responsables", { signal }),
+      const [currentAccounts, currentPeople] = await Promise.all([
+        listResource("comptes", { signal }), listResource("personnes", { signal }),
       ]);
       if (signal?.aborted) return;
       setAccounts(currentAccounts);
-      setPeople([...teachers.map((person) => ({ ...person, kind: "ENSEIGNANT" })), ...guardians.map((person) => ({ ...person, kind: "RESPONSABLE" }))]);
+      setPeople([...new Map(currentPeople.map((person) => [person.idPersonne, person])).values()]);
     } catch (failure) { if (!signal?.aborted) setError(failure.message || "Chargement impossible."); }
     finally { if (!signal?.aborted) setLoading(false); }
   }, []);
@@ -64,7 +66,7 @@ export default function ComptesUtilisateursPage() {
     finally { setBusy(false); }
   }
 
-  const candidates = people.filter((person) => !accounts.some((account) => account.idPersonne === person.idPersonne) && (!form?.role || form.role === "ADMIN" || person.kind === form.role));
+  const candidates = people.filter((person) => !accounts.some((account) => account.idPersonne === person.idPersonne) && (!form?.role || form.role === "ADMIN" || person.profils.includes(form.role)));
   return <div className="min-h-screen bg-school-paper px-4 py-8 sm:px-6"><main className="mx-auto max-w-5xl">
     <Link to="/espace" className="font-semibold text-school-blue underline">← Tableau de bord</Link>
     <div className="mt-6 flex flex-wrap items-center justify-between gap-4"><h1 className="font-display text-4xl font-bold uppercase text-school-blue">Comptes utilisateurs</h1><button type="button" disabled={busy || loading} onClick={() => open()} className="bg-school-blue px-5 py-3 font-bold text-white disabled:opacity-50">Ajouter</button></div>
@@ -75,12 +77,12 @@ export default function ComptesUtilisateursPage() {
       <h2 className="font-display text-2xl font-bold uppercase text-school-blue">{editing ? "Modifier le compte" : "Créer un compte"}</h2>
       <div className="mt-5 grid gap-4 sm:grid-cols-2">
         <label className="font-semibold text-school-ink">Rôle<select className={control} required disabled={busy} value={form.role} onChange={(event) => setForm({ ...form, role: event.target.value, idPersonne: "" })}><option value="">Choisir…</option>{Object.entries(roles).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
-        {!editing && <label className="font-semibold text-school-ink">Personne<select className={control} required disabled={busy} value={form.idPersonne} onChange={(event) => setForm({ ...form, idPersonne: event.target.value })}><option value="">Choisir…</option>{candidates.map((person) => <option key={person.idPersonne} value={person.idPersonne}>{person.prenom} {person.nom} · {roles[person.kind]}{person.emailContact ? ` · ${person.emailContact}` : ""}</option>)}</select></label>}
+        {!editing && <label className="font-semibold text-school-ink">Personne<select className={control} required disabled={busy} value={form.idPersonne} onChange={(event) => setForm({ ...form, idPersonne: event.target.value })}><option value="">Choisir…</option>{candidates.map((person) => <option key={person.idPersonne} value={person.idPersonne}>{person.prenom} {person.nom} · {profileLabels(person.profils)}{person.emailContact ? ` · ${person.emailContact}` : ""}</option>)}</select></label>}
         <label className="font-semibold text-school-ink">E-mail de connexion<input className={control} type="email" maxLength={255} required disabled={busy} autoComplete="off" value={form.emailConnexion} onChange={(event) => setForm({ ...form, emailConnexion: event.target.value })} /></label>
         <label className="font-semibold text-school-ink">{editing ? "Nouveau mot de passe (facultatif)" : "Mot de passe"}<input className={control} type="password" minLength={8} maxLength={100} required={!editing} disabled={busy} autoComplete="new-password" value={editing ? form.nouveauMotDePasse : form.motDePasse} onChange={(event) => setForm({ ...form, [editing ? "nouveauMotDePasse" : "motDePasse"]: event.target.value })} /></label>
         {editing && <label className="flex items-center gap-3 font-semibold text-school-ink"><input type="checkbox" checked={form.actif} disabled={busy} onChange={(event) => setForm({ ...form, actif: event.target.checked })} />Compte actif</label>}
       </div>
-      {!editing && candidates.length === 0 && <p className="mt-4 text-school-muted">Aucune personne disponible pour ce rôle. Créez d’abord un enseignant ou un responsable sans compte.</p>}
+      {!editing && candidates.length === 0 && <p className="mt-4 text-school-muted">Aucune personne disponible pour ce rôle. Choisissez une personne sans compte disposant du profil requis pour ce rôle.</p>}
       <div className="mt-5 flex flex-wrap gap-3"><button disabled={busy || (!editing && !candidates.length)} className="bg-school-blue px-5 py-3 font-bold text-white disabled:opacity-50">{busy ? "Enregistrement…" : "Enregistrer"}</button><button type="button" disabled={busy} onClick={() => setForm(null)} className="border border-slate-300 px-5 py-3 font-bold disabled:opacity-50">Annuler</button></div>
     </form>}
     {!loading && accounts.length === 0 && <p className="mt-6 bg-white p-6 text-school-muted">Aucun compte utilisateur.</p>}

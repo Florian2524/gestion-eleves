@@ -7,4 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface ResponsabiliteLegaleRepository
         extends JpaRepository<ResponsabiliteLegale, ResponsabiliteLegaleId> {
     boolean existsByResponsable_IdPersonneAndEleve_IdPersonne(Long idResponsable, Long idEleve);
+
+    boolean existsByEleve_IdPersonne(Long idPersonne);
+    boolean existsByResponsable_IdPersonne(Long idPersonne);
 }

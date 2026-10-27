@@ -34,6 +34,8 @@ public class EnseignementService {
     private final EnseignementMapper enseignementMapper;
     private final PondererService pondererService;
 
+    private final ProfilPersonneService profils;
+
     public EnseignementService(
             EnseignementRepository enseignementRepository,
             EnseignantRepository enseignantRepository,
@@ -42,8 +44,10 @@ public class EnseignementService {
             EvaluationRepository evaluationRepository,
             LigneBulletinRepository ligneBulletinRepository,
             EnseignementMapper enseignementMapper,
-            PondererService pondererService
+            PondererService pondererService,
+            ProfilPersonneService profils
     ) {
+        this.profils = profils;
         this.enseignementRepository = enseignementRepository;
         this.enseignantRepository = enseignantRepository;
         this.classeRepository = classeRepository;
@@ -218,6 +222,7 @@ public class EnseignementService {
     private Enseignant findEnseignantById(
             Long idEnseignant
     ) {
+        profils.verrouiller(idEnseignant);
         return enseignantRepository.findById(idEnseignant)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(

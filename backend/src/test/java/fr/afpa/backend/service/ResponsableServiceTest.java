@@ -2,6 +2,7 @@ package fr.afpa.backend.service;
 
 import fr.afpa.backend.dto.responsable.ResponsableRequest;
 import fr.afpa.backend.dto.responsable.ResponsableResponse;
+import fr.afpa.backend.entity.Personne;
 import fr.afpa.backend.entity.Responsable;
 import fr.afpa.backend.exception.ResourceNotFoundException;
 import fr.afpa.backend.mapper.ResponsableMapper;
@@ -37,12 +38,14 @@ class ResponsableServiceTest {
     private Responsable responsable;
     private ResponsableResponse response;
 
+    @Mock
+    private ProfilPersonneService profils;
+
     @BeforeEach
     void setUp() {
-        responsableService = new ResponsableService(
-                responsableRepository,
-                responsableMapper
-        );
+        responsableService = new ResponsableService(responsableRepository,
+                        responsableMapper,
+                        profils);
 
         request = new ResponsableRequest(
                 "Dupont",
@@ -53,14 +56,7 @@ class ResponsableServiceTest {
                 "Médecin"
         );
 
-        responsable = new Responsable(
-                request.nom(),
-                request.prenom(),
-                request.emailContact(),
-                request.telephone(),
-                request.adresse(),
-                request.profession()
-        );
+        responsable = new Responsable(new Personne(request.nom(), request.prenom(), request.emailContact(), request.telephone(), request.adresse()), request.profession());
 
         response = new ResponsableResponse(
                 1L,
@@ -132,7 +128,7 @@ class ResponsableServiceTest {
         when(responsableMapper.toEntity(request))
                 .thenReturn(responsable);
 
-        when(responsableRepository.save(responsable))
+        when(profils.creer(responsable.getPersonne(), responsable))
                 .thenReturn(responsable);
 
         when(responsableMapper.toResponse(responsable))
@@ -144,7 +140,7 @@ class ResponsableServiceTest {
         assertThat(result).isEqualTo(response);
 
         verify(responsableMapper).toEntity(request);
-        verify(responsableRepository).save(responsable);
+        verify(profils).creer(responsable.getPersonne(), responsable);
         verify(responsableMapper).toResponse(responsable);
     }
 

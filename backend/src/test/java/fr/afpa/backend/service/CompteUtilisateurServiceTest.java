@@ -53,7 +53,7 @@ class CompteUtilisateurServiceTest {
     private PasswordEncoder passwordEncoder;
 
     @Mock
-    private Responsable personne;
+    private Personne personne;
 
     @Mock
     private CompteUtilisateur compteUtilisateur;
@@ -65,16 +65,25 @@ class CompteUtilisateurServiceTest {
     private CompteUtilisateurUpdateRequest updateRequest;
     private CompteUtilisateurResponse response;
 
+    @Mock
+    private ProfilPersonneService profils;
+
+    @Mock private fr.afpa.backend.repository.EnseignantRepository enseignants;
+    @Mock private fr.afpa.backend.repository.ResponsableRepository responsables;
+
     @BeforeEach
     void setUp() {
         compteUtilisateurService =
-                new CompteUtilisateurService(
-                        compteUtilisateurRepository,
+                new CompteUtilisateurService(compteUtilisateurRepository,
                         personneRepository,
                         compteUtilisateurMapper,
-                        passwordEncoder
-                );
+                        passwordEncoder,
+                        enseignants,
+                        responsables,
+                        profils);
 
+        org.mockito.Mockito.lenient().when(personne.getIdPersonne()).thenReturn(1L);
+        org.mockito.Mockito.lenient().when(responsables.existsById(1L)).thenReturn(true);
         createRequest =
                 new CompteUtilisateurCreateRequest(
                         1L,
@@ -288,7 +297,9 @@ class CompteUtilisateurServiceTest {
 
     @Test
     void shouldCreateTeacherAccountForTeacher() {
-        Personne teacher = new Enseignant("Dupont", "Jean", null, null, null, "ENS-1");
+        Personne teacher = new Personne("Dupont", "Jean", null, null, null);
+        when(enseignants.existsById(1L)).thenReturn(true);
+        org.springframework.test.util.ReflectionTestUtils.setField(teacher, "idPersonne", 1L);
         var request = new CompteUtilisateurCreateRequest(1L, "teacher@example.com", "MotDePasse123", RoleUtilisateur.ENSEIGNANT);
         when(personneRepository.findById(1L)).thenReturn(Optional.of(teacher));
         when(passwordEncoder.encode("MotDePasse123")).thenReturn("encoded");
@@ -303,7 +314,8 @@ class CompteUtilisateurServiceTest {
 
     @Test
     void shouldRejectGuardianRoleForNonGuardian() {
-        Personne teacher = new Enseignant("Dupont", "Jean", null, null, null, "ENS-1");
+        when(responsables.existsById(org.mockito.ArgumentMatchers.any())).thenReturn(false);
+        Personne teacher = new Personne("Dupont", "Jean", null, null, null);
         when(personneRepository.findById(1L)).thenReturn(Optional.of(teacher));
 
         assertThatThrownBy(() -> compteUtilisateurService.create(createRequest))

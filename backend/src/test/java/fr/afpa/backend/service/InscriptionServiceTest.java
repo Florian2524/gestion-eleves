@@ -2,6 +2,7 @@ package fr.afpa.backend.service;
 
 import fr.afpa.backend.dto.inscription.InscriptionRequest;
 import fr.afpa.backend.dto.inscription.InscriptionResponse;
+import fr.afpa.backend.entity.Personne;
 import fr.afpa.backend.entity.Eleve;
 import fr.afpa.backend.entity.Inscription;
 import fr.afpa.backend.exception.ResourceNotFoundException;
@@ -45,13 +46,15 @@ class InscriptionServiceTest {
     private Inscription inscription;
     private InscriptionResponse response;
 
+    @Mock
+    private ProfilPersonneService profils;
+
     @BeforeEach
     void setUp() {
-        inscriptionService = new InscriptionService(
-                inscriptionRepository,
-                eleveRepository,
-                inscriptionMapper
-        );
+        inscriptionService = new InscriptionService(inscriptionRepository,
+                        eleveRepository,
+                        inscriptionMapper,
+                        profils);
 
         request = new InscriptionRequest(
                 2L,
@@ -60,16 +63,7 @@ class InscriptionServiceTest {
                 "ACTIVE"
         );
 
-        eleve = new Eleve(
-                "Martin",
-                "Léa",
-                "lea.martin@example.com",
-                "0611223344",
-                "12 rue des Écoles",
-                "ELV-001",
-                LocalDate.of(2014, 3, 15),
-                null
-        );
+        eleve = new Eleve(new Personne("Martin", "Léa", "lea.martin@example.com", "0611223344", "12 rue des Écoles"), "ELV-001", LocalDate.of(2014, 3, 15), null);
 
         inscription = new Inscription(
                 eleve,

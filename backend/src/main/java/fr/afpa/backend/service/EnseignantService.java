@@ -1,6 +1,8 @@
 package fr.afpa.backend.service;
 
 import fr.afpa.backend.dto.enseignant.EnseignantRequest;
+import fr.afpa.backend.dto.enseignant.EnseignantProfilRequest;
+import fr.afpa.backend.entity.Personne;
 import fr.afpa.backend.dto.enseignant.EnseignantResponse;
 import fr.afpa.backend.entity.Enseignant;
 import fr.afpa.backend.exception.DuplicateResourceException;
@@ -21,15 +23,18 @@ public class EnseignantService {
     private final EnseignantRepository enseignantRepository;
     private final EnseignementRepository enseignementRepository;
     private final EnseignantMapper enseignantMapper;
+    private final ProfilPersonneService profils;
 
     public EnseignantService(
             EnseignantRepository enseignantRepository,
             EnseignementRepository enseignementRepository,
-            EnseignantMapper enseignantMapper
+            EnseignantMapper enseignantMapper,
+            ProfilPersonneService profils
     ) {
         this.enseignantRepository = enseignantRepository;
         this.enseignementRepository = enseignementRepository;
         this.enseignantMapper = enseignantMapper;
+        this.profils = profils;
     }
 
     public List<EnseignantResponse> findAll() {
@@ -63,7 +68,7 @@ public class EnseignantService {
                 enseignantMapper.toEntity(request);
 
         Enseignant savedEnseignant =
-                enseignantRepository.save(enseignant);
+                profils.creer(enseignant.getPersonne(), enseignant);
 
         return enseignantMapper.toResponse(savedEnseignant);
     }
@@ -73,6 +78,7 @@ public class EnseignantService {
             Long id,
             EnseignantRequest request
     ) {
+        profils.verrouiller(id);
         Enseignant enseignant = findEntityById(id);
 
         boolean numeroEmployeAlreadyUsed =
@@ -111,7 +117,22 @@ public class EnseignantService {
             );
         }
 
+        profils.verifierSuppressionEnseignant(id);
         enseignantRepository.delete(enseignant);
+    }
+
+
+    @Transactional
+    public EnseignantResponse ajouterProfil(Long idPersonne, EnseignantProfilRequest request) {
+        Personne personne = profils.verrouiller(idPersonne);
+        if (enseignantRepository.existsById(idPersonne)) {
+            throw new DuplicateResourceException("Cette personne possède déjà un profil enseignant.");
+        }
+        if (enseignantRepository.existsByNumeroEmploye(request.numeroEmploye())) {
+            throw new DuplicateResourceException("Un enseignant possède déjà ce numéro d'employé.");
+        }
+        Enseignant profil = profils.ajouter(new Enseignant(personne, request.numeroEmploye()));
+        return enseignantMapper.toResponse(profil);
     }
 
     private Enseignant findEntityById(Long id) {

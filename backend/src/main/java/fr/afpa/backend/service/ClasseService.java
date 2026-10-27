@@ -25,12 +25,16 @@ public class ClasseService {
     private final ClasseMapper classeMapper;
     private final PondererRepository pondererRepository;
 
+    private final ProfilPersonneService profils;
+
     public ClasseService(
             ClasseRepository classeRepository,
             EnseignantRepository enseignantRepository,
             ClasseMapper classeMapper,
-            PondererRepository pondererRepository
+            PondererRepository pondererRepository,
+            ProfilPersonneService profils
     ) {
+        this.profils = profils;
         this.classeRepository = classeRepository;
         this.enseignantRepository = enseignantRepository;
         this.classeMapper = classeMapper;
@@ -143,6 +147,7 @@ public class ClasseService {
             return null;
         }
 
+        profils.verrouiller(idProfesseurPrincipal);
         return enseignantRepository
                 .findById(idProfesseurPrincipal)
                 .orElseThrow(() -> new ResourceNotFoundException(

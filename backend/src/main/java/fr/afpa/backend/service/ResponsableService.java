@@ -1,9 +1,12 @@
 package fr.afpa.backend.service;
 
 import fr.afpa.backend.dto.responsable.ResponsableRequest;
+import fr.afpa.backend.dto.responsable.ResponsableProfilRequest;
+import fr.afpa.backend.entity.Personne;
 import fr.afpa.backend.dto.responsable.ResponsableResponse;
 import fr.afpa.backend.entity.Responsable;
 import fr.afpa.backend.exception.ResourceNotFoundException;
+import fr.afpa.backend.exception.DuplicateResourceException;
 import fr.afpa.backend.mapper.ResponsableMapper;
 import fr.afpa.backend.repository.ResponsableRepository;
 import org.springframework.stereotype.Service;
@@ -17,13 +20,16 @@ public class ResponsableService {
 
     private final ResponsableRepository responsableRepository;
     private final ResponsableMapper responsableMapper;
+    private final ProfilPersonneService profils;
 
     public ResponsableService(
             ResponsableRepository responsableRepository,
-            ResponsableMapper responsableMapper
+            ResponsableMapper responsableMapper,
+            ProfilPersonneService profils
     ) {
         this.responsableRepository = responsableRepository;
         this.responsableMapper = responsableMapper;
+        this.profils = profils;
     }
 
     public List<ResponsableResponse> findAll() {
@@ -47,7 +53,7 @@ public class ResponsableService {
                 responsableMapper.toEntity(request);
 
         Responsable savedResponsable =
-                responsableRepository.save(responsable);
+                profils.creer(responsable.getPersonne(), responsable);
 
         return responsableMapper.toResponse(
                 savedResponsable
@@ -59,6 +65,7 @@ public class ResponsableService {
             Long id,
             ResponsableRequest request
     ) {
+        profils.verrouiller(id);
         Responsable responsable = findEntityById(id);
 
         responsableMapper.updateEntity(
@@ -77,7 +84,19 @@ public class ResponsableService {
     @Transactional
     public void delete(Long id) {
         Responsable responsable = findEntityById(id);
+        profils.verifierSuppressionResponsable(id);
         responsableRepository.delete(responsable);
+    }
+
+
+    @Transactional
+    public ResponsableResponse ajouterProfil(Long idPersonne, ResponsableProfilRequest request) {
+        Personne personne = profils.verrouiller(idPersonne);
+        if (responsableRepository.existsById(idPersonne)) {
+            throw new DuplicateResourceException("Cette personne possède déjà un profil responsable.");
+        }
+        Responsable profil = profils.ajouter(new Responsable(personne, request.profession()));
+        return responsableMapper.toResponse(profil);
     }
 
     private Responsable findEntityById(Long id) {

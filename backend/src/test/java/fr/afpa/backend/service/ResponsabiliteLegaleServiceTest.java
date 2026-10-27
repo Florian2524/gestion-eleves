@@ -61,15 +61,17 @@ class ResponsabiliteLegaleServiceTest {
     private ResponsabiliteLegaleResponse response;
     private ResponsabiliteLegaleId id;
 
+    @Mock
+    private ProfilPersonneService profils;
+
     @BeforeEach
     void setUp() {
         responsabiliteLegaleService =
-                new ResponsabiliteLegaleService(
-                        responsabiliteLegaleRepository,
+                new ResponsabiliteLegaleService(responsabiliteLegaleRepository,
                         responsableRepository,
                         eleveRepository,
-                        responsabiliteLegaleMapper
-                );
+                        responsabiliteLegaleMapper,
+                        profils);
 
         request = new ResponsabiliteLegaleRequest(
                 1L,

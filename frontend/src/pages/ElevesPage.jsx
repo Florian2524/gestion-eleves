@@ -1,3 +1,5 @@
+import PersonneChoice from "../components/school/PersonneChoice";
+import { attachProfile, listResource } from "../api/schoolApi";
 import {
   useEffect,
   useMemo,
@@ -104,16 +106,37 @@ const emptyEleve = { nom: "", prenom: "", matricule: "", dateNaissance: "", emai
 function EleveForm({ eleve, onSave, onCancel, saving }) {
   const [values, setValues] = useState(() => eleve ? { ...emptyEleve, ...eleve } : emptyEleve);
   const [photo, setPhoto] = useState(null);
+  const [mode, setMode] = useState("new");
+  const [people, setPeople] = useState([]);
+  const [idPersonne, setIdPersonne] = useState("");
+  const [peopleError, setPeopleError] = useState("");
+  const attaching = !eleve && mode === "existing";
+  useEffect(() => {
+    if (eleve) return;
+    const controller = new AbortController();
+    listResource("personnes", { signal: controller.signal }).then(setPeople).catch((failure) => {
+      if (!controller.signal.aborted) setPeopleError(failure.message);
+    });
+    return () => controller.abort();
+  }, [eleve]);
   const fields = [
     ["nom", "Nom", "text", true], ["prenom", "Prénom", "text", true],
     ["matricule", "Matricule", "text", true], ["dateNaissance", "Date de naissance", "date", true],
     ["emailContact", "E-mail", "email"], ["telephone", "Téléphone", "tel"],
     ["adresse", "Adresse", "text"],
   ];
-  return <form onSubmit={(event) => { event.preventDefault(); onSave(values, photo); }} className="mt-7 bg-white p-6 shadow-sm">
+  return <form onSubmit={(event) => { event.preventDefault(); onSave(attaching ? { idPersonne: Number(idPersonne), matricule: values.matricule, dateNaissance: values.dateNaissance } : values, photo); }} className="mt-7 bg-white p-6 shadow-sm">
     <h2 className="font-display text-2xl font-bold uppercase text-school-blue">{eleve ? "Modifier l’élève" : "Ajouter un élève"}</h2>
+    {!eleve && <label className="mt-4 block font-semibold">Création du profil
+      <select value={mode} onChange={(event) => setMode(event.target.value)} className="mt-2 min-h-11 w-full border border-slate-300 px-3">
+        <option value="new">Créer une nouvelle personne</option><option value="existing">Rattacher à une personne existante</option>
+      </select>
+    </label>}
+    {attaching && <PersonneChoice people={people} value={idPersonne} onChange={setIdPersonne} profileType="ELEVE" disabled={saving} />}
+    {attaching && peopleError && <p role="alert">{peopleError}</p>}
+    {eleve && <p className="mt-4">Les nom, prénom et coordonnées sont communs à tous les profils de cette personne.</p>}
     <div className="mt-5 grid gap-4 sm:grid-cols-2">
-      {fields.map(([name, label, type, required]) => <label key={name} className="block text-sm font-semibold text-school-ink">
+      {fields.filter(([name]) => !attaching || ["matricule", "dateNaissance"].includes(name)).map(([name, label, type, required]) => <label key={name} className="block text-sm font-semibold text-school-ink">
         {label}{required ? " *" : ""}
         <input type={type} required={required} maxLength={name === "matricule" ? 50 : name === "telephone" ? 30 : name === "adresse" ? 500 : name === "emailContact" ? 255 : 100}
           value={values[name] ?? ""} onChange={(event) => setValues({ ...values, [name]: event.target.value })}
@@ -166,7 +189,9 @@ export default function ElevesPage() {
     setSaving(true); setActionError(""); setNotice("");
     try {
       const payload = { ...values, photoUrl: undefined };
-      const saved = editing?.idPersonne ? await updateEleve(editing.idPersonne, payload) : await createEleve(payload);
+      const saved = editing?.idPersonne ? await updateEleve(editing.idPersonne, payload)
+        : values.idPersonne ? await attachProfile(values.idPersonne, "ELEVE", { matricule: values.matricule, dateNaissance: values.dateNaissance })
+        : await createEleve(payload);
       if (photo) await uploadElevePhoto(saved.idPersonne, photo);
       setEditing(undefined);
       setNotice("Élève enregistré.");
@@ -176,7 +201,7 @@ export default function ElevesPage() {
   }
 
   async function removeEleve(eleve) {
-    if (!window.confirm(`Supprimer ${eleve.prenom} ${eleve.nom} ?`)) return;
+    if (!window.confirm(`Retirer le profil élève de ${eleve.prenom} ${eleve.nom} ? La personne et ses autres profils seront conservés.`)) return;
     setActionError(""); setNotice("");
     try { await deleteEleve(eleve.idPersonne); setNotice("Élève supprimé."); setReloadKey((key) => key + 1); }
     catch (failure) { setActionError(failure.message || "Suppression impossible."); }

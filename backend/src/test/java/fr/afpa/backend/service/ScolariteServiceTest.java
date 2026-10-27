@@ -2,6 +2,7 @@ package fr.afpa.backend.service;
 
 import fr.afpa.backend.dto.scolarite.ScolariteRequest;
 import fr.afpa.backend.dto.scolarite.ScolariteResponse;
+import fr.afpa.backend.entity.Personne;
 import fr.afpa.backend.entity.Classe;
 import fr.afpa.backend.entity.Eleve;
 import fr.afpa.backend.entity.Scolarite;
@@ -52,14 +53,16 @@ class ScolariteServiceTest {
     private Scolarite scolarite;
     private ScolariteResponse response;
 
+    @Mock
+    private ProfilPersonneService profils;
+
     @BeforeEach
     void setUp() {
-        scolariteService = new ScolariteService(
-                scolariteRepository,
-                eleveRepository,
-                classeRepository,
-                scolariteMapper
-        );
+        scolariteService = new ScolariteService(scolariteRepository,
+                        eleveRepository,
+                        classeRepository,
+                        scolariteMapper,
+                        profils);
 
         request = new ScolariteRequest(
                 1L,
@@ -69,16 +72,7 @@ class ScolariteServiceTest {
                 "EN_COURS"
         );
 
-        eleve = new Eleve(
-                "Martin",
-                "Léa",
-                "lea.martin@example.com",
-                "0611223344",
-                "12 rue des Écoles",
-                "ELV-001",
-                LocalDate.of(2014, 3, 15),
-                null
-        );
+        eleve = new Eleve(new Personne("Martin", "Léa", "lea.martin@example.com", "0611223344", "12 rue des Écoles"), "ELV-001", LocalDate.of(2014, 3, 15), null);
 
         classe = new Classe(
                 "6A",

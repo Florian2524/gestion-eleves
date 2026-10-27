@@ -20,4 +20,6 @@ public interface ClasseRepository extends JpaRepository<Classe, Long> {
             String anneeScolaire,
             Long idClasse
     );
+
+    boolean existsByProfesseurPrincipal_IdPersonne(Long idPersonne);
 }
