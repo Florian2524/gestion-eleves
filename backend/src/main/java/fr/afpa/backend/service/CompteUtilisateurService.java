@@ -5,8 +5,6 @@ import fr.afpa.backend.dto.compteutilisateur.CompteUtilisateurResponse;
 import fr.afpa.backend.dto.compteutilisateur.CompteUtilisateurUpdateRequest;
 import fr.afpa.backend.entity.CompteUtilisateur;
 import fr.afpa.backend.entity.Personne;
-import fr.afpa.backend.entity.Enseignant;
-import fr.afpa.backend.entity.Responsable;
 import fr.afpa.backend.entity.RoleUtilisateur;
 import fr.afpa.backend.exception.DuplicateResourceException;
 import fr.afpa.backend.exception.InvalidAccountRoleException;
@@ -15,6 +13,8 @@ import fr.afpa.backend.exception.ResourceInUseException;
 import fr.afpa.backend.mapper.CompteUtilisateurMapper;
 import fr.afpa.backend.repository.CompteUtilisateurRepository;
 import fr.afpa.backend.repository.PersonneRepository;
+import fr.afpa.backend.repository.EnseignantRepository;
+import fr.afpa.backend.repository.ResponsableRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,12 +36,17 @@ public class CompteUtilisateurService {
     private final PersonneRepository personneRepository;
     private final CompteUtilisateurMapper compteUtilisateurMapper;
     private final PasswordEncoder passwordEncoder;
+    private final EnseignantRepository enseignants;
+    private final ResponsableRepository responsables;
+    private final ProfilPersonneService profils;
 
     public CompteUtilisateurService(
             CompteUtilisateurRepository compteUtilisateurRepository,
             PersonneRepository personneRepository,
             CompteUtilisateurMapper compteUtilisateurMapper,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            EnseignantRepository enseignants, ResponsableRepository responsables,
+            ProfilPersonneService profils
     ) {
         this.compteUtilisateurRepository =
                 compteUtilisateurRepository;
@@ -49,6 +54,7 @@ public class CompteUtilisateurService {
         this.personneRepository = personneRepository;
         this.compteUtilisateurMapper = compteUtilisateurMapper;
         this.passwordEncoder = passwordEncoder;
+        this.enseignants = enseignants; this.responsables = responsables; this.profils = profils;
     }
 
     public List<CompteUtilisateurResponse> findAll() {
@@ -70,6 +76,7 @@ public class CompteUtilisateurService {
     public CompteUtilisateurResponse create(
             CompteUtilisateurCreateRequest request
     ) {
+        profils.verrouiller(request.idPersonne());
         Personne personne = personneRepository
                 .findById(request.idPersonne())
                 .orElseThrow(() ->
@@ -137,6 +144,7 @@ public class CompteUtilisateurService {
         CompteUtilisateur compteUtilisateur =
                 findEntityById(idUtilisateur);
 
+        profils.verrouillerCompte(compteUtilisateur);
         validateRole(compteUtilisateur.getPersonne(), request.role());
 
         protectLastActiveAdminOnUpdate(
@@ -192,6 +200,7 @@ public class CompteUtilisateurService {
         CompteUtilisateur compteUtilisateur =
                 findEntityById(idUtilisateur);
 
+        profils.verrouillerCompte(compteUtilisateur);
         protectLastActiveAdminOnDelete(
                 compteUtilisateur
         );
@@ -274,10 +283,10 @@ public class CompteUtilisateurService {
     }
 
     private void validateRole(Personne personne, RoleUtilisateur role) {
-        if (role == RoleUtilisateur.ENSEIGNANT && !(personne instanceof Enseignant)) {
+        if (role == RoleUtilisateur.ENSEIGNANT && !enseignants.existsById(personne.getIdPersonne())) {
             throw new InvalidAccountRoleException("Le rôle ENSEIGNANT exige une personne enseignante.");
         }
-        if (role == RoleUtilisateur.RESPONSABLE && !(personne instanceof Responsable)) {
+        if (role == RoleUtilisateur.RESPONSABLE && !responsables.existsById(personne.getIdPersonne())) {
             throw new InvalidAccountRoleException("Le rôle RESPONSABLE exige un responsable légal.");
         }
     }

@@ -2,6 +2,7 @@ package fr.afpa.backend.service;
 
 import fr.afpa.backend.dto.eleve.EleveRequest;
 import fr.afpa.backend.dto.eleve.EleveResponse;
+import fr.afpa.backend.entity.Personne;
 import fr.afpa.backend.entity.Eleve;
 import fr.afpa.backend.exception.DuplicateResourceException;
 import fr.afpa.backend.exception.ResourceNotFoundException;
@@ -39,12 +40,14 @@ class EleveServiceTest {
     private Eleve eleve;
     private EleveResponse response;
 
+    @Mock
+    private ProfilPersonneService profils;
+
     @BeforeEach
     void setUp() {
-        eleveService = new EleveService(
-                eleveRepository,
-                eleveMapper
-        );
+        eleveService = new EleveService(eleveRepository,
+                        eleveMapper,
+                        profils);
 
         request = new EleveRequest(
                 "Dupont",
@@ -57,16 +60,7 @@ class EleveServiceTest {
                 null
         );
 
-        eleve = new Eleve(
-                request.nom(),
-                request.prenom(),
-                request.emailContact(),
-                request.telephone(),
-                request.adresse(),
-                request.matricule(),
-                request.dateNaissance(),
-                request.photoUrl()
-        );
+        eleve = new Eleve(new Personne(request.nom(), request.prenom(), request.emailContact(), request.telephone(), request.adresse()), request.matricule(), request.dateNaissance(), request.photoUrl());
 
         response = new EleveResponse(
                 1L,
@@ -136,7 +130,7 @@ class EleveServiceTest {
         when(eleveMapper.toEntity(request))
                 .thenReturn(eleve);
 
-        when(eleveRepository.save(eleve))
+        when(profils.creer(eleve.getPersonne(), eleve))
                 .thenReturn(eleve);
 
         when(eleveMapper.toResponse(eleve))
@@ -150,7 +144,7 @@ class EleveServiceTest {
                 .existsByMatricule(request.matricule());
 
         verify(eleveMapper).toEntity(request);
-        verify(eleveRepository).save(eleve);
+        verify(profils).creer(eleve.getPersonne(), eleve);
         verify(eleveMapper).toResponse(eleve);
     }
 

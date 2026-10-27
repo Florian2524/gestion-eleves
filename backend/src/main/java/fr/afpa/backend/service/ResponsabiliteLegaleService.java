@@ -30,12 +30,16 @@ public class ResponsabiliteLegaleService {
     private final ResponsabiliteLegaleMapper
             responsabiliteLegaleMapper;
 
+    private final ProfilPersonneService profils;
+
     public ResponsabiliteLegaleService(
             ResponsabiliteLegaleRepository responsabiliteLegaleRepository,
             ResponsableRepository responsableRepository,
             EleveRepository eleveRepository,
-            ResponsabiliteLegaleMapper responsabiliteLegaleMapper
+            ResponsabiliteLegaleMapper responsabiliteLegaleMapper,
+            ProfilPersonneService profils
     ) {
+        this.profils = profils;
         this.responsabiliteLegaleRepository =
                 responsabiliteLegaleRepository;
 
@@ -75,6 +79,7 @@ public class ResponsabiliteLegaleService {
                         request.idEleve()
                 );
 
+        profils.verrouillerTous(request.idResponsable(), request.idEleve());
         if (responsabiliteLegaleRepository.existsById(id)) {
             throw new DuplicateResourceException(
                     "La responsabilité légale entre le responsable "
@@ -128,6 +133,7 @@ public class ResponsabiliteLegaleService {
             Long idResponsable,
             Long idEleve
     ) {
+        profils.verrouillerTous(idResponsable, idEleve);
         ResponsabiliteLegale responsabiliteLegale =
                 findEntityById(
                         idResponsable,

@@ -560,6 +560,8 @@ class BulletinCalculServiceTest {
 
         Eleve eleve =
                 mock(Eleve.class);
+        fr.afpa.backend.entity.Personne personne = mock(fr.afpa.backend.entity.Personne.class);
+        when(eleve.getPersonne()).thenReturn(personne);
 
         Classe classe =
                 mock(Classe.class);
@@ -584,10 +586,10 @@ class BulletinCalculServiceTest {
         when(eleve.getMatricule())
                 .thenReturn("ELV-001");
 
-        when(eleve.getNom())
+        when(eleve.getPersonne().getNom())
                 .thenReturn("Martin");
 
-        when(eleve.getPrenom())
+        when(eleve.getPersonne().getPrenom())
                 .thenReturn("Léa");
 
         when(classe.getIdClasse())

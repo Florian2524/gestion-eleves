@@ -1,6 +1,8 @@
 package fr.afpa.backend.service;
 
 import fr.afpa.backend.dto.eleve.EleveRequest;
+import fr.afpa.backend.dto.eleve.EleveProfilRequest;
+import fr.afpa.backend.entity.Personne;
 import fr.afpa.backend.dto.eleve.EleveResponse;
 import fr.afpa.backend.entity.Eleve;
 import fr.afpa.backend.exception.DuplicateResourceException;
@@ -18,13 +20,16 @@ public class EleveService {
 
     private final EleveRepository eleveRepository;
     private final EleveMapper eleveMapper;
+    private final ProfilPersonneService profils;
 
     public EleveService(
             EleveRepository eleveRepository,
-            EleveMapper eleveMapper
+            EleveMapper eleveMapper,
+            ProfilPersonneService profils
     ) {
         this.eleveRepository = eleveRepository;
         this.eleveMapper = eleveMapper;
+        this.profils = profils;
     }
 
     public List<EleveResponse> findAll() {
@@ -49,13 +54,14 @@ public class EleveService {
         }
 
         Eleve eleve = eleveMapper.toEntity(request);
-        Eleve savedEleve = eleveRepository.save(eleve);
+        Eleve savedEleve = profils.creer(eleve.getPersonne(), eleve);
 
         return eleveMapper.toResponse(savedEleve);
     }
 
     @Transactional
     public EleveResponse update(Long id, EleveRequest request) {
+        profils.verrouiller(id);
         Eleve eleve = findEntityById(id);
 
         boolean matriculeAlreadyUsed =
@@ -81,7 +87,22 @@ public class EleveService {
     @Transactional
     public void delete(Long id) {
         Eleve eleve = findEntityById(id);
+        profils.verifierSuppressionEleve(id);
         eleveRepository.delete(eleve);
+    }
+
+
+    @Transactional
+    public EleveResponse ajouterProfil(Long idPersonne, EleveProfilRequest request) {
+        Personne personne = profils.verrouiller(idPersonne);
+        if (eleveRepository.existsById(idPersonne)) {
+            throw new DuplicateResourceException("Cette personne possède déjà un profil eleve.");
+        }
+        if (eleveRepository.existsByMatricule(request.matricule())) {
+            throw new DuplicateResourceException("Un élève possède déjà ce matricule.");
+        }
+        Eleve profil = profils.ajouter(new Eleve(personne, request.matricule(), request.dateNaissance(), null));
+        return eleveMapper.toResponse(profil);
     }
 
     private Eleve findEntityById(Long id) {

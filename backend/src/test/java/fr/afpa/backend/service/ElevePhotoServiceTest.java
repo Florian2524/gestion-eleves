@@ -1,5 +1,6 @@
 package fr.afpa.backend.service;
 
+import fr.afpa.backend.entity.Personne;
 import fr.afpa.backend.entity.Eleve;
 import fr.afpa.backend.exception.InvalidPhotoException;
 import fr.afpa.backend.exception.ResourceNotFoundException;
@@ -33,7 +34,7 @@ class ElevePhotoServiceTest {
 
     @BeforeEach void setUp() {
         service = new ElevePhotoService(repository, directory.toString());
-        eleve = new Eleve("Dupont", "Alice", null, null, null, "E1", LocalDate.of(2010, 1, 1), null);
+        eleve = new Eleve(new Personne("Dupont", "Alice", null, null, null), "E1", LocalDate.of(2010, 1, 1), null);
     }
 
     @Test void uploadsReadsReplacesAndDeletesPhoto() throws Exception {

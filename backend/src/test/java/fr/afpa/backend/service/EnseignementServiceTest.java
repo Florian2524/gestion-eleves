@@ -2,6 +2,7 @@ package fr.afpa.backend.service;
 
 import fr.afpa.backend.dto.enseignement.EnseignementRequest;
 import fr.afpa.backend.dto.enseignement.EnseignementResponse;
+import fr.afpa.backend.entity.Personne;
 import fr.afpa.backend.entity.Classe;
 import fr.afpa.backend.entity.Enseignant;
 import fr.afpa.backend.entity.Enseignement;
@@ -70,18 +71,20 @@ class EnseignementServiceTest {
     private Enseignement enseignement;
     private EnseignementResponse response;
 
+    @Mock
+    private ProfilPersonneService profils;
+
     @BeforeEach
     void setUp() {
-        enseignementService = new EnseignementService(
-                enseignementRepository,
-                enseignantRepository,
-                classeRepository,
-                matiereRepository,
-                evaluationRepository,
-                ligneBulletinRepository,
-                enseignementMapper,
-                pondererService
-        );
+        enseignementService = new EnseignementService(enseignementRepository,
+                        enseignantRepository,
+                        classeRepository,
+                        matiereRepository,
+                        evaluationRepository,
+                        ligneBulletinRepository,
+                        enseignementMapper,
+                        pondererService,
+                        profils);
 
         request = new EnseignementRequest(
                 1L,
@@ -93,14 +96,7 @@ class EnseignementServiceTest {
                 true
         );
 
-        enseignant = new Enseignant(
-                "Martin",
-                "Sophie",
-                "sophie.martin@example.com",
-                "0611223344",
-                "20 rue des Écoles",
-                "ENS-001"
-        );
+        enseignant = new Enseignant(new Personne("Martin", "Sophie", "sophie.martin@example.com", "0611223344", "20 rue des Écoles"), "ENS-001");
 
         classe = new Classe(
                 "6e A",

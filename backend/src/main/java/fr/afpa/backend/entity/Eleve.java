@@ -2,18 +2,38 @@ package fr.afpa.backend.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.PrimaryKeyJoinColumn;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.MapsId;
+import jakarta.persistence.OneToOne;
+import java.util.Objects;
 import jakarta.persistence.Table;
 
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "eleve")
-@PrimaryKeyJoinColumn(
-        name = "id_personne",
-        referencedColumnName = "id_personne"
-)
-public class Eleve extends Personne {
+public class Eleve {
+
+    @Id
+    @Column(name = "id_personne")
+    private Long idPersonne;
+
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @MapsId
+    @JoinColumn(name = "id_personne", nullable = false,
+            foreignKey = @ForeignKey(name = "fk_eleve_personne"))
+    private Personne personne;
+
+    public Long getIdPersonne() {
+        return idPersonne;
+    }
+
+    public Personne getPersonne() {
+        return personne;
+    }
 
     @Column(name = "matricule", nullable = false, unique = true, length = 50)
     private String matricule;
@@ -28,16 +48,12 @@ public class Eleve extends Personne {
     }
 
     public Eleve(
-            String nom,
-            String prenom,
-            String emailContact,
-            String telephone,
-            String adresse,
+            Personne personne,
             String matricule,
             LocalDate dateNaissance,
             String photoUrl
     ) {
-        super(nom, prenom, emailContact, telephone, adresse);
+        this.personne = Objects.requireNonNull(personne, "La personne est obligatoire");
         this.matricule = matricule;
         this.dateNaissance = dateNaissance;
         this.photoUrl = photoUrl;

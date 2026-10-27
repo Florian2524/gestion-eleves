@@ -1,6 +1,7 @@
 import { apiRequest } from "./http";
 
 const paths = {
+  personnes: "/personnes",
   classes: "/classes",
   ponderations: "/ponderations",
   matieres: "/matieres",
@@ -18,3 +19,5 @@ export const listResource = (resource, options = {}) => apiRequest(paths[resourc
 export const createResource = (resource, body) => apiRequest(paths[resource], { method: "POST", body });
 export const updateResource = (resource, id, body) => apiRequest(`${paths[resource]}/${id}`, { method: "PUT", body });
 export const deleteResource = (resource, id) => apiRequest(`${paths[resource]}/${id}`, { method: "DELETE" });
+
+export const attachProfile = (idPersonne, profileType, body) => apiRequest(`/personnes/${idPersonne}/${profileType.toLowerCase()}`, { method: "POST", body });

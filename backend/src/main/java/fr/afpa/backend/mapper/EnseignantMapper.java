@@ -3,6 +3,7 @@ package fr.afpa.backend.mapper;
 import fr.afpa.backend.dto.enseignant.EnseignantRequest;
 import fr.afpa.backend.dto.enseignant.EnseignantResponse;
 import fr.afpa.backend.entity.Enseignant;
+import fr.afpa.backend.entity.Personne;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -10,11 +11,8 @@ public class EnseignantMapper {
 
     public Enseignant toEntity(EnseignantRequest request) {
         return new Enseignant(
-                request.nom(),
-                request.prenom(),
-                request.emailContact(),
-                request.telephone(),
-                request.adresse(),
+                new Personne(request.nom(), request.prenom(), request.emailContact(),
+                        request.telephone(), request.adresse()),
                 request.numeroEmploye()
         );
     }
@@ -22,11 +20,11 @@ public class EnseignantMapper {
     public EnseignantResponse toResponse(Enseignant enseignant) {
         return new EnseignantResponse(
                 enseignant.getIdPersonne(),
-                enseignant.getNom(),
-                enseignant.getPrenom(),
-                enseignant.getEmailContact(),
-                enseignant.getTelephone(),
-                enseignant.getAdresse(),
+                enseignant.getPersonne().getNom(),
+                enseignant.getPersonne().getPrenom(),
+                enseignant.getPersonne().getEmailContact(),
+                enseignant.getPersonne().getTelephone(),
+                enseignant.getPersonne().getAdresse(),
                 enseignant.getNumeroEmploye()
         );
     }
@@ -35,11 +33,11 @@ public class EnseignantMapper {
             EnseignantRequest request,
             Enseignant enseignant
     ) {
-        enseignant.setNom(request.nom());
-        enseignant.setPrenom(request.prenom());
-        enseignant.setEmailContact(request.emailContact());
-        enseignant.setTelephone(request.telephone());
-        enseignant.setAdresse(request.adresse());
+        enseignant.getPersonne().setNom(request.nom());
+        enseignant.getPersonne().setPrenom(request.prenom());
+        enseignant.getPersonne().setEmailContact(request.emailContact());
+        enseignant.getPersonne().setTelephone(request.telephone());
+        enseignant.getPersonne().setAdresse(request.adresse());
         enseignant.setNumeroEmploye(request.numeroEmploye());
     }
 }

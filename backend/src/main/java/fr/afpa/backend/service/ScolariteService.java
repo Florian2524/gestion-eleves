@@ -25,12 +25,16 @@ public class ScolariteService {
     private final ClasseRepository classeRepository;
     private final ScolariteMapper scolariteMapper;
 
+    private final ProfilPersonneService profils;
+
     public ScolariteService(
             ScolariteRepository scolariteRepository,
             EleveRepository eleveRepository,
             ClasseRepository classeRepository,
-            ScolariteMapper scolariteMapper
+            ScolariteMapper scolariteMapper,
+            ProfilPersonneService profils
     ) {
+        this.profils = profils;
         this.scolariteRepository = scolariteRepository;
         this.eleveRepository = eleveRepository;
         this.classeRepository = classeRepository;
@@ -151,6 +155,7 @@ public class ScolariteService {
     }
 
     private Eleve findEleveById(Long idEleve) {
+        profils.verrouiller(idEleve);
         return eleveRepository.findById(idEleve)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(

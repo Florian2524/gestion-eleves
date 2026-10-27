@@ -25,4 +25,6 @@ public interface ScolariteRepository
             LocalDate dateDebut,
             Long idScolarite
     );
+
+    boolean existsByEleve_IdPersonne(Long idPersonne);
 }

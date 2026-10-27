@@ -21,11 +21,15 @@ public class InscriptionService {
     private final EleveRepository eleveRepository;
     private final InscriptionMapper inscriptionMapper;
 
+    private final ProfilPersonneService profils;
+
     public InscriptionService(
             InscriptionRepository inscriptionRepository,
             EleveRepository eleveRepository,
-            InscriptionMapper inscriptionMapper
+            InscriptionMapper inscriptionMapper,
+            ProfilPersonneService profils
     ) {
+        this.profils = profils;
         this.inscriptionRepository = inscriptionRepository;
         this.eleveRepository = eleveRepository;
         this.inscriptionMapper = inscriptionMapper;
@@ -101,6 +105,7 @@ public class InscriptionService {
     }
 
     private Eleve findEleveById(Long idEleve) {
+        profils.verrouiller(idEleve);
         return eleveRepository.findById(idEleve)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(

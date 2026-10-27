@@ -2,6 +2,7 @@ package fr.afpa.backend.service;
 
 import fr.afpa.backend.dto.enseignant.EnseignantRequest;
 import fr.afpa.backend.dto.enseignant.EnseignantResponse;
+import fr.afpa.backend.entity.Personne;
 import fr.afpa.backend.entity.Enseignant;
 import fr.afpa.backend.exception.DuplicateResourceException;
 import fr.afpa.backend.exception.ResourceInUseException;
@@ -43,13 +44,15 @@ class EnseignantServiceTest {
     private Enseignant enseignant;
     private EnseignantResponse response;
 
+    @Mock
+    private ProfilPersonneService profils;
+
     @BeforeEach
     void setUp() {
-        enseignantService = new EnseignantService(
-                enseignantRepository,
-                enseignementRepository,
-                enseignantMapper
-        );
+        enseignantService = new EnseignantService(enseignantRepository,
+                        enseignementRepository,
+                        enseignantMapper,
+                        profils);
 
         request = new EnseignantRequest(
                 "Martin",
@@ -60,14 +63,7 @@ class EnseignantServiceTest {
                 "ENS-001"
         );
 
-        enseignant = new Enseignant(
-                request.nom(),
-                request.prenom(),
-                request.emailContact(),
-                request.telephone(),
-                request.adresse(),
-                request.numeroEmploye()
-        );
+        enseignant = new Enseignant(new Personne(request.nom(), request.prenom(), request.emailContact(), request.telephone(), request.adresse()), request.numeroEmploye());
 
         response = new EnseignantResponse(
                 1L,
@@ -143,7 +139,7 @@ class EnseignantServiceTest {
         when(enseignantMapper.toEntity(request))
                 .thenReturn(enseignant);
 
-        when(enseignantRepository.save(enseignant))
+        when(profils.creer(enseignant.getPersonne(), enseignant))
                 .thenReturn(enseignant);
 
         when(enseignantMapper.toResponse(enseignant))
@@ -160,7 +156,7 @@ class EnseignantServiceTest {
                 );
 
         verify(enseignantMapper).toEntity(request);
-        verify(enseignantRepository).save(enseignant);
+        verify(profils).creer(enseignant.getPersonne(), enseignant);
         verify(enseignantMapper).toResponse(enseignant);
     }
 

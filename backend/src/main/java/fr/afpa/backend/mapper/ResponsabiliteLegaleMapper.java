@@ -30,11 +30,11 @@ public class ResponsabiliteLegaleMapper {
 
         return new ResponsabiliteLegaleResponse(
                 responsable.getIdPersonne(),
-                responsable.getNom(),
-                responsable.getPrenom(),
+                responsable.getPersonne().getNom(),
+                responsable.getPersonne().getPrenom(),
                 eleve.getIdPersonne(),
-                eleve.getNom(),
-                eleve.getPrenom()
+                eleve.getPersonne().getNom(),
+                eleve.getPersonne().getPrenom()
         );
     }
 }

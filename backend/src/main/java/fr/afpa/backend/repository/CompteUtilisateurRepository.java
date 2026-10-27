@@ -22,6 +22,7 @@ public interface CompteUtilisateurRepository
 
     boolean existsByPersonneIdPersonne(Long idPersonne);
 
+    @EntityGraph(attributePaths = "personne")
     Optional<CompteUtilisateur> findByEmailConnexion(
             String emailConnexion
     );
@@ -35,4 +36,6 @@ public interface CompteUtilisateurRepository
     List<CompteUtilisateur> findAllByRoleAndActifTrue(
             RoleUtilisateur role
     );
+
+    boolean existsByPersonne_IdPersonneAndRole(Long idPersonne, RoleUtilisateur role);
 }

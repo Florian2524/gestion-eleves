@@ -67,12 +67,12 @@ const scolarites = {
   validate: (f) => datesValid(f.dateDebut, f.dateFin),
 };
 const enseignants = {
-  title: "Enseignants", resource: "enseignants", idKey: "idPersonne",
+  title: "Enseignants", profileType: "ENSEIGNANT", resource: "enseignants", idKey: "idPersonne",
   fields: [text("nom", "Nom"), text("prenom", "Prénom"), { ...text("emailContact", "E-mail de contact", 255, true), type: "email" }, { ...text("telephone", "Téléphone", 30, true), type: "tel" }, text("adresse", "Adresse", 500, true), text("numeroEmploye", "Numéro d'employé", 50)],
   columns: [col("Nom", (r) => `${r.prenom} ${r.nom}`), col("E-mail", (r) => r.emailContact || "—"), col("Téléphone", (r) => r.telephone || "—"), col("N° employé", (r) => r.numeroEmploye)],
 };
 const responsables = {
-  title: "Responsables légaux", resource: "responsables", idKey: "idPersonne",
+  title: "Responsables légaux", profileType: "RESPONSABLE", resource: "responsables", idKey: "idPersonne",
   fields: [text("nom", "Nom"), text("prenom", "Prénom"), { ...text("emailContact", "E-mail de contact", 255, true), type: "email" }, { ...text("telephone", "Téléphone", 30, true), type: "tel" }, text("adresse", "Adresse", 500, true), text("profession", "Profession", 150, true)],
   columns: [col("Nom", (r) => `${r.prenom} ${r.nom}`), col("E-mail", (r) => r.emailContact || "—"), col("Téléphone", (r) => r.telephone || "—"), col("Profession", (r) => r.profession || "—")],
 };

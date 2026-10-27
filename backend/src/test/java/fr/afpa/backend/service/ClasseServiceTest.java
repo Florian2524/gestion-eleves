@@ -2,6 +2,7 @@ package fr.afpa.backend.service;
 
 import fr.afpa.backend.dto.classe.ClasseRequest;
 import fr.afpa.backend.dto.classe.ClasseResponse;
+import fr.afpa.backend.entity.Personne;
 import fr.afpa.backend.entity.Classe;
 import fr.afpa.backend.entity.Enseignant;
 import fr.afpa.backend.exception.DuplicateResourceException;
@@ -49,14 +50,16 @@ class ClasseServiceTest {
     private Classe classe;
     private ClasseResponse response;
 
+    @Mock
+    private ProfilPersonneService profils;
+
     @BeforeEach
     void setUp() {
-        classeService = new ClasseService(
-                classeRepository,
-                enseignantRepository,
-                classeMapper,
-                pondererRepository
-        );
+        classeService = new ClasseService(classeRepository,
+                        enseignantRepository,
+                        classeMapper,
+                        pondererRepository,
+                        profils);
 
         request = new ClasseRequest(
                 "6A",
@@ -72,14 +75,7 @@ class ClasseServiceTest {
                 null
         );
 
-        professeurPrincipal = new Enseignant(
-                "Martin",
-                "Paul",
-                "paul.martin@example.com",
-                "0611223344",
-                "12 rue des Écoles",
-                "ENS-001"
-        );
+        professeurPrincipal = new Enseignant(new Personne("Martin", "Paul", "paul.martin@example.com", "0611223344", "12 rue des Écoles"), "ENS-001");
 
         classe = new Classe(
                 request.nom(),

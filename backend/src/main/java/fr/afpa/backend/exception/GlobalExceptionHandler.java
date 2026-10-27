@@ -29,7 +29,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiErrorResponse> handleIntegrityConflict(
             org.springframework.dao.DataIntegrityViolationException exception, HttpServletRequest request) {
         return buildResponse(HttpStatus.CONFLICT,
-                "Écriture incompatible avec les données existantes. Rechargez les références et vérifiez les coefficients.",
+                "Écriture incompatible avec les données existantes. Rechargez les données et vérifiez les références et les valeurs uniques.",
                 request.getRequestURI(), Map.of());
     }
 

@@ -3,6 +3,7 @@ package fr.afpa.backend.mapper;
 import fr.afpa.backend.dto.responsable.ResponsableRequest;
 import fr.afpa.backend.dto.responsable.ResponsableResponse;
 import fr.afpa.backend.entity.Responsable;
+import fr.afpa.backend.entity.Personne;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -12,11 +13,8 @@ public class ResponsableMapper {
             ResponsableRequest request
     ) {
         return new Responsable(
-                request.nom(),
-                request.prenom(),
-                request.emailContact(),
-                request.telephone(),
-                request.adresse(),
+                new Personne(request.nom(), request.prenom(), request.emailContact(),
+                        request.telephone(), request.adresse()),
                 request.profession()
         );
     }
@@ -26,11 +24,11 @@ public class ResponsableMapper {
     ) {
         return new ResponsableResponse(
                 responsable.getIdPersonne(),
-                responsable.getNom(),
-                responsable.getPrenom(),
-                responsable.getEmailContact(),
-                responsable.getTelephone(),
-                responsable.getAdresse(),
+                responsable.getPersonne().getNom(),
+                responsable.getPersonne().getPrenom(),
+                responsable.getPersonne().getEmailContact(),
+                responsable.getPersonne().getTelephone(),
+                responsable.getPersonne().getAdresse(),
                 responsable.getProfession()
         );
     }
@@ -39,11 +37,11 @@ public class ResponsableMapper {
             ResponsableRequest request,
             Responsable responsable
     ) {
-        responsable.setNom(request.nom());
-        responsable.setPrenom(request.prenom());
-        responsable.setEmailContact(request.emailContact());
-        responsable.setTelephone(request.telephone());
-        responsable.setAdresse(request.adresse());
+        responsable.getPersonne().setNom(request.nom());
+        responsable.getPersonne().setPrenom(request.prenom());
+        responsable.getPersonne().setEmailContact(request.emailContact());
+        responsable.getPersonne().setTelephone(request.telephone());
+        responsable.getPersonne().setAdresse(request.adresse());
         responsable.setProfession(request.profession());
     }
 }
