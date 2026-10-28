@@ -20,6 +20,8 @@ public interface EleveRepository extends JpaRepository<Eleve, Long> {
 
     boolean existsByMatricule(String matricule);
 
+    boolean existsByPhotoUrl(String photoUrl);
+
     boolean existsByMatriculeAndIdPersonneNot(
             String matricule,
             Long idPersonne
