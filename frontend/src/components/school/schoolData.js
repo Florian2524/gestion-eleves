@@ -1,5 +1,6 @@
 import { getEleves } from "../../api/elevesApi";
 import { listResource } from "../../api/schoolApi";
+import { schoolYearLabel } from "./schoolYear";
 
 export const schoolLookups = {
   eleves: getEleves,
@@ -25,6 +26,9 @@ export function schoolLabels(data) {
     const item = find("enseignements", id, "idEnseignement");
     return item ? enseignant(item.idEnseignant) : "Enseignant indisponible";
   };
-  const periode = (id) => find("periodes", id, "idPeriode")?.libelle ?? "Période indisponible";
+  const periode = (id) => {
+    const item = find("periodes", id, "idPeriode");
+    return item ? `${item.libelle} · ${schoolYearLabel(item.anneeScolaire)}` : "Période indisponible";
+  };
   return { eleve, classe, matiere, enseignant, enseignement, enseignantEnseignement, periode };
 }

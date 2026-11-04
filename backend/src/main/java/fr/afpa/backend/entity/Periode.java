@@ -21,6 +21,9 @@ public class Periode {
     @Column(name = "libelle", nullable = false, length = 100)
     private String libelle;
 
+    @Column(name = "annee_scolaire", length = 9)
+    private String anneeScolaire;
+
     @Column(name = "date_debut", nullable = false)
     private LocalDate dateDebut;
 
@@ -65,6 +68,14 @@ public class Periode {
 
     public void setLibelle(String libelle) {
         this.libelle = libelle;
+    }
+
+    public String getAnneeScolaire() {
+        return anneeScolaire;
+    }
+
+    public void setAnneeScolaire(String anneeScolaire) {
+        this.anneeScolaire = anneeScolaire;
     }
 
     public LocalDate getDateDebut() {

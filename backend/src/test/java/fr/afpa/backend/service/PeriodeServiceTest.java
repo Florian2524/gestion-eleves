@@ -51,7 +51,8 @@ class PeriodeServiceTest {
                 LocalDate.of(2026, 12, 18),
                 LocalDate.of(2026, 11, 30),
                 LocalDate.of(2026, 12, 15),
-                "OUVERTE"
+                "OUVERTE",
+                null
         );
 
         periode = new Periode(
@@ -70,7 +71,8 @@ class PeriodeServiceTest {
                 request.dateFin(),
                 request.dateDebutSaisie(),
                 request.dateFinSaisie(),
-                request.statut()
+                request.statut(),
+                null
         );
     }
 

@@ -79,7 +79,10 @@ export default function ResourcePage({ title, resource, idKey, getId, descriptio
       else await createResource(resource, body);
       setForm(null); setEditing(null); setSuccess(editing ? "Modification enregistrée." : "Création enregistrée.");
       await reload();
-    } catch (failure) { setError(failure.message || "Enregistrement impossible."); }
+    } catch (failure) {
+      const validationMessages = Object.values(failure.details?.validationErrors ?? {});
+      setError(validationMessages.join(" ") || failure.message || "Enregistrement impossible.");
+    }
     finally { setBusy(false); }
   }
 

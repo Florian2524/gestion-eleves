@@ -55,6 +55,8 @@ test("un administrateur peut créer, modifier et supprimer une période", async 
     .getByLabel("Libellé", { exact: true })
     .fill(libelle);
 
+  await page.getByLabel("Année scolaire", { exact: true }).fill("2026-2027");
+
   await page
     .getByLabel("Début", { exact: true })
     .fill("2026-09-01");
@@ -89,6 +91,7 @@ test("un administrateur peut créer, modifier et supprimer une période", async 
 
   await expect(periode).toBeVisible();
   await expect(periode).toContainText("OUVERTE");
+  await expect(periode).toContainText("2026-2027");
 
   /*
    * Modification
@@ -100,6 +103,8 @@ test("un administrateur peut créer, modifier et supprimer une période", async 
   await page
     .getByLabel("Libellé", { exact: true })
     .fill(libelleModifie);
+
+  await page.getByLabel("Année scolaire", { exact: true }).fill("2027-2028");
 
   await page
     .getByRole("button", { name: "Enregistrer" })
@@ -114,6 +119,12 @@ test("un administrateur peut créer, modifier et supprimer une période", async 
     .filter({ hasText: libelleModifie });
 
   await expect(periode).toBeVisible();
+
+  await expect(periode).toContainText("2027-2028");
+  await periode.getByRole("button", { name: "Modifier" }).click();
+  await page.getByLabel("Année scolaire", { exact: true }).clear();
+  await page.getByRole("button", { name: "Enregistrer" }).click();
+  await expect(periode).toContainText("Année scolaire non renseignée");
 
   /*
    * Suppression
@@ -130,5 +141,36 @@ test("un administrateur peut créer, modifier et supprimer une période", async 
     page.getByText("Suppression effectuée."),
   ).toBeVisible();
 
+  await expect(periode).toHaveCount(0);
+});
+
+test("une période sans année reste compatible et les années invalides sont refusées", async ({ page }) => {
+  await page.goto("/connexion");
+  await page.getByLabel("Adresse électronique").fill(adminEmail);
+  await page.locator("#motDePasse").fill(adminPassword);
+  await page.getByRole("button", { name: "Se connecter" }).click();
+  await expect(page).toHaveURL(/\/espace$/);
+  await page.goto("/periodes");
+  await page.getByRole("button", { name: "Ajouter" }).click();
+  const libelle = `Historique sans année ${Date.now()}`;
+  await page.getByLabel("Libellé", { exact: true }).fill(libelle);
+  await page.getByLabel("Début", { exact: true }).fill("2026-09-01");
+  await page.getByLabel("Fin", { exact: true }).fill("2026-12-31");
+  await page.getByLabel("Statut", { exact: true }).fill("OUVERTE");
+  for (const year of ["2026/2027", "2026-2028"]) {
+    await page.getByLabel("Année scolaire", { exact: true }).fill(year);
+    await page.getByRole("button", { name: "Enregistrer" }).click();
+    await expect(page.getByRole("alert")).toContainText("deux années consécutives");
+  }
+  await page.getByLabel("Année scolaire", { exact: true }).clear();
+  const saved = page.waitForResponse((r) => r.url().endsWith("/periodes") && r.request().method() === "POST");
+  await page.getByRole("button", { name: "Enregistrer" }).click();
+  const response = await saved;
+  expect(response.status()).toBe(201);
+  expect((await response.json()).anneeScolaire).toBeNull();
+  const periode = page.locator("article").filter({ hasText: libelle });
+  await expect(periode).toContainText("Année scolaire non renseignée");
+  page.once("dialog", (dialog) => dialog.accept());
+  await periode.getByRole("button", { name: "Supprimer" }).click();
   await expect(periode).toHaveCount(0);
 });

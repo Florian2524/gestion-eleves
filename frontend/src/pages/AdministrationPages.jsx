@@ -1,5 +1,6 @@
 import ResourcePage from "../components/school/ResourcePage";
 import { useAuth } from "../context/authContextCore";
+import { schoolYearLabel, validateSchoolYear } from "../components/school/schoolYear";
 
 const personOption = (item) => `${item.prenom} ${item.nom}`;
 const classOption = (item) => `${item.nom} · ${item.anneeScolaire}`;
@@ -24,9 +25,9 @@ const classes = {
 };
 const periodes = {
   title: "Périodes", resource: "periodes", idKey: "idPeriode",
-  fields: [text("libelle", "Libellé", 100), date("dateDebut", "Début"), date("dateFin", "Fin"), date("dateDebutSaisie", "Début de saisie", true), date("dateFinSaisie", "Fin de saisie", true), text("statut", "Statut", 30)],
-  columns: [col("Période", (r) => r.libelle), col("Dates", (r) => `${formatDate(r.dateDebut)} au ${formatDate(r.dateFin)}`), col("Saisie", (r) => r.dateDebutSaisie ? `${formatDate(r.dateDebutSaisie)} au ${formatDate(r.dateFinSaisie)}` : "Non définie"), col("Statut", (r) => r.statut)],
-  validate: (f) => datesValid(f.dateDebut, f.dateFin) || (f.dateDebutSaisie && f.dateFinSaisie ? datesValid(f.dateDebutSaisie, f.dateFinSaisie) : ""),
+  fields: [text("libelle", "Libellé", 100), text("anneeScolaire", "Année scolaire", 9, true), date("dateDebut", "Début"), date("dateFin", "Fin"), date("dateDebutSaisie", "Début de saisie", true), date("dateFinSaisie", "Fin de saisie", true), text("statut", "Statut", 30)],
+  columns: [col("Période", (r) => r.libelle), col("Année scolaire", (r) => schoolYearLabel(r.anneeScolaire)), col("Dates", (r) => `${formatDate(r.dateDebut)} au ${formatDate(r.dateFin)}`), col("Saisie", (r) => r.dateDebutSaisie ? `${formatDate(r.dateDebutSaisie)} au ${formatDate(r.dateFinSaisie)}` : "Non définie"), col("Statut", (r) => r.statut)],
+  validate: (f) => validateSchoolYear(f.anneeScolaire) || datesValid(f.dateDebut, f.dateFin) || (f.dateDebutSaisie && f.dateFinSaisie ? datesValid(f.dateDebutSaisie, f.dateFinSaisie) : ""),
 };
 const ponderations = {
   title: "Pondérations", resource: "ponderations", getId: (r) => `${r.idClasse}/${r.idMatiere}`, lookups: ["classes", "matieres"],
@@ -47,7 +48,7 @@ const enseignementsRead = {
 };
 const evaluationsAdmin = {
   title: "Évaluations", resource: "evaluations", idKey: "idEvaluation", lookups: ["enseignements", "classes", "matieres", "periodes", "enseignants"],
-  fields: [select("idEnseignement", "Enseignement", "enseignements", "idEnseignement", teachingOption), select("idPeriode", "Période", "periodes", "idPeriode", (i) => i.libelle), text("libelle", "Libellé", 150), date("dateEvaluation", "Date"), text("typeEvaluation", "Type", 50), number("coefficientEvaluation", "Coefficient"), number("bareme", "Barème", "20")],
+  fields: [select("idEnseignement", "Enseignement", "enseignements", "idEnseignement", teachingOption), select("idPeriode", "Période", "periodes", "idPeriode", (i) => `${i.libelle} · ${schoolYearLabel(i.anneeScolaire)}`), text("libelle", "Libellé", 150), date("dateEvaluation", "Date"), text("typeEvaluation", "Type", 50), number("coefficientEvaluation", "Coefficient"), number("bareme", "Barème", "20")],
   columns: [col("Évaluation", (r) => r.libelle), col("Matière et classe", (r, l) => l.enseignement(r.idEnseignement)), col("Enseignant", (r, l) => l.enseignantEnseignement(r.idEnseignement)), col("Période", (r, l) => l.periode(r.idPeriode)), col("Date", (r) => formatDate(r.dateEvaluation)), col("Barème", (r) => r.bareme)],
 };
 const evaluationsRead = {

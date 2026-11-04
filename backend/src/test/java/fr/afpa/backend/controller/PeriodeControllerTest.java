@@ -58,7 +58,8 @@ class PeriodeControllerTest {
                 LocalDate.of(2026, 12, 18),
                 LocalDate.of(2026, 11, 30),
                 LocalDate.of(2026, 12, 15),
-                "OUVERTE"
+                "OUVERTE",
+                null
         );
 
         response = new PeriodeResponse(
@@ -68,7 +69,8 @@ class PeriodeControllerTest {
                 request.dateFin(),
                 request.dateDebutSaisie(),
                 request.dateFinSaisie(),
-                request.statut()
+                request.statut(),
+                null
         );
     }
 
@@ -216,7 +218,8 @@ class PeriodeControllerTest {
                         null,
                         null,
                         null,
-                        ""
+                        "",
+                        null
                 );
 
         mockMvc.perform(post("/periodes")
@@ -259,7 +262,8 @@ class PeriodeControllerTest {
                         LocalDate.of(2026, 9, 1),
                         null,
                         null,
-                        "OUVERTE"
+                        "OUVERTE",
+                        null
                 );
 
         mockMvc.perform(post("/periodes")
@@ -292,7 +296,8 @@ class PeriodeControllerTest {
                         LocalDate.of(2026, 12, 18),
                         LocalDate.of(2026, 12, 15),
                         LocalDate.of(2026, 11, 30),
-                        "OUVERTE"
+                        "OUVERTE",
+                        null
                 );
 
         mockMvc.perform(post("/periodes")
