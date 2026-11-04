@@ -9,6 +9,7 @@ public record PeriodeResponse(
         LocalDate dateFin,
         LocalDate dateDebutSaisie,
         LocalDate dateFinSaisie,
-        String statut
+        String statut,
+        String anneeScolaire
 ) {
 }

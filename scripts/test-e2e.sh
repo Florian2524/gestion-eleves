@@ -21,13 +21,22 @@ frontend_port=$(free_port)
 if [[ "$backend_port" == 8080 || "$frontend_port" == 5173 || "$backend_port" == "$frontend_port" ]]; then exit 1; fi
 # Aucune connexion, aucun volume ou processus de développement n'est réutilisé.
 test_container_id=$(docker run --detach --rm --tmpfs /var/lib/postgresql/data:rw \
-  --publish 127.0.0.1::5432 --env POSTGRES_DB=ponderer_e2e \
-  --env POSTGRES_USER=ponderer_e2e --env POSTGRES_PASSWORD=ponderer_e2e postgres:17)
+  --publish 127.0.0.1::5432 --env POSTGRES_DB=postgres \
+  --env POSTGRES_USER=isolated_cluster_admin --env POSTGRES_PASSWORD=isolated_cluster_only postgres:17)
 for attempt in {1..30}; do
-  if docker exec "$test_container_id" pg_isready -U ponderer_e2e -d ponderer_e2e >/dev/null 2>&1; then break; fi
+  if docker exec "$test_container_id" pg_isready -U isolated_cluster_admin -d postgres >/dev/null 2>&1; then break; fi
   if [[ "$attempt" == 30 ]]; then exit 1; fi
   sleep 1
 done
+# Identifiants exclusivement jetables ; le serveur applicatif ne reçoit jamais le compte d'amorçage.
+docker exec -i "$test_container_id" psql -X -v ON_ERROR_STOP=1 -U isolated_cluster_admin -d postgres >/dev/null <<'SQL'
+CREATE ROLE ponderer_e2e LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION PASSWORD 'ponderer_e2e';
+CREATE DATABASE ponderer_e2e OWNER ponderer_e2e;
+SQL
+if [[ $(docker exec "$test_container_id" psql -X -qAt -U ponderer_e2e -d ponderer_e2e -c \
+  "SELECT rolsuper OR rolcreatedb OR rolcreaterole FROM pg_roles WHERE rolname=current_user") != f ]]; then
+  echo "Compte applicatif E2E trop privilégié ; arrêt." >&2; exit 1
+fi
 database_port=$(docker port "$test_container_id" 5432/tcp)
 database_port=${database_port##*:}
 if [[ ! "$database_port" =~ ^[0-9]+$ || "$database_port" == 5432 ]]; then exit 1; fi

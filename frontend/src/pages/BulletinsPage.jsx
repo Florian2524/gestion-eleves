@@ -34,6 +34,7 @@ import { getEleves } from "../api/elevesApi";
 import { listResource } from "../api/schoolApi";
 import { ApiError } from "../api/http";
 import { useAuth } from "../context/authContextCore";
+import { schoolYearLabel } from "../components/school/schoolYear";
 
 const roleLabels = {
   ADMIN: "Administrateur",
@@ -686,6 +687,7 @@ export default function BulletinsPage() {
                     value={periode.idPeriode}
                   >
                     {periode.libelle}
+                    {` · ${schoolYearLabel(periode.anneeScolaire)}`}
                     {` — ${buildDateRange(
                       periode.dateDebut,
                       periode.dateFin,

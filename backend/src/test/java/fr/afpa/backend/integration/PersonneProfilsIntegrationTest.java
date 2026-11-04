@@ -364,9 +364,9 @@ class PersonneProfilsIntegrationTest extends IsolatedPostgres {
                 .isInstanceOf(DuplicateResourceException.class);
     }
 
-    @Test void schemaV1V2ValideSansNouvelleMigrationNiGenerateurDeProfil() {
-        assertThat(jdbc.queryForList("SELECT version FROM flyway_schema_history WHERE success ORDER BY installed_rank", String.class)).containsExactly("1", "2");
-        assertThat(jdbc.queryForList("SELECT checksum FROM flyway_schema_history WHERE success ORDER BY installed_rank", Integer.class))
+    @Test void schemaV1V2V3ValideSansGenerateurDeProfil() {
+        assertThat(jdbc.queryForList("SELECT version FROM flyway_schema_history WHERE success ORDER BY installed_rank", String.class)).containsExactly("1", "2", "3");
+        assertThat(jdbc.queryForList("SELECT checksum FROM flyway_schema_history WHERE success AND version IN ('1','2') ORDER BY installed_rank", Integer.class))
                 .containsExactly(-526686782, 1440610697);
         assertThat(scalar("SELECT count(*) FROM information_schema.columns WHERE table_schema='public' AND table_name IN ('eleve','enseignant','responsable') AND column_name='id_personne' AND is_identity='NO' AND column_default IS NULL")).isEqualTo(3);
         assertThat(scalar("SELECT count(*) FROM pg_constraint WHERE conname IN ('fk_eleve_personne','fk_enseignant_personne','fk_responsable_personne') AND contype='f' AND convalidated")).isEqualTo(3);

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 public class PeriodeMapper {
 
     public Periode toEntity(PeriodeRequest request) {
-        return new Periode(
+        Periode periode = new Periode(
                 request.libelle(),
                 request.dateDebut(),
                 request.dateFin(),
@@ -17,6 +17,8 @@ public class PeriodeMapper {
                 request.dateFinSaisie(),
                 request.statut()
         );
+        periode.setAnneeScolaire(request.anneeScolaire());
+        return periode;
     }
 
     public PeriodeResponse toResponse(Periode periode) {
@@ -27,7 +29,8 @@ public class PeriodeMapper {
                 periode.getDateFin(),
                 periode.getDateDebutSaisie(),
                 periode.getDateFinSaisie(),
-                periode.getStatut()
+                periode.getStatut(),
+                periode.getAnneeScolaire()
         );
     }
 
@@ -41,5 +44,8 @@ public class PeriodeMapper {
         periode.setDateDebutSaisie(request.dateDebutSaisie());
         periode.setDateFinSaisie(request.dateFinSaisie());
         periode.setStatut(request.statut());
+        if (request.anneeScolairePresente()) {
+            periode.setAnneeScolaire(request.anneeScolaire());
+        }
     }
 }

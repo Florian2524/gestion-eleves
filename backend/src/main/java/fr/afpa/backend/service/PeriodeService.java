@@ -4,6 +4,7 @@ import fr.afpa.backend.dto.periode.PeriodeRequest;
 import fr.afpa.backend.dto.periode.PeriodeResponse;
 import fr.afpa.backend.entity.Periode;
 import fr.afpa.backend.exception.ResourceNotFoundException;
+import fr.afpa.backend.exception.BusinessRuleViolationException;
 import fr.afpa.backend.mapper.PeriodeMapper;
 import fr.afpa.backend.repository.PeriodeRepository;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,7 @@ public class PeriodeService {
 
     @Transactional
     public PeriodeResponse create(PeriodeRequest request) {
+        verifierAnneeScolaire(request);
         Periode periode = periodeMapper.toEntity(request);
         Periode savedPeriode = periodeRepository.save(periode);
 
@@ -50,6 +52,7 @@ public class PeriodeService {
             Long id,
             PeriodeRequest request
     ) {
+        verifierAnneeScolaire(request);
         Periode periode = findEntityById(id);
 
         periodeMapper.updateEntity(request, periode);
@@ -64,6 +67,12 @@ public class PeriodeService {
     public void delete(Long id) {
         Periode periode = findEntityById(id);
         periodeRepository.delete(periode);
+    }
+
+    private void verifierAnneeScolaire(PeriodeRequest request) {
+        if (!request.isAnneeScolaireValide()) {
+            throw new BusinessRuleViolationException(PeriodeRequest.ANNEE_SCOLAIRE_MESSAGE);
+        }
     }
 
     private Periode findEntityById(Long id) {

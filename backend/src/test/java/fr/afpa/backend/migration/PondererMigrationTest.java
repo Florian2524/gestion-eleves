@@ -84,9 +84,9 @@ class PondererMigrationTest {
             """)).isEqualTo("0");
     }
     @Test void migrateEmptyV1AndValidateChecksum() throws Exception {
-        var result = flyway(null).migrate();
+        var result = flyway("2").migrate();
         assertThat(result.migrationsExecuted).isEqualTo(1);
-        flyway(null).validate();
+        flyway("2").validate();
         assertThat(scalar("SELECT count(*) FROM ponderer")).isEqualTo("0");
         try (var input = getClass().getResourceAsStream("/db/migration/V1__create_initial_schema.sql")) {
             assertThat(HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(input.readAllBytes())))
@@ -95,7 +95,7 @@ class PondererMigrationTest {
     }
     @Test void backfillAllIncludingInactiveAndPreserveEveryOriginalValue() throws Exception {
         seed(); var before = snapshot();
-        flyway(null).migrate();
+        flyway("2").migrate();
         assertThat(snapshot()).isEqualTo(before);
         assertThat(scalar("SELECT jsonb_agg(to_jsonb(p) ORDER BY id_classe)::text FROM ponderer p"))
                 .contains("25", "28", "30", "32", "42", "41", "2.00");
@@ -117,13 +117,13 @@ class PondererMigrationTest {
     }
     private void assertFailedMigrationPreservesV1() throws Exception {
         var before = snapshot();
-        assertThatThrownBy(() -> flyway(null).migrate()).hasStackTraceContaining("coefficients incohérents");
+        assertThatThrownBy(() -> flyway("2").migrate()).hasStackTraceContaining("coefficients incohérents");
         assertThat(snapshot()).isEqualTo(before);
         assertThat(scalar("SELECT to_regclass('" + schema + ".ponderer') IS NULL")).isEqualTo("t");
         assertThat(scalar("SELECT count(*) FROM flyway_schema_history WHERE version='2'")).isEqualTo("0");
     }
     @Test void sqlConstraintsEnforcePositivityUniquenessAndReferences() throws Exception {
-        seed(); flyway(null).migrate();
+        seed(); flyway("2").migrate();
         for (String coefficient : List.of("0", "-1", "'NaN'", "NULL")) {
             assertThatThrownBy(() -> sql("INSERT INTO ponderer VALUES (99,28," + coefficient + ")")).isInstanceOf(SQLException.class);
         }
@@ -134,7 +134,7 @@ class PondererMigrationTest {
         assertThatThrownBy(() -> sql("UPDATE ponderer SET id_classe=99 WHERE id_classe=25")).hasMessageContaining("immuable");
     }
     @Test void oldWriterInitializesOrChecksAndExplicitPondererChangeCascades() throws Exception {
-        seed(); flyway(null).migrate();
+        seed(); flyway("2").migrate();
         sql("INSERT INTO enseignement(id_enseignement,id_enseignant,id_classe,id_matiere,coefficient_matiere,date_debut) VALUES (5,1,99,28,4,'2026-09-01')");
         assertThat(scalar("SELECT coefficient_matiere FROM ponderer WHERE id_classe=99")).isEqualTo("4.00");
         assertThatThrownBy(() -> sql("UPDATE enseignement SET coefficient_matiere=3 WHERE id_enseignement=1"))
@@ -147,14 +147,14 @@ class PondererMigrationTest {
         assertConsistent();
     }
     @Test void failedOldCreationRollsBackItsPondererInitialization() throws Exception {
-        seed(); flyway(null).migrate();
+        seed(); flyway("2").migrate();
         assertThatThrownBy(() -> sql("INSERT INTO enseignement(id_enseignement,id_enseignant,id_classe,id_matiere,coefficient_matiere,date_debut) VALUES (5,9999,99,28,4,'2026-09-01')"))
                 .isInstanceOf(SQLException.class);
         assertThat(scalar("SELECT count(*) FROM ponderer WHERE id_classe=99")).isEqualTo("0");
     }
     @ParameterizedTest @ValueSource(strings = {"4", "7"})
     void concurrentFirstCreationsSerializeAndCheckCoefficient(String secondCoefficient) throws Exception {
-        seed(); flyway(null).migrate();
+        seed(); flyway("2").migrate();
         try (Connection first = connection(); Connection second = connection();
              ExecutorService executor = Executors.newSingleThreadExecutor()) {
             first.setAutoCommit(false);
@@ -190,7 +190,7 @@ class PondererMigrationTest {
         assertThat(scalar("SELECT coefficient_matiere FROM ponderer WHERE id_classe=99")).isEqualTo("4.00");
     }
     @Test void referenceLockBeforeTeachingWriteSerializesConcurrentCoefficientUpdate() throws Exception {
-        seed(); flyway(null).migrate();
+        seed(); flyway("2").migrate();
         try (Connection teaching = connection(); Connection weighting = connection();
              ExecutorService executor = Executors.newSingleThreadExecutor()) {
             teaching.setAutoCommit(false);
