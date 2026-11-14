@@ -52,8 +52,18 @@ minimatch à jour dans les plages compatibles. Lint, 27 tests React et build
 ont été relancés avec succès sur cet arbre de dépendances.
 
 La relance finale Playwright après correction npm passe également : 16/16.
-PlantUML 1.2025.10 récupéré depuis Maven Central : contrôle syntaxique des sept
+Historique du premier sprint, désormais dépassé par la campagne ci-dessous : PlantUML 1.2025.10 récupéré depuis Maven Central : contrôle syntaxique des sept
 sources réussi ; six PNG régénérés en mode headless/Smetana. Le rendu du
 diagramme complet a produit une erreur interne du moteur : son export
 historique a été rétabli, aucune image d'erreur n'est publiée.
 Les vues découpées sont celles à utiliser pour la présentation.
+
+## Nouvelle campagne de finalisation de PR #5
+
+438 tests Java, zéro échec/erreur/ignoré ; 27 React ; 16 Playwright ; lint,
+build et packaging réussis. Audit npm en ligne recontrôlé.
+Le mode --demo a redémarré PostgreSQL isolé et les deux serveurs sur ports
+dynamiques ; arrêt Ctrl-C effectué. Aucun parcours candidat manuel n'est revendiqué.
+Graphviz a permis de lever le blocage du rendu complet ; les cas d'utilisation
+ont aussi été régénérés. Contrôle syntaxique et correspondance des sources
+par métadonnées PNG effectués. Voir UML_RENDU.md.

@@ -5,7 +5,9 @@ left to right direction
 
 skinparam shadowing false
 skinparam classAttributeIconSize 0
-skinparam linetype ortho
+skinparam linetype polyline
+skinparam nodesep 60
+skinparam ranksep 100
 skinparam packageStyle rectangle
 
 hide empty methods
@@ -16,7 +18,7 @@ hide empty methods
 
 package "Utilisateurs" {
 
-    abstract class Personne {
+    class Personne {
         - idPersonne : Long
         - nom : String
         - prenom : String

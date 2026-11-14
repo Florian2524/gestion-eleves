@@ -1,34 +1,42 @@
-# Matrice de conformité
+# Conformité aux exigences communiquées
 
-Référence : documents du dépôt et mission jury. Aucun énoncé PDF trouvé dans
-le dépôt ; conformité à un sujet officiel non certifiée. Chemins depuis la racine.
+Référence provisoire : liste transmise par l’utilisateur, sujet « Développement d’une application Full Stack de gestion des élèves ». Le PDF original n’est pas accessible ici et n’a pas été consulté ; comparaison manuelle encore nécessaire.
 
-| Exigence | Implémentation / fichier | Preuve | Statut | Action |
-|---|---|---|---|---|
-| MCD | docs/merise/MCD.png | conception-audit.md | Partiellement conforme | Corriger patte ELEVE dans Looping |
-| MLD | docs/merise/MLD.png | audit modèles | Partiellement conforme | Identifier et renommer FK responsabilité |
-| MPD | docs/merise/mpd-courant-v3.sql | migrations officielles | Conforme documentaire | Ne pas exécuter sur base existante |
-| Cas d'utilisation | docs/uml/cas-utilisation.puml | source | À vérifier manuellement | Comparer au scénario oral |
-| Classes UML | docs/uml/diagramme-classes-*.puml | MapsId/PONDERER/année | Partiellement conforme | PNG complet à régénérer ; vues découpées actualisées |
-| Séquence | docs/uml/sequence-ajouter-note.puml | NoteRequest, HTTP 400 | Partiellement conforme | PNG complet à régénérer ; vues découpées actualisées |
-| JWT/comptes | JwtConfig, ActiveAccountJwtValidator | tests sécurité Java | Conforme automatisé | Durcissement production distinct |
-| Rôles/ressources | SecurityConfig, SecurityExpressions | AuthorizationHttpTest, roles-access.spec.js | Conforme automatisé | Répétition orale |
-| CRUD élèves | EleveController/Service, React | tests Java/E2E | Conforme automatisé | Répéter manuellement |
-| Notes/barèmes | NoteService | tests métier/HTTP | Conforme automatisé | Montrer refus 21/20 |
-| Photos | ElevePhotoService | ElevePhotoTransactionIntegrationTest | Conforme automatisé | Photo fictive |
-| Bulletins/PDF | BulletinCalculService, BulletinPdfService | tests calcul/PDF/E2E | Conforme automatisé | Ouvrir PDF en lecteur |
-| Couches/erreurs/DTO | controller/service/repository/exception/dto | suite Java | Conforme automatisé | Expliquer un parcours |
-| Connexion/déconnexion | AuthContext, authStorage | E2E rôles | Conforme automatisé | Session expirée manuelle |
-| Formulaires/navigation | frontend/src/pages | React/E2E | Partiellement conforme | Inspection visuelle |
-| Responsive/contrastes | frontend/src/index.css, composants | pas de mesure exhaustive | À vérifier manuellement | Téléphone/clavier |
-| PostgreSQL/Flyway | scripts/test-ponderer.sh | tests migration | Conforme automatisé | Base réelle non migrée |
-| Docker | scripts tmpfs | compte test non superutilisateur | Conforme tests | Déploiement complet différé |
-| README | README.md | base neuve/existante séparées | Partiellement conforme | Répéter hors ligne |
-| Démonstration | scripts/test-e2e.sh --demo | procédure dédiée | À vérifier manuellement | Répétition complète candidat |
-| Tests | TESTS_ET_PREUVES.md | campagne locale | Voir preuves | Distinguer CI et local |
-| GitHub | feature/jury-finalisation | commits/PR si réseau | À vérifier | Publication/CI |
-| Scrum | docs/scrum/README.md | chronologie Git | Conforme documentaire | Pas de cérémonie inventée |
-| Dossier jury | docs/jury/ | neuf documents | Conforme documentaire | Relecture candidat |
+| Exigence | Fichier depuis la racine | État | Preuve / action |
+|---|---|---|---|
+| MCD Merise | docs/merise/MCD.png | Réalisé mais à vérifier manuellement | Guide Looping ; export historique |
+| MLD | docs/merise/MLD.png | Réalisé mais à vérifier manuellement | FK et profils à revoir dans Looping |
+| MPD PostgreSQL | docs/merise/mpd-courant-v3.sql | Réalisé et prouvé | Concaténation V1/V2/V3 ; migrations immuables |
+| UML cas d’utilisation | docs/uml/cas-utilisation.puml | Réalisé et prouvé | Source et export ; relecture orale |
+| UML classes | docs/uml/diagramme-classes-complet.puml | Réalisé et prouvé | Rendu Graphviz actuel ; vues découpées pour l’oral |
+| UML séquence | docs/uml/sequence-ajouter-note.puml | Réalisé et prouvé | PNG déjà exporté ; NoteRequest et HTTP 400 |
+| Java 17+ / Spring Boot 3+ | backend/pom.xml | Réalisé et prouvé | Java 21 ; Spring Boot 3 ; suite Java |
+| Spring Data JPA | backend/src/main/java/fr/afpa/backend/repository/ | Réalisé et prouvé | Repositories et intégration PostgreSQL |
+| Spring Security JWT | backend/src/main/java/fr/afpa/backend/config/JwtConfig.java | Réalisé et prouvé | Validation signature/expiration/compte |
+| Trois rôles | backend/src/main/java/fr/afpa/backend/config/SecurityConfig.java | Réalisé et prouvé | Tests HTTP et E2E des rattachements |
+| API REST | backend/src/main/java/fr/afpa/backend/controller/ | Réalisé et prouvé | DTO, validations, statuts HTTP |
+| Gestion élèves | frontend/src/pages/ElevesPage.jsx | Réalisé et prouvé | CRUD et E2E |
+| Gestion notes | backend/src/main/java/fr/afpa/backend/service/NoteService.java | Réalisé et prouvé | Barème, classe, droits et E2E |
+| Upload photos | backend/src/main/java/fr/afpa/backend/service/ElevePhotoService.java | Réalisé et prouvé | Tests transactionnels et E2E |
+| Bulletins PDF | backend/src/main/java/fr/afpa/backend/service/BulletinPdfService.java | Réalisé et prouvé | Calcul et signature PDF en tests |
+| JUnit/Mockito/AssertJ/MockMvc | backend/src/test/ | Réalisé et prouvé | Suite Java complète |
+| React/Tailwind | frontend/package.json | Réalisé et prouvé | Build, lint et tests |
+| Responsive | frontend/src/ | Réalisé mais à vérifier manuellement | Clavier, mobile, contrastes : répétition candidat |
+| PostgreSQL/Docker Compose | docker-compose.yml | Réalisé et prouvé | Compose documenté ; tests sur PostgreSQL 17 jetable |
+| README/documentation | README.md, docs/jury/ | Réalisé et prouvé | Base neuve/existante séparées ; démo isolée |
+| Dépôt GitHub | PR #5 | Réalisé et prouvé | Branche publiée, CI ; aucune fusion automatique |
+| Suivi Scrum | docs/scrum/README.md | Réalisé mais à vérifier manuellement | Traçabilité Git prouvée ; cérémonies non attestées |
 
-Points d'attention : exports obsolètes, répétition de démo, absence d'énoncé officiel.
-La migration réelle V3 n'est pas un prérequis à la démonstration isolée.
+## Partie Scrum du sujet
+
+| Exigence | État | Explication et action |
+|---|---|---|
+| Équipe de trois, PO formateur, Scrum Master/développeurs | Dépendant d’une validation du formateur | Aucun membre ni rôle effectivement tenu n’est attesté par les fichiers ; faire confirmer l’organisation réelle |
+| Trois à quatre sprints hebdomadaires | Prévu mais non réalisé dans les preuves disponibles | Les commits datent des incréments, pas des sprints d’une semaine |
+| Planning, Daily, Review, Retrospective | Prévu mais non réalisé dans les preuves disponibles | Aucune cérémonie attestée ; ne pas inventer de comptes rendus |
+| Kanban To Do/In Progress/In Review/Done | Réalisé documentaire | Voir tableau de finalisation ; pas une reconstitution d’un tableau historique |
+| Cartes : titre, story, responsable, branche | Réalisé documentaire | Trame fournie ; responsable à renseigner par le candidat |
+| Rapports courts de sprint | Réalisé partiellement | Incréments Git factuels et trame ; pas de rapport de cérémonie inventé |
+| Démonstrations 5–10 minutes | Prévu mais non réalisé dans les preuves disponibles | Répétition candidat à effectuer ; E2E ne prouve pas une review |
+
+« Non attesté » ne permet pas de conclure qu’un événement n’a jamais eu lieu ; le candidat doit apporter les preuves réelles ou expliquer l’écart au formateur.

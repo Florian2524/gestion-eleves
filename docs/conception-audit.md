@@ -72,3 +72,15 @@ Looping, à effectuer sur une copie du .loo : dans RESPONSABILITE_LEGALE,
 mettre la patte ELEVE à 0,n ; dans le MLD identifier chaque FK par sa table
 cible, puis nommer id_responsable et id_eleve. Vérifier la PK composée et
 exporter sous de nouveaux noms. Ne jamais modifier LoopingImage.jpg.
+
+## Clôture des rendus et exigences — finalisation PR #5
+
+Le diagramme complet a finalement été rendu avec Graphviz 2.42.2 et PlantUML
+1.2025.10, après correction de Personne concrète et ajustements de disposition
+(polylignes, espacement). Aucune association n'a été supprimée. Le PNG des cas
+d'utilisation est également régénéré avec Graphviz. Les autres exports restent
+ceux des sources courantes, vérifiés par leurs métadonnées.
+Le complet est un document de référence à zoomer ; les vues découpées sont
+préférables sur vidéoprojecteur. Les mentions précédentes d'échec restent
+l'historique des essais, pas l'état du livrable final.
+Le guide GUIDE_LOOPING.md décrit les seules corrections Merise encore manuelles.

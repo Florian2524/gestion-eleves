@@ -68,3 +68,26 @@ distinction entre tests automatiques et recette manuelle, exports identifiés
 comme historiques tant qu'ils ne sont pas régénérés, données réelles préservées.
 Une fonctionnalité reportée ne doit pas être déclarée livrée sur la seule base
 d'un document ou d'un schéma.
+
+## Confrontation au sujet communiqué — finalisation PR #5
+
+Le sujet envisage trois personnes, PO formateur, Scrum Master/développeurs,
+trois à quatre sprints hebdomadaires, Planning/Daily/Review/Retrospective
+et démos de 5–10 minutes. Les traces disponibles ne prouvent ni cette équipe,
+ni ces rôles effectivement tenus, ni ces cérémonies. Le candidat doit faire
+confirmer les faits par le formateur. Les dates Git ne sont pas des sprints.
+
+Tableau documentaire actuel (pas un historique Kanban reconstitué) :
+
+| État | Carte / user story | Responsable | Branche |
+|---|---|---|---|
+| To Do | Comme candidat, corriger Looping pour défendre les cardinalités | Candidat à confirmer | À créer après correction manuelle |
+| In Progress | Comme candidat, répéter les trois rôles et le PDF | À renseigner par le candidat | feature/jury-finalisation |
+| In Review | Comme candidat, disposer des modèles et preuves de soutenance | Auteur des commits visibles dans Git | feature/jury-finalisation, PR #5 |
+| Done | Comme développeur, tester les règles sur base jetable | Auteur des commits visibles dans Git | Voir commits et CI |
+
+Trame de rapport court à compléter après une vraie période de travail :
+dates réelles, objectif, cartes terminées/non terminées, preuves Git/CI,
+difficultés, actions suivantes. Une review effective peut présenter en 5–10
+minutes : besoin, parcours, refus métier, PDF, tests et limites.
+Ne pas remplir rétrospectivement une présence ou une validation non attestée.
