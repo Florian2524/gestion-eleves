@@ -65,8 +65,7 @@ demande ; aucun processus de validation ou d'archivage n'est modélisé.
 
 Les sources PlantUML décrivent désormais les profils associés par MapsId,
 PONDERER et Periode.anneeScolaire facultative. La séquence utilise NoteRequest
-et HTTP 400 pour les violations du barème/classe. Les PNG restent historiques,
-non régénérés : ne pas les présenter comme actuels. Aucun moteur PlantUML local trouvé.
+et HTTP 400 pour les violations du barème/classe. Six PNG ont ensuite été régénérés avec PlantUML 1.2025.10/Smetana. Le diagramme complet reste historique : le moteur a échoué et son ancien export a été préservé.
 Le MPD V1 est conservé ; mpd-courant-v3.sql rassemble les migrations pour lecture.
 
 Looping, à effectuer sur une copie du .loo : dans RESPONSABILITE_LEGALE,

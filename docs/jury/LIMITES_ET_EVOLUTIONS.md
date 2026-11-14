@@ -5,7 +5,7 @@
 - Énoncé PDF non trouvé dans le dépôt : exigences évaluées à partir des documents
   disponibles et de la mission, pas d'un sujet officiel consulté.
 - Répéter manuellement toute la démonstration, le responsive et les contrastes.
-- Corriger les exports Looping et régénérer les UML ; les PNG actuels sont historiques.
+- Corriger les exports Looping et régénérer le seul UML complet resté historique ; six autres PNG ont été régénérés.
 - Contrôler les dépendances en ligne et la CI distante quand le réseau fonctionne.
 - PostgreSQL réel reste V2 : ce sprint n'autorise ni sa migration ni son backend.
 

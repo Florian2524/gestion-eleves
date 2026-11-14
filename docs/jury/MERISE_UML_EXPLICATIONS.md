@@ -12,7 +12,7 @@ acteurs, classes applicatives et séquences d'appels.
 | MPD historique | docs/merise/mpd-postgresql.sql | V1 conservée |
 | MPD courant | docs/merise/mpd-courant-v3.sql | V1/V2/V3 documentaires |
 | Cas d'utilisation | docs/uml/cas-utilisation.puml | Source disponible |
-| Classes | docs/uml/diagramme-classes-*.puml | Sources réconciliées, PNG historiques |
+| Classes | docs/uml/diagramme-classes-*.puml | Sources réconciliées ; six PNG régénérés, complet historique |
 | Séquence note | docs/uml/sequence-ajouter-note.puml | DTO et HTTP corrigés |
 
 PERSONNE porte les coordonnées communes. ELEVE, ENSEIGNANT et RESPONSABLE
@@ -43,5 +43,4 @@ des dates et de l'année scolaire : décision différée au lot 3B.
 
 Les entités BULLETIN/LIGNE_BULLETIN existent dans le schéma, mais le parcours
 courant génère un calcul et un PDF à la demande. Ne pas prétendre disposer
-d'un archivage validé. Régénérer les PNG avec PlantUML avant de les présenter
-comme actuels ; aucun nouveau rendu n'est revendiqué dans ce sprint.
+d'un archivage validé. Six PNG sont régénérés avec PlantUML 1.2025.10/Smetana. Le diagramme complet seul reste historique : erreur interne du moteur, ancien PNG préservé. Utiliser les vues découpées actualisées pour l’oral.

@@ -9,8 +9,8 @@ le dépôt ; conformité à un sujet officiel non certifiée. Chemins depuis la 
 | MLD | docs/merise/MLD.png | audit modèles | Partiellement conforme | Identifier et renommer FK responsabilité |
 | MPD | docs/merise/mpd-courant-v3.sql | migrations officielles | Conforme documentaire | Ne pas exécuter sur base existante |
 | Cas d'utilisation | docs/uml/cas-utilisation.puml | source | À vérifier manuellement | Comparer au scénario oral |
-| Classes UML | docs/uml/diagramme-classes-*.puml | MapsId/PONDERER/année | Partiellement conforme | Régénérer PNG |
-| Séquence | docs/uml/sequence-ajouter-note.puml | NoteRequest, HTTP 400 | Partiellement conforme | Régénérer PNG |
+| Classes UML | docs/uml/diagramme-classes-*.puml | MapsId/PONDERER/année | Partiellement conforme | PNG complet à régénérer ; vues découpées actualisées |
+| Séquence | docs/uml/sequence-ajouter-note.puml | NoteRequest, HTTP 400 | Partiellement conforme | PNG complet à régénérer ; vues découpées actualisées |
 | JWT/comptes | JwtConfig, ActiveAccountJwtValidator | tests sécurité Java | Conforme automatisé | Durcissement production distinct |
 | Rôles/ressources | SecurityConfig, SecurityExpressions | AuthorizationHttpTest, roles-access.spec.js | Conforme automatisé | Répétition orale |
 | CRUD élèves | EleveController/Service, React | tests Java/E2E | Conforme automatisé | Répéter manuellement |

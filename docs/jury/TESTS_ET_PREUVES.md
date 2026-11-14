@@ -50,3 +50,10 @@ Après npm audit fix sans --force : zéro vulnérabilité signalée par le regis
 Le package.json reste inchangé ; le lock met notamment ESLint/config-array et
 minimatch à jour dans les plages compatibles. Lint, 27 tests React et build
 ont été relancés avec succès sur cet arbre de dépendances.
+
+La relance finale Playwright après correction npm passe également : 16/16.
+PlantUML 1.2025.10 récupéré depuis Maven Central : contrôle syntaxique des sept
+sources réussi ; six PNG régénérés en mode headless/Smetana. Le rendu du
+diagramme complet a produit une erreur interne du moteur : son export
+historique a été rétabli, aucune image d'erreur n'est publiée.
+Les vues découpées sont celles à utiliser pour la présentation.

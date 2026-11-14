@@ -31,7 +31,7 @@ npm audit --audit-level=high. Les commandes réseau requièrent un accès dispon
 ## À terminer manuellement
 
 1. Obtenir l'énoncé officiel et compléter la matrice si des exigences manquent.
-2. Corriger Looping sur copie et régénérer les PNG UML.
+2. Corriger Looping sur copie et régénérer le PNG UML complet (échec Smetana) ; six autres PNG actualisés.
 3. Répéter toutes les manipulations de DEMONSTRATION.md, avec clavier/mobile.
 4. Préparer captures et PDF fictifs de secours, sans données réelles.
 5. Relire le dossier avec le candidat : appropriation des 35 réponses.
