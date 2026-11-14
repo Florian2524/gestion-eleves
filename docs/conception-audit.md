@@ -60,3 +60,27 @@ liens de `Classe`, `Inscription`, `Scolarite`, `Enseignement`, `Evaluation`,
 Les bulletins et lignes de bulletin sont représentés comme entités persistées
 dans le schéma. Le parcours utilisateur calcule actuellement le bulletin à la
 demande ; aucun processus de validation ou d'archivage n'est modélisé.
+
+## Réconciliation du sprint jury — 14 novembre 2026
+
+Les sources PlantUML décrivent désormais les profils associés par MapsId,
+PONDERER et Periode.anneeScolaire facultative. La séquence utilise NoteRequest
+et HTTP 400 pour les violations du barème/classe. Six PNG ont ensuite été régénérés avec PlantUML 1.2025.10/Smetana. Le diagramme complet reste historique : le moteur a échoué et son ancien export a été préservé.
+Le MPD V1 est conservé ; mpd-courant-v3.sql rassemble les migrations pour lecture.
+
+Looping, à effectuer sur une copie du .loo : dans RESPONSABILITE_LEGALE,
+mettre la patte ELEVE à 0,n ; dans le MLD identifier chaque FK par sa table
+cible, puis nommer id_responsable et id_eleve. Vérifier la PK composée et
+exporter sous de nouveaux noms. Ne jamais modifier LoopingImage.jpg.
+
+## Clôture des rendus et exigences — finalisation PR #5
+
+Le diagramme complet a finalement été rendu avec Graphviz 2.42.2 et PlantUML
+1.2025.10, après correction de Personne concrète et ajustements de disposition
+(polylignes, espacement). Aucune association n'a été supprimée. Le PNG des cas
+d'utilisation est également régénéré avec Graphviz. Les autres exports restent
+ceux des sources courantes, vérifiés par leurs métadonnées.
+Le complet est un document de référence à zoomer ; les vues découpées sont
+préférables sur vidéoprojecteur. Les mentions précédentes d'échec restent
+l'historique des essais, pas l'état du livrable final.
+Le guide GUIDE_LOOPING.md décrit les seules corrections Merise encore manuelles.

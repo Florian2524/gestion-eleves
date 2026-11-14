@@ -35,6 +35,7 @@ class Classe {
 }
 
 class Periode {
+  - anneeScolaire : String [0..1]
   - idPeriode : Long
   - libelle : String
   - dateDebut : LocalDate

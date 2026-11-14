@@ -25,8 +25,8 @@ class Matiere {
 }
 
 class Enseignement {
+  - coefficientMatiere : BigDecimal (miroir SQL de PONDERER)
   - idEnseignement : Long
-  - coefficientMatiere : BigDecimal
   - dateDebut : LocalDate
   - dateFin : LocalDate
   - actif : Boolean
@@ -57,6 +57,7 @@ class Scolarite {
 }
 
 class Periode {
+  - anneeScolaire : String [0..1]
   - idPeriode : Long
   - libelle : String
   - dateDebut : LocalDate
@@ -100,4 +101,12 @@ Enseignant "0..1" -- "0..*" Bulletin : valide
 Bulletin "1" -- "0..*" LigneBulletin : contient
 Enseignement "1" -- "0..*" LigneBulletin : fait l'objet de
 
+class Ponderer {
+  - idClasse : Long
+  - idMatiere : Long
+  - coefficientMatiere : BigDecimal
+}
+Classe "1" -- "0..*" Ponderer
+Matiere "1" -- "0..*" Ponderer
+note right of Ponderer : Clé composée (classe, matière)
 @enduml

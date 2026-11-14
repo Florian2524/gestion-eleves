@@ -153,7 +153,19 @@ git clone https://github.com/Florian2524/gestion-eleves.git
 cd gestion-eleves
 ```
 
-### 1. Démarrer PostgreSQL
+### Base existante : arrêt préalable obligatoire
+
+**Sur la base locale existante encore en V2, ne pas démarrer ce backend :
+Flyway appliquerait V3 automatiquement. La migration réelle reste non autorisée
+pendant le sprint jury.** Une base existante exige sauvegarde validée,
+contrôle d'identité et autorisation de migration séparée. Ne pas désactiver
+simplement Flyway pour contourner un schéma incompatible.
+
+Pour tester ou présenter le projet sans risque, utiliser
+`./scripts/test-e2e.sh --demo` : PostgreSQL 17 neuf, ports dynamiques,
+compte fictif et uploads jetables. Voir [la démonstration](docs/jury/DEMONSTRATION.md).
+
+### 1. Installation sur base neuve uniquement : démarrer PostgreSQL
 
 ```bash
 docker compose up -d
@@ -167,7 +179,7 @@ docker compose ps
 
 PostgreSQL est exposé sur le port `5432`.
 
-Si le port est déjà occupé, arrêter le service qui l'utilise ou modifier le port
+Si le port est déjà occupé, conserver le service existant et modifier le port
 publié dans `docker-compose.yml` (par exemple `5433:5432`) et définir
 `DB_URL=jdbc:postgresql://localhost:5433/gestion_eleves` pour le backend.
 `docker compose ps` doit indiquer `healthy` avant le lancement des tests.
@@ -340,3 +352,9 @@ Les principales évolutions hors du périmètre actuel sont :
 
 Projet réalisé par Florian dans le cadre de la formation
 Concepteur Développeur d’Applications.
+
+## Dossier de soutenance
+
+Voir [la checklist et les preuves](docs/jury/CHECKLIST_LIVRABLES.md),
+[le plan oral](docs/jury/PLAN_SOUTENANCE.md) et
+[les limites](docs/jury/LIMITES_ET_EVOLUTIONS.md).
