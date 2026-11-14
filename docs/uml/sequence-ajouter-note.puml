@@ -1,91 +1,40 @@
 @startuml
-hide footbox
-title Diagramme de séquence\nAjouter une note à un élève
-
+title Saisie d'une note : parcours simplifié conforme au service
 autonumber
-
-skinparam shadowing false
-skinparam responseMessageBelowArrow true
-skinparam sequenceMessageAlign center
-
 actor Enseignant
-
-boundary "Frontend React" as Frontend
-control "Spring Security\nJWT" as Security
-control "NoteController" as Controller
-control "NoteService" as Service
-
-entity "EvaluationRepository" as EvaluationRepository
-entity "ScolariteRepository" as ScolariteRepository
-entity "NoteRepository" as NoteRepository
-
-database "PostgreSQL" as Database
-
-Enseignant -> Frontend : Saisir la note de l'élève
-Frontend -> Security : POST /notes\nJWT + CreerNoteRequest
-
-Security -> Security : Vérifier le token JWT
-
-alt Token absent ou invalide
-
-    Security --> Frontend : 401 Unauthorized
-    Frontend --> Enseignant : Afficher l'erreur d'authentification
-
-else Token valide
-
-    Security -> Controller : Transmettre la requête authentifiée
-
-    Controller -> Controller : Valider les données reçues
-    Controller -> Security : Vérifier ADMIN ou propriété de l'évaluation
-    Security --> Controller : Autorisation accordée
-    Controller -> Service : create(NoteRequest)
-
-    Service -> EvaluationRepository : findById(idEvaluation)
-    EvaluationRepository -> Database : SELECT evaluation
-    Database --> EvaluationRepository : Évaluation trouvée
-    EvaluationRepository --> Service : Evaluation
-
-    Service -> ScolariteRepository : findById(idScolarite)
-    ScolariteRepository -> Database : SELECT scolarite
-    Database --> ScolariteRepository : Scolarité trouvée
-    ScolariteRepository --> Service : Scolarite
-
-    Service -> Service : Vérifier que l'élève appartient\nà la classe concernée
-    Service -> Service : Vérifier la valeur par rapport au barème
-
-    alt Classe incorrecte ou valeur hors barème
-
-        Service --> Controller : Erreur métier
-        Controller --> Frontend : 403 Forbidden
-        Frontend --> Enseignant : Afficher l'erreur de validation
-
-    else Données métier valides
-
-        Service -> NoteRepository : existsByScolariteAndEvaluation(...)
-        NoteRepository -> Database : Vérifier l'existence d'une note
-        Database --> NoteRepository : true / false
-        NoteRepository --> Service : Résultat
-
-        alt Une note existe déjà
-
-            Service --> Controller : Note déjà existante
-            Controller --> Frontend : 409 Conflict
-            Frontend --> Enseignant : Afficher l'erreur
-
-        else Aucune note existante
-
-            Service -> Service : Créer l'objet Note
-            Service -> NoteRepository : save(note)
-            NoteRepository -> Database : INSERT INTO note
-            Database --> NoteRepository : Note enregistrée
-            NoteRepository --> Service : Note
-
-            Service --> Controller : NoteResponse
-            Controller --> Frontend : 201 Created + NoteResponse
-            Frontend --> Enseignant : Confirmer l'enregistrement
-
-        end
-    end
+boundary React
+control "Spring Security / SecurityExpressions" as Security
+control NoteController
+control NoteService
+entity NoteRepository
+database PostgreSQL
+Enseignant -> React : Saisir note
+React -> Security : POST /notes + JWT + NoteRequest
+alt Jeton absent / invalide
+ Security --> React : 401
+else Identité valide
+ Security -> Security : Rôle et propriété de l'évaluation
+ alt Ressource hors périmètre
+  Security --> React : 403
+ else Autorisé
+  Security -> NoteController : Requête autorisée
+  NoteController -> NoteController : Bean Validation
+  NoteController -> NoteService : create(NoteRequest)
+  NoteService -> NoteRepository : existsByScolarite_IdScolariteAndEvaluation_IdEvaluation(...)
+  alt Doublon
+   NoteService --> React : 409 via GlobalExceptionHandler
+  else Nouvelle note
+   NoteService -> PostgreSQL : Charger scolarité et évaluation via repositories
+   NoteService -> NoteService : Vérifier classe et barème
+   alt Données métier invalides
+    NoteService --> React : 400 via GlobalExceptionHandler
+   else Valides
+    NoteService -> NoteRepository : save(note) dans transaction
+    NoteRepository -> PostgreSQL : INSERT
+    NoteService --> NoteController : NoteResponse
+    NoteController --> React : 201 + NoteResponse
+   end
+  end
+ end
 end
-
 @enduml

@@ -55,9 +55,9 @@ package "Utilisateurs" {
     }
 }
 
-Personne <|-- Eleve
-Personne <|-- Responsable
-Personne <|-- Enseignant
+Personne "1" -- "0..1" Eleve : profil (MapsId)
+Personne "1" -- "0..1" Responsable : profil (MapsId)
+Personne "1" -- "0..1" Enseignant : profil (MapsId)
 
 Personne "1" -- "0..1" CompteUtilisateur : possède >
 CompteUtilisateur --> RoleUtilisateur
@@ -90,6 +90,7 @@ package "Organisation scolaire" {
     }
 
     class Periode {
+  - anneeScolaire : String [0..1]
         - idPeriode : Long
         - libelle : String
         - dateDebut : LocalDate
@@ -128,8 +129,8 @@ package "Pédagogie" {
     }
 
     class Enseignement {
+  - coefficientMatiere : BigDecimal (miroir SQL de PONDERER)
         - idEnseignement : Long
-        - coefficientMatiere : BigDecimal
         - dateDebut : LocalDate
         - dateFin : LocalDate
         - actif : Boolean
@@ -206,4 +207,12 @@ d'un enseignant pour un enseignement
 dans un bulletin donné.
 end note
 
+class Ponderer {
+  - idClasse : Long
+  - idMatiere : Long
+  - coefficientMatiere : BigDecimal
+}
+Classe "1" -- "0..*" Ponderer
+Matiere "1" -- "0..*" Ponderer
+note right of Ponderer : Clé composée (classe, matière)
 @enduml

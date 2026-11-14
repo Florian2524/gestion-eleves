@@ -11,6 +11,7 @@ http:
     data: |-
       {
         "libelle": "Trimestre 1",
+        "anneeScolaire": "2026-2027",
         "dateDebut": "2026-09-01",
         "dateFin": "2026-12-18",
         "dateDebutSaisie": "2026-11-30",

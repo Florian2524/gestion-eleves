@@ -24,9 +24,9 @@ class Bulletin
 class LigneBulletin
 class ResponsabiliteLegale
 
-Personne <|-- Eleve
-Personne <|-- Responsable
-Personne <|-- Enseignant
+Personne "1" -- "0..1" Eleve : profil (MapsId)
+Personne "1" -- "0..1" Responsable : profil (MapsId)
+Personne "1" -- "0..1" Enseignant : profil (MapsId)
 
 Personne "1" -- "0..1" CompteUtilisateur : possède
 
@@ -56,4 +56,12 @@ Enseignant "0..1" -- "0..*" Bulletin : valide
 Bulletin "1" -- "0..*" LigneBulletin
 Enseignement "1" -- "0..*" LigneBulletin
 
+class Ponderer {
+  - idClasse : Long
+  - idMatiere : Long
+  - coefficientMatiere : BigDecimal
+}
+Classe "1" -- "0..*" Ponderer
+Matiere "1" -- "0..*" Ponderer
+note right of Ponderer : Clé composée (classe, matière)
 @enduml

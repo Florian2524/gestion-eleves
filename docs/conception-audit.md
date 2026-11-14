@@ -60,3 +60,16 @@ liens de `Classe`, `Inscription`, `Scolarite`, `Enseignement`, `Evaluation`,
 Les bulletins et lignes de bulletin sont représentés comme entités persistées
 dans le schéma. Le parcours utilisateur calcule actuellement le bulletin à la
 demande ; aucun processus de validation ou d'archivage n'est modélisé.
+
+## Réconciliation du sprint jury — 14 novembre 2026
+
+Les sources PlantUML décrivent désormais les profils associés par MapsId,
+PONDERER et Periode.anneeScolaire facultative. La séquence utilise NoteRequest
+et HTTP 400 pour les violations du barème/classe. Les PNG restent historiques,
+non régénérés : ne pas les présenter comme actuels. Aucun moteur PlantUML local trouvé.
+Le MPD V1 est conservé ; mpd-courant-v3.sql rassemble les migrations pour lecture.
+
+Looping, à effectuer sur une copie du .loo : dans RESPONSABILITE_LEGALE,
+mettre la patte ELEVE à 0,n ; dans le MLD identifier chaque FK par sa table
+cible, puis nommer id_responsable et id_eleve. Vérifier la PK composée et
+exporter sous de nouveaux noms. Ne jamais modifier LoopingImage.jpg.

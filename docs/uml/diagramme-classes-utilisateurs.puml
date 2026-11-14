@@ -50,9 +50,9 @@ class ResponsabiliteLegale {
   - idEleve : Long
 }
 
-Personne <|-- Eleve
-Personne <|-- Responsable
-Personne <|-- Enseignant
+Personne "1" -- "0..1" Eleve : profil (MapsId)
+Personne "1" -- "0..1" Responsable : profil (MapsId)
+Personne "1" -- "0..1" Enseignant : profil (MapsId)
 
 Personne "1" -- "0..1" CompteUtilisateur : possède
 CompteUtilisateur --> RoleUtilisateur
