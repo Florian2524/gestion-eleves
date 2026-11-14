@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Recette navigateur sur des fixtures et processus jetables, indépendants de Compose.
 set -euo pipefail
+umask 077
+demo_mode=0
+if [[ "${1:-}" == --demo ]]; then demo_mode=1; shift; fi
 repo_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 runtime_dir=$(mktemp -d /tmp/gestion-eleves-e2e-XXXXXXXX)
 test_container_id=""
@@ -69,6 +72,14 @@ for attempt in {1..60}; do
 done
 printf 'Recette isolée : frontend %s, backend %s, PostgreSQL %s\n' "$E2E_BASE_URL" "$E2E_API_URL" "$database_url"
 cd "$repo_dir/frontend"
+if [[ "$demo_mode" == 1 ]]; then
+  printf 'Démonstration jetable : %s\nCompte : %s\n' "$E2E_BASE_URL" "$E2E_ADMIN_EMAIL"
+  printf 'Mot de passe fictif : %s\n' "$E2E_ADMIN_PASSWORD"
+  printf 'Base neuve V3, uploads temporaires. Ctrl-C détruit uniquement cet environnement.\n'
+  # Aucun test ne modifie les données de la démonstration interactive.
+  while kill -0 "$backend_pid" "$frontend_pid" 2>/dev/null; do sleep 2; done
+  exit 1
+fi
 npm run test:e2e -- "$@" || {
   result=$?
   mkdir -p test-results
