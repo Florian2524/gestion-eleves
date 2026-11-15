@@ -27,3 +27,32 @@ les profils. Faire confirmer les conventions Merise au formateur.
 Ne remplacer les exports versionnés qu'après cette validation visuelle.
 Capturer avant/après et conserver la copie source. Aucun SQL ne doit être
 exécuté sur PostgreSQL réel pour cette correction documentaire.
+
+## Fiche courte à garder à côté de Looping
+
+Les libellés exacts de menus peuvent dépendre de la version : vérifier la cible
+avant validation plutôt que suivre un menu supposé identique.
+
+1. Enregistrer une copie du .loo sous gestion-eleves-jury.loo ; conserver les
+   originaux et le JPEG personnel sans modification.
+2. Dans le MCD, sélectionner la patte ELEVE de RESPONSABILITE_LEGALE :
+   minimum 0, maximum n. Ne pas changer automatiquement l'autre patte.
+3. Dans le MLD de la copie, suivre chaque FK de la table de liaison :
+   vers RESPONSABLE → id_responsable ; vers ELEVE → id_eleve. Si la structure
+   générée est ambiguë, arrêter le renommage et faire confirmer la cible.
+4. Contrôler la PK : ensemble des deux FK, pas deux clés primaires indépendantes ;
+   aucune clé artificielle supplémentaire. Le couple ne doit pas se répéter.
+5. Vérifier PERSONNE : coordonnées communes, PK partagée des trois profils,
+   cumul autorisé. Ne pas modéliser une spécialisation exclusive.
+6. Vérifier PONDERER : CLASSE/MATIERE, PK du couple et coefficient_matiere.
+   Conserver ENSEIGNEMENT et son miroir SQL ; ne pas confondre coefficient d'évaluation.
+7. Ajouter/vérifier PERIODE.annee_scolaire : facultative au MCD ; VARCHAR(9)
+   nullable au MPD, CHECK années consécutives. Ne déduire aucune année des dates.
+8. Exporter MCD-jury.png et MLD-jury.png, ouvrir à 100 %, relire les deux
+   extrémités, PK/FK et profils ; comparer au MPD courant et au guide.
+   Faire valider les conventions par le formateur avant remplacement des PNG.
+
+Contrôle visuel minimum : un élève sans lien légal reste représentable ; un
+responsable peut être lié à plusieurs élèves ; une personne peut cumuler les
+profils ; un couple classe/matière n'a qu'un coefficient ; année NULL possible.
+Ces manipulations sont à réaliser par le candidat, pas déjà exécutées ici.

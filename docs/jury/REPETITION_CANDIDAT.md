@@ -36,3 +36,18 @@ fictif de secours et les preuves CI, sans toucher à la base de développement.
 6. Flyway V1/V2/V3 ; V3 réelle non autorisée, historique préservé.
 7. Différence unitaire/intégration/E2E et portée réelle des preuves.
 8. Écarts Scrum honnêtes, limites temporelles et archivage différé.
+
+## Ordre de préparation avant le jury
+
+1. Comparer CHECKLIST_LIVRABLES.md au PDF original ; confirmer les numéros US.
+2. Exécuter les huit étapes courtes de GUIDE_LOOPING.md sur une copie ; valider les exports.
+3. Préparer les comptes et données fictifs puis suivre FICHE_DEMONSTRATION.md,
+   en notant les identifiants ; répéter avec déconnexion entre les rôles.
+4. Tester clavier/mobile, ouvrir le PDF et enregistrer les captures de secours.
+5. Répéter PLAN_SOUTENANCE.md, puis sa version courte ; répondre sans lire aux
+   quinze questions de QUESTIONS_ESSENTIELLES.md.
+6. Faire confirmer les faits Scrum par le formateur. Ne pas compléter une
+   cérémonie ou un rôle non attesté avec des faits inventés.
+
+Facultatif après le jury : cohérence temporelle avancée, archivage officiel,
+durcissement production. Ces développements ne sont pas nécessaires à cette répétition.

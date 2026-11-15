@@ -40,3 +40,42 @@ Référence provisoire : liste transmise par l’utilisateur, sujet « Développ
 | Démonstrations 5–10 minutes | Prévu mais non réalisé dans les preuves disponibles | Répétition candidat à effectuer ; E2E ne prouve pas une review |
 
 « Non attesté » ne permet pas de conclure qu’un événement n’a jamais eu lieu ; le candidat doit apporter les preuves réelles ou expliquer l’écart au formateur.
+
+## Confrontation à la transcription des onze pages — préparation orale
+
+Le PDF original n'est pas disponible dans cet environnement. Cette section
+repose exclusivement sur la transcription fournie, pas sur une lecture des
+onze pages. Les numéros US01–US07 doivent être confrontés au PDF : la répartition
+ci-dessous suit l'ordre des sept besoins transcrits, sans garantir leurs intitulés originaux.
+
+| Story, correspondance provisoire | Implémentation | Preuve à montrer | État |
+|---|---|---|---|
+| US01 Connexion ADMIN | AuthenticationController, FirstAdminBootstrap, LoginPage.jsx | SecurityIntegrationTest, connexion E2E | Réalisé/testé |
+| US02 CRUD élèves | EleveController/Service, ElevesPage.jsx | frontend/e2e/admin-eleves.spec.js | Réalisé/testé |
+| US03 Saisie enseignant | NoteController, NoteService, NotesPage.jsx | roles-access.spec.js et NoteServiceTest | Réalisé/testé dans son périmètre |
+| US04 Bulletin enseignant | BulletinController, SecurityExpressions, BulletinsPage.jsx | BulletinControllerTest, AuthorizationHttpTest ; répétition enseignant à faire | Réalisé ; démonstration visuelle à répéter |
+| US05 Bulletin responsable | Même API, lien légal | roles-access.spec.js : bulletin propre autorisé, étranger refusé, PDF | Réalisé/testé |
+| US06 Protection JWT | JwtConfig, ActiveAccountJwtValidator, SecurityConfig | tests JWT et sécurité HTTP | Réalisé/testé |
+| US07 Export PDF ADMIN | BulletinController, BulletinPdfService | admin-bulletins.spec.js, BulletinPdfServiceTest | Réalisé/testé |
+
+Les noms Java ci-dessus sont sous backend/src/main/java/fr/afpa/backend ;
+les tests Java sous backend/src/test/java/fr/afpa/backend.
+Les pages React sont sous frontend/src/pages.
+
+MCD minimum demandé : Eleve, Classe, Inscription, Enseignant, Matiere,
+Enseignement, Note, Bulletin, Responsable, Utilisateur.
+La correspondance de « Utilisateur » dans le code est CompteUtilisateur ;
+PERSONNE porte l'identité et ne remplace pas le compte d'authentification.
+MLD : vérifier PK/FK et n:n via RESPONSABILITE_LEGALE et PONDERER ; les modèles
+Merise restent à corriger visuellement, leur conformité définitive n'est pas
+déclarée. Le MPD courant, JPA et UML sont les références de comparaison.
+
+JUnit 5, Mockito, AssertJ, MockMvc et intégration PostgreSQL sont présents dans
+backend/pom.xml et backend/src/test ; React/Tailwind dans frontend/package.json.
+PostgreSQL/Compose, README et GitHub sont livrés. Responsive, lisibilité et
+clavier exigent encore la recette personnelle ; tests verts ne prouvent pas
+une conformité visuelle exhaustive.
+
+Scrum : l'équipe de trois, PO formateur, rôles, sprints hebdomadaires et
+cérémonies ne peuvent pas être déduits des seuls commits. Conserver la section
+précédente et faire confirmer les faits réels ; aucun faux rapport à produire.
