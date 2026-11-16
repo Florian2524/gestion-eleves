@@ -55,7 +55,7 @@ export default function LoginPage() {
   if (isAuthenticated) {
     return (
       <Navigate
-        to="/espace"
+        to={typeof location.state?.from === "string" ? location.state.from : "/espace"}
         replace
       />
     );
@@ -166,7 +166,7 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="grid min-h-screen bg-school-blue-dark lg:grid-cols-[1.1fr_0.9fr]">
+    <main id="main-content" tabIndex={-1} className="grid min-h-screen bg-school-blue-dark lg:grid-cols-[1.1fr_0.9fr]">
       <section className="relative hidden min-h-screen overflow-hidden lg:block">
         <img
           src="/images/hero-campus.jpg"
@@ -190,9 +190,9 @@ export default function LoginPage() {
               Portail sécurisé
             </p>
 
-            <h1 className="mt-5 font-display text-6xl font-bold uppercase leading-[0.92] xl:text-7xl">
+            <p className="mt-5 font-display text-6xl font-bold uppercase leading-[0.92] xl:text-7xl">
               Accédez à votre espace scolaire
-            </h1>
+            </p>
 
             <p className="mt-7 max-w-xl text-lg leading-8 text-white/80">
               Retrouvez les élèves, les notes et les
@@ -223,7 +223,7 @@ export default function LoginPage() {
                 Scolarité
               </p>
 
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-300">
                 Gestion des élèves
               </p>
             </div>
@@ -234,9 +234,9 @@ export default function LoginPage() {
               Identification
             </p>
 
-            <h2 className="mt-2 font-display text-4xl font-bold uppercase text-white sm:text-5xl">
+            <h1 className="mt-2 font-display text-4xl font-bold uppercase text-white sm:text-5xl">
               Connexion
-            </h2>
+            </h1>
 
             <p className="mt-4 leading-7 text-zinc-400">
               Saisissez les identifiants associés à
@@ -282,6 +282,7 @@ export default function LoginPage() {
                     : "password"
                 }
                 label="Mot de passe"
+                controlClassName="pr-16"
                 placeholder="Au moins 8 caractères"
                 value={form.motDePasse}
                 onChange={updateField}
@@ -292,7 +293,9 @@ export default function LoginPage() {
 
               <button
                 type="button"
-                className="absolute right-3 top-10 grid size-10 place-items-center text-zinc-500 transition hover:text-brand-yellow"
+                className="absolute right-3 top-10 grid size-10 place-items-center text-zinc-300 transition hover:text-brand-yellow"
+                aria-controls="motDePasse"
+                aria-pressed={showPassword}
                 aria-label={
                   showPassword
                     ? "Masquer le mot de passe"
@@ -326,7 +329,7 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <div className="mt-8 flex items-start gap-3 border-t border-zinc-800 pt-6 text-sm leading-6 text-zinc-500">
+          <div className="mt-8 flex items-start gap-3 border-t border-zinc-800 pt-6 text-sm leading-6 text-zinc-300">
             <ShieldCheck
               size={21}
               className="mt-0.5 shrink-0 text-brand-yellow"

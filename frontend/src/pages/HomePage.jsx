@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 
 import AppHeader from "../components/layout/AppHeader";
+import { useAuth } from "../context/authContextCore";
 
 const services = [
   {
@@ -26,6 +27,8 @@ const services = [
     description:
       "Saisissez les résultats et accompagnez la progression de chaque élève.",
     action: "Gérer les notes",
+    responsibleAction: "Voir les résultats",
+    responsibleDescription: "Consultez les résultats et suivez la progression de vos élèves.",
     icon: NotebookPen,
   },
   {
@@ -55,11 +58,13 @@ const highlights = [
 ];
 
 export default function HomePage() {
+  const { auth, isAuthenticated } = useAuth();
+  const isResponsible = isAuthenticated && auth?.role === "RESPONSABLE";
   return (
     <div className="min-h-screen bg-school-paper">
       <AppHeader />
 
-      <main>
+      <main id="main-content" tabIndex={-1}>
         <section
           id="accueil"
           className="relative isolate flex min-h-[650px] items-end overflow-hidden bg-school-blue-dark"
@@ -85,15 +90,14 @@ export default function HomePage() {
             </h1>
 
             <p className="mt-7 max-w-2xl text-base leading-8 text-white/85 sm:text-lg">
-              Centralisez les dossiers des élèves,
-              simplifiez la saisie des notes et rendez
-              les bulletins accessibles depuis un
-              espace unique et sécurisé.
+              {isResponsible
+                ? "Retrouvez les dossiers de vos élèves, consultez leurs résultats et accédez aux bulletins depuis un espace unique et sécurisé."
+                : "Centralisez les dossiers des élèves, simplifiez la saisie des notes et rendez les bulletins accessibles depuis un espace unique et sécurisé."}
             </p>
 
             <div className="mt-9 flex flex-wrap gap-3">
               <a
-                href="#eleves"
+                href="/eleves"
                 className="inline-flex min-h-13 items-center gap-3 bg-brand-yellow px-7 py-3 font-display text-lg font-semibold uppercase text-black transition hover:bg-white"
               >
                 Consulter les élèves
@@ -101,10 +105,10 @@ export default function HomePage() {
               </a>
 
               <a
-                href="#notes"
+                href="/notes"
                 className="inline-flex min-h-13 items-center gap-3 border-2 border-white bg-black/20 px-7 py-3 font-display text-lg font-semibold uppercase text-white transition hover:border-brand-yellow hover:text-brand-yellow"
               >
-                Saisir une note
+                {isResponsible ? "Consulter les notes" : "Saisir une note"}
               </a>
             </div>
           </div>
@@ -154,14 +158,14 @@ export default function HomePage() {
                       </h3>
 
                       <p className="mt-5 leading-7 text-school-muted group-hover:text-white/75">
-                        {service.description}
+                        {isResponsible ? service.responsibleDescription ?? service.description : service.description}
                       </p>
 
                       <a
-                        href={`#${service.id}`}
+                        href={`/${service.id}`}
                         className="mt-auto inline-flex items-center gap-2 pt-8 font-display text-lg font-semibold uppercase text-school-blue group-hover:text-brand-yellow"
                       >
-                        {service.action}
+                        {isResponsible ? service.responsibleAction ?? service.action : service.action}
                         <ArrowRight size={19} />
                       </a>
                     </article>
@@ -270,13 +274,13 @@ export default function HomePage() {
                 </p>
 
                 <h2 className="mt-3 font-display text-4xl font-bold uppercase leading-tight">
-                  Connectez-vous à votre espace
+                  {isAuthenticated ? "Retrouvez votre espace scolaire" : "Connectez-vous à votre espace"}
                 </h2>
 
                 <p className="mt-5 leading-7 text-zinc-400">
-                  Chaque utilisateur accède aux
-                  fonctionnalités correspondant à son
-                  rôle au sein de l’établissement.
+                  {isAuthenticated
+                    ? "Votre session est active. Retrouvez les fonctionnalités accessibles à votre profil dans votre tableau de bord."
+                    : "Chaque utilisateur accède aux fonctionnalités correspondant à son rôle au sein de l’établissement."}
                 </p>
 
                 <div className="mt-9 border-t border-zinc-800 pt-7">
@@ -305,7 +309,7 @@ export default function HomePage() {
 
                 <a
                   id="connexion"
-                  href="/connexion"
+                  href={isAuthenticated ? "/espace" : "/connexion"}
                   className="mt-auto inline-flex min-h-13 items-center justify-center gap-3 bg-brand-yellow px-6 py-3 font-display text-lg font-semibold uppercase text-black"
                 >
                   Accéder à mon espace
@@ -320,7 +324,7 @@ export default function HomePage() {
       <footer className="bg-school-blue-dark text-white">
         <div className="mx-auto flex max-w-[1440px] flex-col gap-3 px-4 py-8 text-sm sm:px-6 md:flex-row md:items-center md:justify-between lg:px-10">
           <p className="font-semibold">
-            Gestion des élèves
+            Scolarité · Gestion des élèves
           </p>
 
           <p className="text-white/60">

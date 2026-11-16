@@ -1,3 +1,8 @@
+import Button from "../components/ui/Button";
+import Panel from "../components/ui/Panel";
+import StatusMessage from "../components/ui/StatusMessage";
+import { lightControlClass } from "../components/ui/controlStyles";
+import ConnectedHeader from "../components/layout/ConnectedHeader";
 import PersonneChoice from "../components/school/PersonneChoice";
 import { attachProfile, listResource } from "../api/schoolApi";
 import {
@@ -7,32 +12,15 @@ import {
 } from "react";
 
 import {
-  ArrowLeft,
-  CalendarDays,
-  GraduationCap,
-  LogOut,
-  Mail,
   RefreshCw,
   Search,
-  ShieldAlert,
   UserRound,
   Users,
 } from "lucide-react";
 
-import {
-  Link,
-  useNavigate,
-} from "react-router";
-
 import { createEleve, deleteEleve, deleteElevePhoto, getElevePhoto, getEleves, updateEleve, uploadElevePhoto } from "../api/elevesApi";
 import { ApiError } from "../api/http";
 import { useAuth } from "../context/authContextCore";
-
-const roleLabels = {
-  ADMIN: "Administrateur",
-  ENSEIGNANT: "Enseignant",
-  RESPONSABLE: "Responsable légal",
-};
 
 function normalizeText(value) {
   return String(value ?? "")
@@ -125,41 +113,51 @@ function EleveForm({ eleve, onSave, onCancel, saving }) {
     ["emailContact", "E-mail", "email"], ["telephone", "Téléphone", "tel"],
     ["adresse", "Adresse", "text"],
   ];
-  return <form onSubmit={(event) => { event.preventDefault(); onSave(attaching ? { idPersonne: Number(idPersonne), matricule: values.matricule, dateNaissance: values.dateNaissance } : values, photo); }} className="mt-7 bg-white p-6 shadow-sm">
-    <h2 className="font-display text-2xl font-bold uppercase text-school-blue">{eleve ? "Modifier l’élève" : "Ajouter un élève"}</h2>
-    {!eleve && <label className="mt-4 block font-semibold">Création du profil
-      <select value={mode} onChange={(event) => setMode(event.target.value)} className="mt-2 min-h-11 w-full border border-slate-300 px-3">
+  return <Panel as="form" aria-labelledby="eleve-form-title" onSubmit={(event) => { event.preventDefault(); onSave(attaching ? { idPersonne: Number(idPersonne), matricule: values.matricule, dateNaissance: values.dateNaissance } : values, photo); }} className="mt-6 border-t-4 border-t-school-blue p-4 sm:p-6">
+    <h2 id="eleve-form-title" className="font-display text-2xl font-semibold text-school-blue-dark">{eleve ? "Modifier l’élève" : "Ajouter un élève"}</h2>
+    <p className="mt-2 text-sm leading-6 text-school-muted">Les champs marqués d’un astérisque (*) sont obligatoires.</p>
+    {!eleve && <label className="mt-4 block text-sm font-semibold">Création du profil
+      <select value={mode} onChange={(event) => setMode(event.target.value)} disabled={saving} className={lightControlClass}>
         <option value="new">Créer une nouvelle personne</option><option value="existing">Rattacher à une personne existante</option>
       </select>
     </label>}
     {attaching && <PersonneChoice people={people} value={idPersonne} onChange={setIdPersonne} profileType="ELEVE" disabled={saving} />}
-    {attaching && peopleError && <p role="alert">{peopleError}</p>}
-    {eleve && <p className="mt-4">Les nom, prénom et coordonnées sont communs à tous les profils de cette personne.</p>}
-    <div className="mt-5 grid gap-4 sm:grid-cols-2">
-      {fields.filter(([name]) => !attaching || ["matricule", "dateNaissance"].includes(name)).map(([name, label, type, required]) => <label key={name} className="block text-sm font-semibold text-school-ink">
-        {label}{required ? " *" : ""}
-        <input type={type} required={required} maxLength={name === "matricule" ? 50 : name === "telephone" ? 30 : name === "adresse" ? 500 : name === "emailContact" ? 255 : 100}
-          value={values[name] ?? ""} onChange={(event) => setValues({ ...values, [name]: event.target.value })}
-          className="mt-2 min-h-11 w-full border border-slate-300 px-3 outline-none focus:border-school-blue" />
-      </label>)}
-      <label className="block text-sm font-semibold text-school-ink">Photo (JPEG, PNG, GIF ou WebP, 5 Mo max.)
-        <input type="file" accept="image/jpeg,image/png,image/gif,image/webp" onChange={(event) => setPhoto(event.target.files?.[0] ?? null)} className="mt-2 block w-full" />
-      </label>
+    {attaching && peopleError && <StatusMessage variant="error" className="mt-4">{peopleError}</StatusMessage>}
+    {eleve && <p className="mt-4 text-sm leading-6 text-school-muted">Les nom, prénom et coordonnées sont communs à tous les profils de cette personne.</p>}
+    <div className="mt-5 space-y-5">
+      {[
+        ["Identité et coordonnées", ["nom", "prenom", "emailContact", "telephone", "adresse"]],
+        ["Informations scolaires", ["matricule", "dateNaissance"]],
+      ].filter(([, names]) => !attaching || names.includes("matricule")).map(([legend, names]) => (
+        <fieldset key={legend} className="min-w-0 border-t border-slate-200 pt-4">
+          <legend className="pr-3 text-sm font-bold text-school-blue">{legend}</legend>
+          <div className="grid min-w-0 gap-4 sm:grid-cols-2">
+            {fields.filter(([name]) => names.includes(name)).map(([name, label, type, required]) => (
+              <div key={name} className={`min-w-0 ${name === "adresse" ? "sm:col-span-2" : ""}`}>
+                <div className="flex gap-1 text-sm font-semibold text-school-ink"><label htmlFor={`eleve-${name}`}>{label}</label>{required && <span aria-hidden="true">*</span>}</div>
+                <input id={`eleve-${name}`} type={type} required={required} disabled={saving} maxLength={name === "matricule" ? 50 : name === "telephone" ? 30 : name === "adresse" ? 500 : name === "emailContact" ? 255 : 100}
+                  value={values[name] ?? ""} onChange={(event) => setValues({ ...values, [name]: event.target.value })} className={lightControlClass} />
+              </div>
+            ))}
+          </div>
+        </fieldset>
+      ))}
+      <div className="min-w-0 border-t border-slate-200 pt-4">
+        <label htmlFor="eleve-photo" className="block text-sm font-semibold text-school-ink">Photo de l’élève</label>
+        <input id="eleve-photo" type="file" accept="image/jpeg,image/png,image/gif,image/webp" aria-describedby="eleve-photo-hint" disabled={saving} onChange={(event) => setPhoto(event.target.files?.[0] ?? null)} className={`${lightControlClass} text-sm file:mr-3 file:border-0 file:bg-school-blue-light file:px-3 file:py-2 file:font-semibold file:text-school-blue-dark`} />
+        <p id="eleve-photo-hint" className="mt-2 text-sm leading-6 text-school-muted">Facultative. Formats JPEG, PNG, GIF ou WebP, 5 Mo maximum.</p>
+      </div>
     </div>
-    <div className="mt-5 flex flex-wrap gap-3">
-      <button disabled={saving} type="submit" className="min-h-11 bg-school-blue px-5 font-bold text-white disabled:opacity-50">{saving ? "Enregistrement..." : "Enregistrer"}</button>
-      <button type="button" onClick={onCancel} className="min-h-11 border border-slate-300 px-5 font-bold">Annuler</button>
+    <div className="mt-6 flex flex-wrap gap-3 border-t border-slate-200 pt-5">
+      <Button loading={saving} type="submit" variant="school">{saving ? "Enregistrement..." : "Enregistrer"}</Button>
+      <Button disabled={saving} onClick={onCancel} variant="secondary">Annuler</Button>
     </div>
-  </form>;
+  </Panel>;
 }
 
 export default function ElevesPage() {
-  const navigate = useNavigate();
 
-  const {
-    auth,
-    logout,
-  } = useAuth();
+  const { auth } = useAuth();
 
   const [eleves, setEleves] =
     useState([]);
@@ -216,16 +214,11 @@ export default function ElevesPage() {
   function actions(eleve) {
     if (!isAdmin) return null;
     return <div className="flex flex-wrap gap-2 text-sm font-semibold">
-      <button type="button" onClick={() => { setEditing(eleve); setActionError(""); }} className="text-school-blue underline">Modifier</button>
-      {eleve.photoUrl && <button type="button" onClick={() => removePhoto(eleve)} className="text-school-blue underline">Retirer photo</button>}
-      <button type="button" onClick={() => removeEleve(eleve)} className="text-red-700 underline">Supprimer</button>
+      <Button type="button" onClick={() => { setEditing(eleve); setActionError(""); }} variant="secondary">Modifier</Button>
+      {eleve.photoUrl && <Button type="button" onClick={() => removePhoto(eleve)} variant="secondary">Retirer photo</Button>}
+      <Button type="button" onClick={() => removeEleve(eleve)} variant="danger">Supprimer</Button>
     </div>;
   }
-
-  const roleLabel =
-    roleLabels[auth?.role] ??
-    auth?.role ??
-    "Utilisateur";
 
   useEffect(() => {
     const controller =
@@ -327,380 +320,93 @@ export default function ElevesPage() {
     });
   }, [eleves, search]);
 
-  function handleLogout() {
-    logout();
-
-    navigate(
-      "/connexion",
-      {
-        replace: true,
-      },
-    );
-  }
-
   return (
     <div className="min-h-screen bg-school-paper">
-      <header className="bg-school-blue-dark text-white">
-        <div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-5 px-4 py-5 sm:px-6 lg:px-10">
-          <Link
-            to="/espace"
-            className="flex items-center gap-3"
-          >
-            <span className="grid size-12 place-items-center bg-brand-yellow text-black">
-              <GraduationCap size={27} />
-            </span>
-
-            <span>
-              <span className="block font-display text-2xl font-bold uppercase">
-                Scolarité
-              </span>
-
-              <span className="block text-xs uppercase tracking-[0.18em] text-white/55">
-                Gestion des élèves
-              </span>
-            </span>
-          </Link>
-
-          <div className="flex items-center gap-5">
-            <div className="hidden text-right sm:block">
-              <p className="font-semibold">
-                {auth?.emailConnexion}
-              </p>
-
-              <p className="text-xs uppercase tracking-wider text-white/55">
-                {roleLabel}
-              </p>
+      <ConnectedHeader />
+      <main id="main-content" tabIndex={-1} className="mx-auto max-w-[1440px] px-4 py-8 sm:px-6 lg:px-10">
+        <Panel className="p-4 sm:p-6">
+          <div className="flex flex-wrap items-start justify-between gap-5">
+            <div className="min-w-0 border-l-4 border-brand-yellow pl-4">
+              <p className="text-sm font-bold uppercase tracking-widest text-school-blue">Dossiers scolaires</p>
+              <h1 className="mt-1 font-display text-3xl font-bold uppercase text-school-blue-dark sm:text-4xl">Liste des élèves</h1>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-school-muted">Consultez les dossiers accessibles à votre profil. Recherchez un élève par identité, matricule ou coordonnées.</p>
             </div>
-
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="inline-flex min-h-11 items-center gap-2 border border-white/25 px-4 font-semibold transition hover:border-brand-yellow hover:text-brand-yellow"
-            >
-              <LogOut size={18} />
-              Déconnexion
-            </button>
+            {isAdmin && <Button onClick={() => { setEditing(null); setActionError(""); }} variant="primary"><Users size={18} aria-hidden="true" />Ajouter un élève</Button>}
           </div>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-[1440px] px-4 py-8 sm:px-6 lg:px-10 lg:py-12">
-        {isAdmin && <button type="button" onClick={() => { setEditing(null); setActionError(""); }} className="mb-5 min-h-11 bg-school-blue px-5 font-bold text-white">Ajouter un élève</button>}
-        {actionError && <p role="alert" className="mb-5 border border-red-300 bg-red-50 p-4 text-red-800">{actionError}</p>}
-        {notice && <p role="status" className="mb-5 border border-green-300 bg-green-50 p-4 text-green-800">{notice}</p>}
+          <div className="mt-5 border-t border-slate-200 pt-5">
+            <label htmlFor="eleves-search" className="block text-sm font-semibold text-school-ink">Rechercher un élève</label>
+            <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="relative w-full sm:max-w-xl">
+                <Search size={20} aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-school-muted" />
+                <input id="eleves-search" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Nom, prénom, matricule ou contact…" className={`${lightControlClass} mt-0 pl-10`} />
+              </div>
+              {!loading && !error && <p role="status" className="text-sm font-semibold text-school-blue">{filteredEleves.length} résultat{filteredEleves.length > 1 ? "s" : ""} sur {eleves.length} élève{eleves.length > 1 ? "s" : ""}</p>}
+            </div>
+          </div>
+        </Panel>
+        {actionError && <StatusMessage variant="error" className="mt-5">{actionError}</StatusMessage>}
+        {notice && <StatusMessage variant="success" className="mt-5">{notice}</StatusMessage>}
         {isAdmin && editing !== undefined && <EleveForm key={editing?.idPersonne ?? "new"} eleve={editing} onSave={saveEleve} onCancel={() => setEditing(undefined)} saving={saving} />}
-        <Link
-          to="/espace"
-          className="inline-flex items-center gap-2 font-semibold text-school-blue transition hover:text-school-blue-dark"
-        >
-          <ArrowLeft size={18} />
-          Retour à l’espace sécurisé
-        </Link>
-
-        <section className="mt-7 bg-white p-6 shadow-[0_18px_50px_rgba(23,23,23,0.06)] sm:p-8 lg:p-10">
-          <div className="flex flex-col justify-between gap-7 lg:flex-row lg:items-end">
-            <div>
-              <p className="font-display text-base font-semibold uppercase tracking-[0.18em] text-school-blue">
-                Dossiers scolaires
-              </p>
-
-              <h1 className="mt-2 font-display text-5xl font-bold uppercase leading-none text-school-ink sm:text-6xl">
-                Liste des élèves
-              </h1>
-
-              <p className="mt-5 max-w-2xl leading-7 text-school-muted">
-                Consultez les élèves enregistrés dans
-                l’établissement et recherchez un dossier
-                par identité, matricule ou coordonnées.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-4 bg-school-blue-light/50 px-5 py-4">
-              <Users
-                size={30}
-                className="text-school-blue"
-              />
-
-              <div>
-                <p className="font-display text-3xl font-bold text-school-blue">
-                  {loading
-                    ? "—"
-                    : eleves.length}
-                </p>
-
-                <p className="text-sm text-school-muted">
-                  élèves enregistrés
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-9 flex flex-col gap-4 border-t border-slate-200 pt-7 sm:flex-row sm:items-center sm:justify-between">
-            <label className="relative block w-full max-w-xl">
-              <span className="sr-only">
-                Rechercher un élève
-              </span>
-
-              <Search
-                size={20}
-                className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-              />
-
-              <input
-                type="search"
-                value={search}
-                onChange={(event) =>
-                  setSearch(event.target.value)
-                }
-                placeholder="Nom, prénom, matricule ou contact..."
-                className="min-h-12 w-full border border-slate-300 bg-white pl-12 pr-4 text-school-ink outline-none transition placeholder:text-slate-400 focus:border-school-blue focus:ring-2 focus:ring-school-blue/15"
-              />
-            </label>
-
-            {!loading && !error && (
-              <p className="shrink-0 text-sm font-semibold text-school-muted">
-                {filteredEleves.length}
-                {" "}
-                résultat
-                {filteredEleves.length > 1
-                  ? "s"
-                  : ""}
-              </p>
-            )}
-          </div>
-        </section>
-
-        {loading && (
-          <section
-            aria-live="polite"
-            className="mt-7 grid min-h-64 place-items-center bg-white p-8"
-          >
-            <div className="text-center">
-              <RefreshCw
-                size={38}
-                className="mx-auto animate-spin text-school-blue"
-              />
-
-              <p className="mt-5 font-semibold text-school-muted">
-                Chargement des élèves...
-              </p>
-            </div>
-          </section>
-        )}
-
+        {loading && <StatusMessage className="mt-5">Chargement des élèves...</StatusMessage>}
         {!loading && error && (
-          <section
-            role="alert"
-            className="mt-7 flex flex-col items-start gap-5 border border-red-200 bg-red-50 p-7 sm:flex-row sm:items-center sm:justify-between"
-          >
-            <div className="flex items-start gap-4">
-              <ShieldAlert
-                size={28}
-                className="shrink-0 text-red-600"
-              />
-
-              <div>
-                <h2 className="font-display text-2xl font-bold uppercase text-red-800">
-                  Chargement impossible
-                </h2>
-
-                <p className="mt-2 text-red-700">
-                  {error}
-                </p>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() =>
-                setReloadKey(
-                  (currentKey) =>
-                    currentKey + 1,
-                )
-              }
-              className="inline-flex min-h-11 items-center gap-2 bg-red-700 px-5 font-semibold text-white transition hover:bg-red-800"
-            >
-              <RefreshCw size={18} />
-              Réessayer
-            </button>
-          </section>
+          <Panel className="mt-5 border-red-300 p-4 sm:p-6">
+            <StatusMessage variant="error">Chargement impossible : {error}</StatusMessage>
+            <Button variant="danger" className="mt-4" onClick={() => setReloadKey((currentKey) => currentKey + 1)}><RefreshCw size={18} aria-hidden="true" />Réessayer</Button>
+          </Panel>
         )}
-
-        {!loading &&
-          !error &&
-          filteredEleves.length === 0 && (
-            <section className="mt-7 grid min-h-64 place-items-center bg-white p-8 text-center">
-              <div>
-                <UserRound
-                  size={45}
-                  className="mx-auto text-slate-300"
-                />
-
-                <h2 className="mt-5 font-display text-3xl font-bold uppercase text-school-blue">
-                  Aucun élève trouvé
-                </h2>
-
-                <p className="mt-3 text-school-muted">
-                  {search
-                    ? "Aucun dossier ne correspond à votre recherche."
-                    : "Aucun élève n’est encore enregistré."}
-                </p>
-              </div>
-            </section>
-          )}
-
-        {!loading &&
-          !error &&
-          filteredEleves.length > 0 && (
-            <>
-              <section className="mt-7 hidden overflow-hidden bg-white shadow-[0_18px_50px_rgba(23,23,23,0.05)] md:block">
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[850px] border-collapse text-left">
-                    <thead className="bg-school-blue text-white">
-                      <tr>
-                        <th className="px-6 py-4 text-sm uppercase tracking-wider">
-                          Élève
-                        </th>
-
-                        <th className="px-6 py-4 text-sm uppercase tracking-wider">
-                          Matricule
-                        </th>
-
-                        <th className="px-6 py-4 text-sm uppercase tracking-wider">
-                          Contact
-                        </th>
-
-                        {isAdmin && <th className="px-6 py-4 text-sm uppercase tracking-wider">Actions</th>}
-                        <th className="px-6 py-4 text-sm uppercase tracking-wider">
-                          Naissance
-                        </th>
+        {!loading && !error && filteredEleves.length === 0 && (
+          <Panel className="mt-5 p-6 text-center">
+            <UserRound size={32} aria-hidden="true" className="mx-auto text-school-blue" />
+            <h2 className="mt-3 font-display text-2xl font-semibold text-school-blue">Aucun élève trouvé</h2>
+            <p className="mt-2 text-sm leading-6 text-school-muted">{search ? "Aucun dossier ne correspond à votre recherche. Essayez un autre nom, un matricule ou des coordonnées." : "Aucun élève n’est encore enregistré."}</p>
+          </Panel>
+        )}
+        {!loading && !error && filteredEleves.length > 0 && (
+          <>
+            <Panel className="mt-5 hidden min-w-0 overflow-hidden md:block">
+              <div className="overflow-x-auto" role="region" aria-label="Tableau des élèves" tabIndex={0}>
+                <table className="w-full min-w-[850px] border-collapse text-left text-sm">
+                  <caption className="sr-only">Dossiers des élèves correspondant à la recherche</caption>
+                  <thead className="bg-school-blue text-white"><tr>
+                    <th scope="col" className="px-4 py-3">Élève</th>
+                    <th scope="col" className="px-4 py-3">Matricule</th>
+                    <th scope="col" className="px-4 py-3">Coordonnées</th>
+                    <th scope="col" className="px-4 py-3">Naissance</th>
+                    {isAdmin && <th scope="col" className="px-4 py-3">Actions</th>}
+                  </tr></thead>
+                  <tbody>
+                    {filteredEleves.map((eleve) => (
+                      <tr key={eleve.idPersonne} className="border-b border-slate-200 align-top transition-colors last:border-0 hover:bg-school-blue-light/25 focus-within:bg-school-blue-light/25">
+                        <td className="px-4 py-4"><div className="flex items-center gap-3"><ElevePortrait eleve={eleve} /><p className="max-w-56 break-words font-semibold text-school-blue-dark">{eleve.prenom} {eleve.nom}</p></div></td>
+                        <td className="max-w-44 break-words px-4 py-4 font-semibold text-school-blue">{eleve.matricule ?? "Non renseigné"}</td>
+                        <td className="max-w-64 px-4 py-4 [overflow-wrap:anywhere]"><p>{eleve.emailContact ?? "E-mail non renseigné"}</p><p className="mt-1 text-school-muted">{eleve.telephone ?? "Téléphone non renseigné"}</p>{eleve.adresse && <p className="mt-1 text-school-muted">{eleve.adresse}</p>}</td>
+                        <td className="px-4 py-4 text-school-muted">{formatDate(eleve.dateNaissance)}</td>
+                        {isAdmin && <td className="px-4 py-4">{actions(eleve)}</td>}
                       </tr>
-                    </thead>
-
-                    <tbody>
-                      {filteredEleves.map(
-                        (eleve) => (
-                          <tr
-                            key={eleve.idPersonne}
-                            className="border-b border-slate-200 transition last:border-0 hover:bg-school-blue-light/25"
-                          >
-                            <td className="px-6 py-5">
-                              <div className="flex items-center gap-4">
-                                <ElevePortrait eleve={eleve} />
-
-                                <div>
-                                  <p className="font-semibold text-school-ink">
-                                    {eleve.prenom}
-                                    {" "}
-                                    {eleve.nom}
-                                  </p>
-
-                                  <p className="mt-1 text-sm text-school-muted">
-                                    {eleve.emailContact ??
-                                      "Coordonnées non renseignées"}
-                                  </p>
-                                </div>
-                              </div>
-                            </td>
-
-                            <td className="px-6 py-5 font-semibold text-school-blue">
-                              {eleve.matricule ??
-                                "Non renseigné"}
-                            </td>
-
-                            <td className="px-6 py-5">
-                              <p className="text-school-ink">
-                                {eleve.emailContact ??
-                                  "Non renseigné"}
-                              </p>
-
-                              <p className="mt-1 text-sm text-school-muted">
-                                {eleve.telephone ??
-                                  "Téléphone non renseigné"}
-                              </p>
-                            </td>
-
-                            {isAdmin && <td className="px-6 py-5">{actions(eleve)}</td>}
-                            <td className="px-6 py-5 text-school-muted">
-                              {formatDate(
-                                eleve.dateNaissance,
-                              )}
-                            </td>
-                          </tr>
-                        ),
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </section>
-
-              <section className="mt-7 grid gap-4 md:hidden">
-                {filteredEleves.map((eleve) => (
-                  <article
-                    key={eleve.idPersonne}
-                    className="bg-white p-6 shadow-[0_12px_35px_rgba(23,23,23,0.05)]"
-                  >
-                    <div className="flex items-start gap-4">
-                      <ElevePortrait eleve={eleve} />
-
-                      <div className="min-w-0">
-                        <h2 className="font-display text-2xl font-bold uppercase text-school-blue">
-                          {eleve.prenom}
-                          {" "}
-                          {eleve.nom}
-                        </h2>
-
-                        <p className="mt-1 text-sm font-semibold text-school-muted">
-                          {eleve.matricule ??
-                            "Matricule non renseigné"}
-                        </p>
-                      </div>
-                    </div>
-
-                    <dl className="mt-6 space-y-4 border-t border-slate-200 pt-5">
-                      <div className="flex items-start gap-3">
-                        <Mail
-                          size={19}
-                          className="mt-0.5 shrink-0 text-school-blue"
-                        />
-
-                        <div>
-                          <dt className="text-xs font-bold uppercase tracking-wider text-school-muted">
-                            Contact
-                          </dt>
-
-                          <dd className="mt-1 break-words text-school-ink">
-                            {eleve.emailContact ??
-                              "Non renseigné"}
-                          </dd>
-                        </div>
-                      </div>
-
-                      <div className="flex items-start gap-3">
-                        <CalendarDays
-                          size={19}
-                          className="mt-0.5 shrink-0 text-school-blue"
-                        />
-
-                        <div>
-                          <dt className="text-xs font-bold uppercase tracking-wider text-school-muted">
-                            Date de naissance
-                          </dt>
-
-                          <dd className="mt-1 text-school-ink">
-                            {formatDate(
-                              eleve.dateNaissance,
-                            )}
-                          </dd>
-                        </div>
-                      </div>
-                    </dl>
-                    {isAdmin && <div className="mt-5">{actions(eleve)}</div>}
-                  </article>
-                ))}
-              </section>
-            </>
-          )}
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Panel>
+            <section aria-label="Cartes des élèves" className="mt-5 grid gap-4 md:hidden">
+              {filteredEleves.map((eleve) => (
+                <Panel as="article" key={eleve.idPersonne} className="min-w-0 p-4">
+                  <div className="flex items-start gap-3">
+                    <ElevePortrait eleve={eleve} />
+                    <div className="min-w-0"><h2 className="break-words font-display text-2xl font-semibold text-school-blue-dark">{eleve.prenom} {eleve.nom}</h2><p className="mt-1 break-words text-sm font-semibold text-school-muted">Matricule : {eleve.matricule ?? "Non renseigné"}</p></div>
+                  </div>
+                  <dl className="mt-4 space-y-3 border-t border-slate-200 pt-4 text-sm leading-6">
+                    <div className="min-w-0"><dt className="font-semibold text-school-muted">E-mail</dt><dd className="[overflow-wrap:anywhere]">{eleve.emailContact ?? "Non renseigné"}</dd></div>
+                    <div><dt className="font-semibold text-school-muted">Téléphone</dt><dd className="[overflow-wrap:anywhere]">{eleve.telephone ?? "Non renseigné"}</dd></div>
+                    {eleve.adresse && <div><dt className="font-semibold text-school-muted">Adresse</dt><dd className="[overflow-wrap:anywhere]">{eleve.adresse}</dd></div>}
+                    <div><dt className="font-semibold text-school-muted">Date de naissance</dt><dd>{formatDate(eleve.dateNaissance)}</dd></div>
+                  </dl>
+                  {isAdmin && <div className="mt-4 border-t border-slate-200 pt-4">{actions(eleve)}</div>}
+                </Panel>
+              ))}
+            </section>
+          </>
+        )}
       </main>
     </div>
   );

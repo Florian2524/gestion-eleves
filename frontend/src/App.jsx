@@ -1,3 +1,4 @@
+import NavigationAccessibility from "./components/layout/NavigationAccessibility";
 import {
   Navigate,
   Route,
@@ -20,6 +21,8 @@ const rolesAutorises = ["ADMIN", "ENSEIGNANT", "RESPONSABLE"];
 
 export default function App() {
   return (
+    <>
+      <NavigationAccessibility />
     <Routes>
       <Route
         path="/"
@@ -92,5 +95,6 @@ export default function App() {
         }
       />
     </Routes>
+    </>
   );
 }

@@ -1,3 +1,4 @@
+import { lightControlClass } from "../ui/controlStyles";
 import { profileLabels } from "./personneProfiles";
 
 export default function PersonneChoice({ people, value, onChange, profileType, disabled }) {
@@ -5,7 +6,7 @@ export default function PersonneChoice({ people, value, onChange, profileType, d
   const selected = candidates.find((person) => String(person.idPersonne) === String(value));
   return <div className="mt-4 border border-school-blue bg-school-paper p-4">
     <label className="block font-semibold">Personne existante
-      <select required disabled={disabled} value={value} onChange={(event) => onChange(event.target.value)} className="mt-2 min-h-11 w-full border border-slate-300 bg-white px-3">
+      <select required disabled={disabled} value={value} onChange={(event) => onChange(event.target.value)} className={lightControlClass}>
         <option value="">Choisir une personne…</option>
         {candidates.map((person) => <option key={person.idPersonne} value={person.idPersonne}>{person.prenom} {person.nom} · #{person.idPersonne} · {profileLabels(person.profils)}{person.emailContact ? ` · ${person.emailContact}` : ""}</option>)}
       </select>

@@ -1,0 +1,2 @@
+// Shared by native controls in light business forms; dark login fields stay separate.
+export const lightControlClass = "mt-2 min-h-11 w-full min-w-0 rounded-none border border-slate-400 bg-white px-3 py-2 text-school-ink placeholder:text-slate-500 transition-colors enabled:hover:border-school-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-school-blue disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-100 disabled:text-slate-600";

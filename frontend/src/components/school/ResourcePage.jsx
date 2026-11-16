@@ -1,5 +1,9 @@
+import Panel from "../ui/Panel";
+import Button from "../ui/Button";
+import StatusMessage from "../ui/StatusMessage";
+import { lightControlClass } from "../ui/controlStyles";
+import ConnectedHeader from "../layout/ConnectedHeader";
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router";
 import { attachProfile, createResource, deleteResource, listResource, updateResource } from "../../api/schoolApi";
 import { useAuth } from "../../context/authContextCore";
 import { schoolLabels, schoolLookups } from "./schoolData";
@@ -8,10 +12,10 @@ import PersonneChoice from "./PersonneChoice";
 import { profileLabels } from "./personneProfiles";
 
 const identityFields = new Set(["nom", "prenom", "emailContact", "telephone", "adresse"]);
-const fieldClass = "mt-2 min-h-11 w-full border border-slate-300 bg-white px-3 text-school-ink focus:border-school-blue";
+const fieldClass = lightControlClass;
 const emptyLookups = [];
 
-export default function ResourcePage({ title, resource, idKey, getId, description, fields, columns, lookups = emptyLookups, profileType, canWrite = (role) => role === "ADMIN", validate }) {
+export default function ResourcePage({ title, resource, idKey, getId, description, fields, columns, lookups = emptyLookups, profileType, canWrite = (role) => role === "ADMIN", validate, formFields: FormFields, rowDetails: RowDetails, formLabel, fieldGroups, primaryColumn }) {
   const rowId = getId ?? ((row) => row[idKey]);
   const { auth } = useAuth();
   const writable = canWrite(auth?.role);
@@ -95,49 +99,64 @@ export default function ResourcePage({ title, resource, idKey, getId, descriptio
   }
 
   const labels = schoolLabels(data);
-  return <div className="min-h-screen bg-school-paper px-4 py-8 sm:px-6">
-    <main className="mx-auto max-w-6xl">
-      <Link to="/espace" className="font-semibold text-school-blue underline">← Tableau de bord</Link>
+  return <div className="min-h-screen bg-school-paper">
+    <ConnectedHeader /><main id="main-content" tabIndex={-1} className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+      {primaryColumn ? (
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0 w-full border-l-4 border-brand-yellow pl-4 sm:w-auto sm:flex-1">
+            <h1 className="font-display text-3xl font-bold uppercase text-school-blue-dark [overflow-wrap:anywhere] sm:text-4xl">{title}</h1>
+            {description && <p className="mt-2 max-w-3xl text-sm leading-6 text-school-muted">{description}</p>}
+          </div>
+          {writable && <Button type="button" disabled={busy} onClick={() => open()} variant="primary">Ajouter</Button>}
+        </div>
+      ) : (
+        <>
       <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
-        <h1 className="font-display text-4xl font-bold uppercase text-school-blue">{title}</h1>
-        {writable && <button type="button" disabled={busy} onClick={() => open()} className="bg-school-blue px-5 py-3 font-bold text-white disabled:opacity-50">Ajouter</button>}
+        <h1 className="min-w-0 break-words font-display text-3xl font-bold uppercase text-school-blue sm:text-4xl">{title}</h1>
+        {writable && <Button type="button" disabled={busy} onClick={() => open()} variant="school">Ajouter</Button>}
       </div>
       {description && <p className="mt-4 text-school-muted">{description}</p>}
-      {loading && <p role="status" className="mt-6">Chargement…</p>}
-      {error && <p role="alert" className="mt-6 border border-red-300 bg-red-50 p-4 text-red-800">{error}</p>}
-      {loadError && <p role="alert" className="mt-6 border border-red-300 bg-red-50 p-4 text-red-800">{loadError}</p>}
-      {success && <p role="status" className="mt-6 border border-green-300 bg-green-50 p-4 text-green-800">{success}</p>}
-      {form && writable && !loading && !loadError && <form onSubmit={save} className="mt-6 bg-white p-6 shadow-sm">
-        <h2 className="font-display text-2xl font-bold uppercase text-school-blue">{editing ? "Modifier" : "Créer"}</h2>
+        </>
+      )}
+      {loading && <StatusMessage className="mt-6">Chargement…</StatusMessage>}
+      {error && <StatusMessage variant="error" className="mt-6">{error}</StatusMessage>}
+      {loadError && <StatusMessage variant="error" className="mt-6">{loadError}</StatusMessage>}
+      {success && <StatusMessage variant="success" className="mt-6">{success}</StatusMessage>}
+      {form && writable && !loading && !loadError && <Panel as="form" onSubmit={save} aria-label={formLabel} className="mt-6 p-4 sm:p-6">
+        <h2 className="font-display text-2xl font-bold uppercase text-school-blue">{formLabel ? `${editing ? "Modifier" : "Créer"} — ${formLabel}` : editing ? "Modifier" : "Créer"}</h2>
         {profileType && !editing && <label className="mt-4 block font-semibold">Création du profil
-          <select value={creationMode} onChange={(event) => { setCreationMode(event.target.value); setSelectedPerson(""); }} className={fieldClass}>
+          <select disabled={Boolean(primaryColumn && busy)} value={creationMode} onChange={(event) => { setCreationMode(event.target.value); setSelectedPerson(""); }} className={fieldClass}>
             <option value="new">Créer une nouvelle personne</option>
             <option value="existing">Rattacher à une personne existante</option>
           </select>
         </label>}
         {attaching && <PersonneChoice people={people} value={selectedPerson} onChange={setSelectedPerson} profileType={profileType} disabled={busy} />}
-        {profileType && editing && <p className="mt-4">Les nom, prénom et coordonnées sont communs à tous les profils de cette personne.</p>}
-        <div className="mt-5 grid gap-4 sm:grid-cols-2">
-          {activeFields.map((field) => <label key={field.name} className="block font-semibold text-school-ink">{field.label}
-            {field.type === "select" ? <select className={fieldClass} disabled={Boolean(editing && field.immutable)} required={!field.optional} value={form[field.name]} onChange={(event) => setForm({ ...form, [field.name]: event.target.value })}>
-              <option value="">Choisir…</option>
-              {(data[field.lookup] ?? []).map((item) => <option key={item[field.optionId]} value={item[field.optionId]}>{field.optionLabel(item, labels)}</option>)}
-            </select> : field.type === "checkbox" ? <input className="ml-3" type="checkbox" checked={Boolean(form[field.name])} onChange={(event) => setForm({ ...form, [field.name]: event.target.checked })} />
-              : <input className={fieldClass} type={field.type || "text"} min={field.min} step={field.step} maxLength={field.maxLength} required={!field.optional} value={form[field.name]} onChange={(event) => setForm({ ...form, [field.name]: event.target.value })} />}
-          </label>)}
+        {profileType && editing && <p className="mt-4 text-sm leading-6 text-school-muted">Les nom, prénom et coordonnées sont communs à tous les profils de cette personne.</p>}
+        {FormFields ? <FormFields fields={activeFields} form={form} setForm={setForm} data={data} labels={labels} busy={busy} editing={editing} fieldGroups={fieldGroups} resource={resource} /> : (
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            {activeFields.map((field) => <label key={field.name} className="block font-semibold text-school-ink">{field.label}
+              {field.type === "select" ? <select className={fieldClass} disabled={Boolean(editing && field.immutable)} required={!field.optional} value={form[field.name]} onChange={(event) => setForm({ ...form, [field.name]: event.target.value })}>
+                <option value="">Choisir…</option>
+                {(data[field.lookup] ?? []).map((item) => <option key={item[field.optionId]} value={item[field.optionId]}>{field.optionLabel(item, labels)}</option>)}
+              </select> : field.type === "checkbox" ? <input className="ml-3" type="checkbox" checked={Boolean(form[field.name])} onChange={(event) => setForm({ ...form, [field.name]: event.target.checked })} />
+                : <input className={fieldClass} type={field.type || "text"} min={field.min} step={field.step} maxLength={field.maxLength} required={!field.optional} value={form[field.name]} onChange={(event) => setForm({ ...form, [field.name]: event.target.value })} />}
+            </label>)}
+          </div>
+        )}
+        <div className="mt-5 flex flex-wrap gap-3">
+          <Button type="submit" loading={busy} disabled={busy} variant="school">{busy ? "Enregistrement…" : "Enregistrer"}</Button>
+          <Button type="button" disabled={busy} onClick={() => setForm(null)} variant="secondary">Annuler</Button>
         </div>
-        <div className="mt-5 flex gap-3">
-          <button disabled={busy} className="bg-school-blue px-5 py-3 font-bold text-white disabled:opacity-50">{busy ? "Enregistrement…" : "Enregistrer"}</button>
-          <button type="button" disabled={busy} onClick={() => setForm(null)} className="border border-slate-300 px-5 py-3 font-bold">Annuler</button>
-        </div>
-      </form>}
-      {!loading && !loadError && rows.length === 0 && <p className="mt-6 bg-white p-6 text-school-muted">Aucune donnée disponible.</p>}
-      {!loading && !loadError && rows.length > 0 && <div className="mt-6 grid gap-4 md:grid-cols-2">
-        {rows.map((row) => <article key={rowId(row)} className="bg-white p-5 shadow-sm">
-          <dl className="grid gap-2">{columns.map((column) => <div key={column.label} className="flex flex-wrap justify-between gap-2 border-b border-slate-100 py-2"><dt className="font-semibold text-school-muted">{column.label}</dt><dd className="text-right text-school-ink">{column.render(row, labels) ?? "—"}</dd></div>)}</dl>
-          {profileType && <p className="mt-3 text-sm">Personne #{row.idPersonne} · {profileLabels(people.find((person) => person.idPersonne === row.idPersonne)?.profils ?? [profileType])}</p>}
-          {writable && <div className="mt-4 flex gap-4 font-semibold"><button type="button" disabled={busy} onClick={() => open(row)} className="text-school-blue underline disabled:opacity-50">Modifier</button><button type="button" disabled={busy} onClick={() => remove(row)} className="text-red-700 underline disabled:opacity-50">Supprimer</button></div>}
-        </article>)}
+      </Panel>}
+      {!loading && !loadError && rows.length === 0 && (primaryColumn ? <Panel className="mt-6 p-5"><h2 className="font-display text-xl font-semibold text-school-blue-dark">Aucune donnée disponible.</h2><p className="mt-2 text-sm text-school-muted">{writable ? "Utilisez Ajouter pour renseigner un premier élément." : "Aucun élément n’est disponible pour votre profil."}</p></Panel> : <p className="mt-6 bg-white p-6 text-school-muted">Aucune donnée disponible.</p>)}
+      {!loading && !loadError && rows.length > 0 && <div className={primaryColumn ? `mt-6 grid items-start gap-4 md:grid-cols-2 ${columns.length <= 4 ? "xl:grid-cols-3" : ""}` : "mt-6 grid gap-4 md:grid-cols-2"}>
+        {rows.map((row) => <Panel as="article" key={rowId(row)} className={primaryColumn ? "min-w-0 p-4 transition-colors hover:border-school-blue focus-within:border-school-blue sm:p-5" : "min-w-0 p-5"}>
+          {RowDetails ? <RowDetails row={row} columns={columns} labels={labels} primaryColumn={primaryColumn} /> : (
+            <dl className="grid gap-2">{columns.map((column) => <div key={column.label} className="flex flex-wrap justify-between gap-2 border-b border-slate-100 py-2"><dt className="font-semibold text-school-muted">{column.label}</dt><dd className="min-w-0 break-words text-right text-school-ink [overflow-wrap:anywhere]">{column.render(row, labels) ?? "—"}</dd></div>)}</dl>
+          )}
+          {profileType && <p className="mt-3 break-words text-sm text-school-muted">Personne #{row.idPersonne} · {profileLabels(people.find((person) => person.idPersonne === row.idPersonne)?.profils ?? [profileType])}</p>}
+          {writable && <div className="mt-4 flex flex-wrap gap-3 font-semibold"><Button type="button" disabled={busy} onClick={() => open(row)} variant="secondary">Modifier</Button><Button type="button" disabled={busy} onClick={() => remove(row)} variant="danger">Supprimer</Button></div>}
+        </Panel>)}
       </div>}
     </main>
   </div>;

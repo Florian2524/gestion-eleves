@@ -25,60 +25,109 @@
     sans-serif;
 }
 
-* {
-  box-sizing: border-box;
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    min-width: 320px;
+    scroll-behavior: smooth;
+    background: var(--color-school-paper);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  body {
+    min-width: 320px;
+    min-height: 100vh;
+    margin: 0;
+    background: var(--color-school-paper);
+    color: var(--color-school-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  ::selection {
+    background: var(--color-brand-yellow);
+    color: var(--color-brand-black);
+  }
+
+  /* Two contrasting edges keep keyboard focus visible on light and dark surfaces. */
+  :where(a, button, input, select, textarea, [role="region"][tabindex="0"]):focus-visible {
+    outline: 2px solid var(--color-school-blue-dark);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px white;
+  }
 }
 
-html {
-  min-width: 320px;
-  scroll-behavior: smooth;
-  background: var(--color-school-paper);
-}
+@layer components {
+  .skip-link {
+    position: fixed;
+    top: 0.5rem;
+    left: 0.5rem;
+    z-index: 100;
+    max-width: calc(100% - 1rem);
+    padding: 0.75rem 1rem;
+    transform: translateY(calc(-100% - 1rem));
+    background: var(--color-brand-yellow);
+    color: var(--color-school-blue-dark);
+    font-weight: 700;
+  }
 
-body {
-  min-width: 320px;
-  min-height: 100vh;
-  margin: 0;
-  background: var(--color-school-paper);
-  color: var(--color-school-ink);
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-}
+  .skip-link:focus {
+    transform: translateY(0);
+  }
 
-#root {
-  min-height: 100vh;
-}
+  #main-content:focus-visible {
+    outline: 2px solid var(--color-school-blue-dark);
+    outline-offset: -2px;
+    box-shadow: inset 0 0 0 4px white;
+  }
 
-button,
-input,
-select,
-textarea {
-  font: inherit;
-}
+  #note-form-title:focus-visible {
+    outline: 2px solid var(--color-school-blue);
+    outline-offset: 4px;
+  }
 
-button,
-a {
-  -webkit-tap-highlight-color: transparent;
-}
+  /* Only dark Field controls opt in; light forms keep native autofill colors. */
+  .school-field-dark:-webkit-autofill,
+  .school-field-dark:-webkit-autofill:hover,
+  .school-field-dark:-webkit-autofill:focus {
+    -webkit-text-fill-color: #f4f4f5;
+    caret-color: #f4f4f5;
+    -webkit-box-shadow: 0 0 0 1000px #18181b inset;
+    box-shadow: 0 0 0 1000px #18181b inset;
+  }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-::selection {
-  background: var(--color-brand-yellow);
-  color: var(--color-brand-black);
-}
-
-input:-webkit-autofill,
-input:-webkit-autofill:hover,
-input:-webkit-autofill:focus,
-textarea:-webkit-autofill,
-select:-webkit-autofill {
-  -webkit-text-fill-color: #f4f4f5;
-  caret-color: #f4f4f5;
-  -webkit-box-shadow: 0 0 0 1000px #18181b inset;
-  box-shadow: 0 0 0 1000px #18181b inset;
+  .school-field-dark:-webkit-autofill:focus-visible {
+    outline: 2px solid var(--color-brand-yellow);
+    outline-offset: 2px;
+  }
 }
