@@ -1,0 +1,216 @@
+@startuml
+' Première version jury — le modèle JPA est inchangé.
+' Les champs de relation sont portés par les associations nommées.
+' Le fichier PlantUML reste la référence sémantique du modèle ; la disposition graphique définitive est diagramme-classes-jury-v2.drawio. Un rendu PlantUML recalculera sa propre disposition et ne reproduira pas exactement les coordonnées de draw.io.
+' Les exports jury SVG/PNG/PDF proviennent de cette mise en page manuelle, pas du placement automatique PlantUML.
+title Gestion des élèves · Diagramme de classes complet\nAnnexe CDA · Modèle persistant Java
+top to bottom direction
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName SansSerif
+skinparam defaultFontSize 14
+skinparam classFontSize 15
+skinparam classAttributeFontSize 13
+skinparam classAttributeIconSize 0
+skinparam classBorderColor #526173
+skinparam ArrowColor #526173
+skinparam linetype polyline
+skinparam nodesep 55
+skinparam ranksep 75
+hide empty methods
+hide circle
+
+' Identité et accès
+skinparam classBackgroundColor<<identite>> #E7EFF9
+hide <<identite>> stereotype
+class Personne <<identite>> {
+  idPersonne : Long {PK}
+  nom : String
+  prenom : String
+  emailContact : String [0..1]
+  telephone : String [0..1]
+  adresse : String [0..1]
+}
+class CompteUtilisateur <<identite>> {
+  idUtilisateur : Long {PK}
+  emailConnexion : String {U}
+  motDePasseHash : String
+  role : RoleUtilisateur
+  actif : boolean
+  dateCreation : OffsetDateTime
+  --
+  {field} U(personne)
+}
+enum RoleUtilisateur <<identite>> {
+  ADMIN
+  ENSEIGNANT
+  RESPONSABLE
+}
+
+' Profils et responsabilités
+skinparam classBackgroundColor<<profils>> #E7F3EE
+hide <<profils>> stereotype
+class Eleve <<profils>> {
+  idPersonne : Long {PK, FK}
+  matricule : String {U}
+  dateNaissance : LocalDate
+  photoUrl : String [0..1]
+}
+class Enseignant <<profils>> {
+  idPersonne : Long {PK, FK}
+  numeroEmploye : String {U}
+}
+class Responsable <<profils>> {
+  idPersonne : Long {PK, FK}
+  profession : String [0..1]
+}
+class ResponsabiliteLegale <<profils>> {
+  id : ResponsabiliteLegaleId {PK, EmbeddedId}
+}
+class ResponsabiliteLegaleId <<profils>> <<embeddable>> {
+  idResponsable : Long {PK, FK}
+  idEleve : Long {PK, FK}
+}
+
+' Parcours scolaire
+skinparam classBackgroundColor<<parcours>> #FFF1D9
+hide <<parcours>> stereotype
+class Inscription <<parcours>> {
+  idInscription : Long {PK}
+  dateInscription : LocalDate
+  dateFin : LocalDate [0..1]
+  statut : String
+}
+class Scolarite <<parcours>> {
+  idScolarite : Long {PK}
+  dateDebut : LocalDate
+  dateFin : LocalDate [0..1]
+  statut : String
+  --
+  {field} U(eleve, classe, dateDebut)
+}
+class Classe <<parcours>> {
+  idClasse : Long {PK}
+  nom : String
+  niveau : String
+  anneeScolaire : String
+  --
+  {field} U(nom, anneeScolaire)
+}
+
+' Organisation pédagogique
+skinparam classBackgroundColor<<pedagogie>> #EEEAF8
+hide <<pedagogie>> stereotype
+class Matiere <<pedagogie>> {
+  idMatiere : Long {PK}
+  code : String {U}
+  nom : String
+}
+class Ponderer <<pedagogie>> {
+  id : PondererId {PK, EmbeddedId}
+  coefficientMatiere : BigDecimal
+}
+class PondererId <<pedagogie>> <<embeddable>> {
+  idClasse : Long {PK, FK}
+  idMatiere : Long {PK, FK}
+}
+class Enseignement <<pedagogie>> {
+  idEnseignement : Long {PK}
+  coefficientMatiere : BigDecimal
+  dateDebut : LocalDate
+  dateFin : LocalDate [0..1]
+  actif : boolean
+  --
+  {field} U(enseignant, classe, matiere, dateDebut)
+}
+
+' Évaluations et bulletins
+skinparam classBackgroundColor<<resultats>> #FBEAEC
+hide <<resultats>> stereotype
+class Evaluation <<resultats>> {
+  idEvaluation : Long {PK}
+  libelle : String
+  dateEvaluation : LocalDate
+  typeEvaluation : String
+  coefficientEvaluation : BigDecimal
+  bareme : BigDecimal
+}
+class Note <<resultats>> {
+  idNote : Long {PK}
+  valeur : BigDecimal
+  commentaire : String [0..1]
+  statutNote : String
+  dateSaisie : OffsetDateTime
+  --
+  {field} U(scolarite, evaluation)
+}
+class Periode <<resultats>> {
+  idPeriode : Long {PK}
+  libelle : String
+  anneeScolaire : String [0..1]
+  dateDebut : LocalDate
+  dateFin : LocalDate
+  dateDebutSaisie : LocalDate [0..1]
+  dateFinSaisie : LocalDate [0..1]
+  statut : String
+}
+class Bulletin <<resultats>> {
+  idBulletin : Long {PK}
+  dateGeneration : LocalDate [0..1]
+  moyenneGenerale : BigDecimal [0..1]
+  appreciationGenerale : String [0..1]
+  statut : String
+  dateValidation : OffsetDateTime [0..1]
+  --
+  {field} U(scolarite, periode)
+}
+class LigneBulletin <<resultats>> {
+  idLigneBulletin : Long {PK}
+  texte : String [0..1]
+  dateSaisie : OffsetDateTime [0..1]
+  dateModification : OffsetDateTime [0..1]
+  statut : String
+  --
+  {field} U(bulletin, enseignement)
+}
+Bulletin "0..*" --> "1" Scolarite : scolarite
+Bulletin "0..*" --> "1" Periode : periode
+Bulletin "0..*" --> "0..1" Enseignant : validateur
+Classe "0..*" --> "0..1" Enseignant : professeurPrincipal
+CompteUtilisateur "0..1" --> "1" Personne : personne
+Eleve "0..1" --> "1" Personne : personne · MapsId
+Enseignant "0..1" --> "1" Personne : personne · MapsId
+Enseignement "0..*" --> "1" Enseignant : enseignant
+Enseignement "0..*" --> "1" Classe : classe
+Enseignement "0..*" --> "1" Matiere : matiere
+Evaluation "0..*" --> "1" Enseignement : enseignement
+Evaluation "0..*" --> "1" Periode : periode
+Inscription "0..*" --> "1" Eleve : eleve
+LigneBulletin "0..*" --> "1" Bulletin : bulletin
+LigneBulletin "0..*" --> "1" Enseignement : enseignement
+Note "0..*" --> "1" Scolarite : scolarite
+Note "0..*" --> "1" Evaluation : evaluation
+Ponderer "0..*" --> "1" Classe : classe · MapsId
+Ponderer "0..*" --> "1" Matiere : matiere · MapsId
+ResponsabiliteLegale "0..*" --> "1" Responsable : responsable · MapsId
+ResponsabiliteLegale "0..*" --> "1" Eleve : eleve · MapsId
+Responsable "0..1" --> "1" Personne : personne · MapsId
+Scolarite "0..*" --> "1" Eleve : eleve
+Scolarite "0..*" --> "1" Classe : classe
+ResponsabiliteLegale ..> ResponsabiliteLegaleId : type de id
+Ponderer ..> PondererId : type de id
+CompteUtilisateur ..> RoleUtilisateur : type de role
+legend bottom left
+  |= Domaine |= Couleur |
+  | Identité et accès | <back:#E7EFF9>     </back> |
+  | Profils et responsabilités | <back:#E7F3EE>     </back> |
+  | Parcours scolaire | <back:#FFF1D9>     </back> |
+  | Organisation pédagogique | <back:#EEEAF8>     </back> |
+  | Évaluations et bulletins | <back:#FBEAEC>     </back> |
+  PK : clé primaire · FK : clé étrangère · U : unicité (du champ ou du tuple)
+  MapsId : identité partagée ou composante de clé · [0..1] : nullable ; sinon obligatoire
+  Flèche pleine : référence JPA (24) ; pointillée : type de champ (3), sans composition
+  Profils cumulables, sans héritage · 1:1 pour les profils et le compte ; autres liens N:1
+  Ponderer : coefficient de référence ; Enseignement.coefficientMatiere : miroir SQL
+endlegend
+@enduml

@@ -1,0 +1,145 @@
+' React + client API regroupe NotesPage.jsx, notesApi.js et http.js.
+' existsBy… abrège existsByScolarite_IdScolariteAndEvaluation_IdEvaluation.
+' Les règles détaillées et les composants regroupés sont documentés dans la note de lecture.
+@startuml sequence-ajouter-note-jury
+title Ajouter une note · Scénario nominal\nGestion des élèves — annexe CDA · 1 / 2
+hide footbox
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName SansSerif
+skinparam defaultFontSize 17
+skinparam defaultFontColor #233247
+skinparam titleFontSize 24
+skinparam titleFontColor #233247
+skinparam sequenceMessageAlign left
+skinparam sequenceArrowThickness 1.2
+skinparam sequenceLifeLineBorderColor #9AA8B8
+skinparam sequenceParticipantBorderColor #738296
+skinparam sequenceActorBorderColor #526173
+skinparam sequenceArrowColor #526173
+skinparam sequenceGroupBorderColor #9AA8B8
+skinparam sequenceGroupBackgroundColor #F8FAFC
+skinparam sequenceGroupBodyBackgroundColor #FFFFFF
+skinparam sequenceReferenceBackgroundColor #F8FAFC
+skinparam sequenceReferenceBorderColor #9AA8B8
+skinparam sequenceMessagePadding 3
+skinparam ParticipantPadding 12
+skinparam NoteBackgroundColor #F8FAFC
+skinparam NoteBorderColor #CBD5E1
+skinparam NoteFontSize 15
+skinparam maxMessageSize 280
+
+actor "Administrateur\nou enseignant" as U #E7F3EE
+boundary "React + client API\nNotesPage.jsx" as UI #E7EFF9
+control "Spring Security / MVC" as G #E7EFF9
+control "NoteController" as C #EEEAF8
+control "NoteService" as S #EEEAF8
+participant "NoteRepository" as N #FFF1D9
+participant "ScolariteRepository" as SC #FFF1D9
+participant "EvaluationRepository" as E #FFF1D9
+
+autonumber
+note over U, G
+<size:17>Données de sélection déjà chargées ; editing = null (création).</size>
+<size:17>Formulaire réservé à ADMIN et ENSEIGNANT ; pas à RESPONSABLE.</size>
+end note
+U -> UI : Saisir puis enregistrer\nune nouvelle note
+UI -> UI : save(event) : contrôles locaux\npuis createNote(body) / apiRequest
+UI -> G : POST /api/notes → /notes\nJWT + NoteRequest JSON
+G -> G : JWT et rôle autorisé ;\ndésérialisation et @Valid
+opt Rôle ENSEIGNANT
+ G -> G : estProprietaireEvaluation(...)\n= true (SecurityExpressions)
+end
+G -> C : create(request) autorisé
+C -> S : create(request)
+activate S
+S -> N : existsBy…(idScolarite, idEvaluation)
+N --> S : false : aucune note pour ce couple
+S -> SC : findById(idScolarite)
+SC --> S : Optional<Scolarite> présent
+S -> E : findById(idEvaluation)
+E --> S : Optional<Evaluation> présent
+S -> S : verifierClasse (même classe)\nverifierBareme (valeur ≤ barème)\nnoteMapper.toEntity(...)
+S -> N : save(note)
+N --> S : savedNote : idNote, dateSaisie
+S --> C : NoteResponse via NoteMapper\n(transaction validée)
+deactivate S
+C --> G : 201 + NoteResponse\nLocation: /notes/{idNote}
+G --> UI : HTTP 201 Created + JSON
+UI -> UI : « Note créée. » ; formulaire vidé\nreloadKey + 1 ; busy = false
+ref over UI, G
+useEffect(reloadKey) : 8 GET distincts en parallèle
+Plusieurs ressources / contrôleurs via Spring MVC
+end ref
+UI --> U : Liste rechargée ; confirmation
+@enduml
+
+@startuml sequence-ajouter-note-jury-erreurs
+title Ajouter une note · Principaux chemins d'échec\nGestion des élèves — annexe CDA · 2 / 2
+hide footbox
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName SansSerif
+skinparam defaultFontSize 17
+skinparam defaultFontColor #233247
+skinparam titleFontSize 24
+skinparam titleFontColor #233247
+skinparam sequenceMessageAlign left
+skinparam sequenceArrowThickness 1.2
+skinparam sequenceLifeLineBorderColor #9AA8B8
+skinparam sequenceParticipantBorderColor #738296
+skinparam sequenceActorBorderColor #526173
+skinparam sequenceArrowColor #526173
+skinparam sequenceGroupBorderColor #9AA8B8
+skinparam sequenceGroupBackgroundColor #F8FAFC
+skinparam sequenceGroupBodyBackgroundColor #FFFFFF
+skinparam sequenceReferenceBackgroundColor #F8FAFC
+skinparam sequenceReferenceBorderColor #9AA8B8
+skinparam sequenceMessagePadding 3
+skinparam ParticipantPadding 12
+skinparam NoteBackgroundColor #F8FAFC
+skinparam NoteBorderColor #CBD5E1
+skinparam NoteFontSize 15
+skinparam maxMessageSize 280
+
+actor "Administrateur\nou enseignant" as U #E7F3EE
+boundary "React + client API\nNotesPage.jsx" as UI #E7EFF9
+control "Spring Security / MVC" as G #E7EFF9
+control "NoteController" as C #EEEAF8
+control "NoteService" as S #EEEAF8
+control "GlobalExceptionHandler" as H #FBEAEC
+
+autonumber
+U -> UI : Enregistrer une nouvelle note
+UI -> UI : Contrôles locaux de save(event)
+alt Sélection, classe, valeur ou statut invalides
+ UI --> U : Message local ; aucun POST
+else Contrôles locaux réussis — la requête est ensuite refusée
+ UI -> G : POST /api/notes → /notes\nJWT + JSON NoteRequest
+ alt JWT invalide / absent, ou rôle interdit par le filtre
+  G -> G : Préparer 401 ou 403 ;\ncontrôleur non exécuté
+ else DTO invalide lors de @Valid
+  G -> H : MethodArgumentNotValidException
+  H --> G : 400 + ApiErrorResponse
+ else ENSEIGNANT non propriétaire de l'évaluation
+  G -> G : @PreAuthorize refuse : 403 ;\nméthode du contrôleur non exécutée
+ else Refus pendant create(request)
+  G -> C : create(request)
+  C -> S : create(request)
+  ref over C, S
+  Arrêt à la première exception (voir vue 1).
+  Doublon : 409 ; ressource absente : 404 ; classe / barème : 400.
+  end ref
+  S --> C : Exception propagée
+  C --> G : Exception propagée à MVC
+  G -> H : Résoudre l'exception\nvia @RestControllerAdvice
+  H --> G : 409 / 404 / 400\n+ ApiErrorResponse
+ end
+ G --> UI : HTTP d'erreur : statut\net corps éventuel
+ opt HTTP 401
+  UI -> UI : clearStoredAuth() + événement\nauth:unauthorized : session invalidée
+ end
+ UI -> UI : ApiError → catch : message\nfinally : busy=false ; pas de reset
+ UI --> U : Erreur ou connexion (401)
+end
+@enduml
